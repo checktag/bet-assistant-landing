@@ -133,7 +133,7 @@ export default function Home() {
         >
           <motion.div variants={fadeUp} className="mb-8 px-4 py-2 rounded-full border border-brand-teal/20 bg-brand-teal/5 backdrop-blur-md flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-            <span className="text-xs font-medium tracking-widest text-brand-teal uppercase">V2.0 Engine Now Live</span>
+            <span className="text-xs font-medium tracking-widest text-brand-teal uppercase">Engine Now Live</span>
           </motion.div>
 
           <motion.h1 variants={fadeUp} className="text-6xl md:text-8xl font-black tracking-[-0.04em] text-white mb-8 leading-[1.05]">
@@ -155,7 +155,7 @@ export default function Home() {
               </span>
             </a>
             <Link href="/docs" className="px-10 py-5 bg-white/5 border border-white/10 text-white text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center w-full md:w-auto whitespace-nowrap">
-              Read Documentation
+              How To Use
             </Link>
           </motion.div>
         </motion.div>
