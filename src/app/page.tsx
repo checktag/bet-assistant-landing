@@ -457,7 +457,7 @@ export default function Home() {
              <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
              <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
           </div>
-          <p className="text-slate-600 text-sm">© 2026 Checktag Platform.</p>
+          <p className="text-slate-600 text-sm">© 2026 CTTS.</p>
         </div>
       </footer>
     </main>
