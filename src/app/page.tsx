@@ -24,7 +24,7 @@ const scaleIn: Variants = {
 export default function Home() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yHero = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const yHero = useTransform(scrollYProgress, [0, 1], ["0%", "-20%"]);
   const opacityHero = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
@@ -147,14 +147,14 @@ export default function Home() {
             Unleash the full mathematical power of an AI analysis engine directly inside Telegram. We automatically scan 55+ global leagues to find structurally mispriced, profitable variance edges.
           </motion.p>
           
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto px-4">
-            <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="group relative px-10 py-5 bg-white text-background font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center">
+          <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 w-full md:w-auto px-4">
+            <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="group relative px-10 py-5 bg-white text-background font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2 group-hover:text-white transition-colors duration-300">
                 Connect Telegram Bot <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
               </span>
             </a>
-            <Link href="/docs" className="px-10 py-5 bg-white/5 border border-white/10 text-white text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center">
+            <Link href="/docs" className="px-10 py-5 bg-white/5 border border-white/10 text-white text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center w-full md:w-auto whitespace-nowrap">
               Read Documentation
             </Link>
           </motion.div>
