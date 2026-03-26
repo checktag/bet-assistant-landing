@@ -453,9 +453,9 @@ export default function Home() {
              <span className="text-slate-300 font-bold tracking-wide">Bet Assistant</span>
           </div>
           <div className="flex gap-8 text-slate-500 text-sm font-medium">
-             <a href="#" className="hover:text-brand-teal transition-colors">Privacy Policy</a>
-             <a href="#" className="hover:text-brand-teal transition-colors">Terms of Service</a>
-             <a href="#" className="hover:text-brand-teal transition-colors">API Status</a>
+             <Link href="/privacy" className="hover:text-brand-teal transition-colors">Privacy Policy</Link>
+             <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
+             <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
           </div>
           <p className="text-slate-600 text-sm">© 2026 Checktag Platform.</p>
         </div>

@@ -87,6 +87,11 @@ export default function Documentation() {
       {/* Footer */}
       <footer className="border-t border-white/5 relative z-20 bg-[#03060E]">
         <div className="max-w-4xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex gap-8 text-slate-500 text-sm font-medium">
+             <Link href="/privacy" className="hover:text-brand-teal transition-colors">Privacy Policy</Link>
+             <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
+             <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
+          </div>
           <p className="text-slate-600 text-sm">© 2026 Checktag Platform. All rights reserved.</p>
         </div>
       </footer>
