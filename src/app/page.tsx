@@ -136,7 +136,7 @@ export default function Home() {
             <span className="text-xs font-medium tracking-widest text-brand-teal uppercase">Engine Now Live</span>
           </motion.div>
 
-          <motion.h1 variants={fadeUp} className="text-6xl md:text-8xl font-black tracking-[-0.04em] text-white mb-8 leading-[1.05]">
+          <motion.h1 variants={fadeUp} className="text-5xl md:text-6xl lg:text-8xl font-black tracking-[-0.04em] text-white mb-8 leading-[1.05]">
             Institutional-Grade <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-400 to-brand-teal drop-shadow-sm">
               Quantitative Betting.
@@ -148,13 +148,13 @@ export default function Home() {
           </motion.p>
           
           <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 w-full md:w-auto px-4">
-            <Link href="/dashboard" className="group relative px-10 py-5 bg-white text-background font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
+            <Link href="/dashboard" className="group relative px-6 md:px-10 py-4 md:py-5 bg-white text-background font-bold text-base md:text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2 group-hover:text-white transition-colors duration-300">
                 Launch Web Dashboard <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
               </span>
             </Link>
-            <Link href="/docs" className="px-10 py-5 bg-white/5 border border-white/10 text-white text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center w-full md:w-auto whitespace-nowrap">
+            <Link href="/docs" className="px-6 md:px-10 py-4 md:py-5 bg-white/5 border border-white/10 text-white text-base md:text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center w-full md:w-auto whitespace-nowrap">
               How To Use
             </Link>
           </motion.div>
@@ -439,7 +439,7 @@ export default function Home() {
            <div className="absolute inset-0 bg-noise opacity-[0.25] mix-blend-overlay"></div>
            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight relative z-10">Stop guessing. <br/>Start <span className="text-gradient">Executing.</span></h2>
            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto relative z-10">Deploy the bot to your Telegram infrastructure right now and gain immediate mathematical parity over the market.</p>
-           <Link href="/auth/signup" className="relative z-10 px-12 py-6 bg-white text-background font-black text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 inline-block uppercase tracking-widest">
+           <Link href="/auth/signup" className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-white text-background font-black text-sm md:text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 flex items-center justify-center uppercase tracking-widest text-center w-full md:w-auto">
              Start 14-Day Free Trial
            </Link>
         </motion.div>

@@ -10,6 +10,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        captchaToken: { label: "Captcha", type: "text" },
       },
       authorize: async (credentials) => {
         try {
@@ -18,6 +19,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const params = new URLSearchParams();
           params.append('username', credentials?.email as string);
           params.append('password', credentials?.password as string);
+          if (credentials?.captchaToken) {
+            params.append('client_secret', credentials.captchaToken as string);
+          }
 
           console.log(`[NextAuth] Attempting login to: ${API_URL}/login`);
           const res = await fetch(`${API_URL}/login`, {
@@ -27,8 +31,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           if (!res.ok) {
-            console.error(`[NextAuth] API responds with status: ${res.status}`);
-            return null;
+            let errorDetail = "Invalid credentials.";
+            try {
+               const errorData = await res.json();
+               errorDetail = errorData?.detail || errorDetail;
+            } catch (e) {}
+            console.error(`[NextAuth] API responds with status: ${res.status} - ${errorDetail}`);
+            throw new Error(errorDetail);
           }
 
           const data = await res.json();
@@ -45,9 +54,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           }
           return null;
-        } catch (error) {
+        } catch (error: any) {
           console.error("[NextAuth] Native fetch error during authorize:", error);
-          return null;
+          throw new Error(error.message || "Failed to authenticate");
         }
       },
     }),

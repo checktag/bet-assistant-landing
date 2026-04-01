@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Mail, Lock, Bot } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -19,15 +21,22 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
+    if (!captchaToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      setError("Please complete the security challenge to authenticate.");
+      return;
+    }
+
     try {
       const res = await signIn("credentials", {
         email,
         password,
+        captchaToken,
         redirect: false,
       });
 
       if (res?.error) {
-        setError("Invalid email or password. Please try again.");
+        // NextAuth surfaces the error thrown in authorize() securely through the 'error' property
+        setError(res.error === "Configuration" ? "Service temporarily unlinked. Please try again." : res.error);
       } else {
         router.push("/dashboard");
       }
@@ -47,7 +56,7 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative z-10"
+        className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative z-10"
       >
         <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-8 text-sm font-medium">
           <ArrowLeft className="w-4 h-4" /> Back to Home
@@ -74,7 +83,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
+                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
               />
             </div>
           </div>
@@ -88,20 +97,39 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
+                placeholder="enter your password"
+                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
               />
             </div>
           </div>
 
+          <div className="pt-2 flex justify-center scale-[0.85] md:scale-100 origin-center">
+            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <Turnstile 
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} 
+                onSuccess={(token) => setCaptchaToken(token)}
+                options={{ theme: 'dark' }}
+              />
+            )}
+          </div>
+
           {error && (
-            <p className="text-xs font-bold text-red-400 text-center bg-red-400/10 py-3 rounded-xl border border-red-400/20">{error}</p>
+            <div className="text-xs font-bold text-red-400 text-center bg-red-400/10 py-3 px-4 rounded-xl border border-red-400/20 leading-relaxed">
+              {error.includes("verify") ? (
+                <>
+                  <span className="block mb-1">{error}</span>
+                  <span className="text-slate-400 font-normal">Check your inbox and spam folder.</span>
+                </>
+              ) : (
+                error
+              )}
+            </div>
           )}
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-white text-background font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center"
+            disabled={isLoading || (!captchaToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)}
+            className="w-full bg-white text-background font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center font-mono"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ENGAGE TERMINAL"}
           </button>

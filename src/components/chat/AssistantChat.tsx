@@ -190,10 +190,10 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-4xl mx-auto bg-[#0A0F1C]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[75vh] md:h-[600px] w-full max-w-4xl mx-auto bg-[#0A0F1C]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="px-8 py-4 border-b border-white/5 flex items-center justify-between bg-white/5">
-        <div className="flex items-center gap-3">
+      <div className="px-4 md:px-8 py-3 md:py-4 border-b border-white/5 flex items-center justify-between bg-white/5">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="w-10 h-10 rounded-xl bg-brand-teal/10 flex items-center justify-center border border-brand-teal/20">
             <Bot className="w-6 h-6 text-brand-teal" />
           </div>
@@ -219,7 +219,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-full mt-4 w-72 bg-[#060913]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 top-full mt-4 w-[85vw] max-w-[288px] bg-[#060913]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 overflow-hidden"
               >
                 <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] mb-3">Institutional Tools</div>
                 <div className="grid gap-2">
@@ -360,14 +360,14 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="p-6 bg-white/5 border-t border-white/5">
+      <form onSubmit={handleSend} className="p-4 md:p-6 bg-white/5 border-t border-white/5">
         <div className="relative group">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me to /scan markets, or type /checkslip sportybet CODE..."
-            className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl px-6 py-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all shadow-inner"
+            className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl px-4 md:px-6 py-3 md:py-4 text-[16px] md:text-sm text-white placeholder:text-slate-600 outline-none transition-all shadow-inner"
           />
           <button
             type="submit"

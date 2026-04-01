@@ -20,9 +20,29 @@ export default async function DashboardPage() {
   const daysLeft = Math.max(0, Math.ceil((trialEnds.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
   return (
-    <div className="min-h-screen bg-[#03060E] text-slate-200 flex overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-white/5 bg-[#060913] flex flex-col p-6 space-y-8">
+    <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
+      {/* Mobile Top Navigation */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-brand-teal/10 flex items-center justify-center border border-brand-teal/20 text-brand-teal font-bold">{user.email[0].toUpperCase()}</div>
+          <div className="flex flex-col">
+            <span className="font-bold tracking-tight text-white text-sm">Bet Assistant</span>
+            {user.is_premium ? (
+              <span className="text-[9px] text-brand-teal font-bold flex items-center gap-1"><Crown className="w-2.5 h-2.5" /> PREMIUM</span>
+            ) : (
+              <span className="text-[9px] text-slate-400 font-bold flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {daysLeft}D LEFT</span>
+            )}
+          </div>
+        </div>
+        <form action={async () => { "use server"; await signOut(); }}>
+          <button className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </form>
+      </div>
+
+      {/* Sidebar Desktop */}
+      <aside className="hidden md:flex w-64 border-r border-white/5 bg-[#060913] flex-col p-6 space-y-8 h-screen sticky top-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 overflow-hidden rounded-lg"><img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" /></div>
           <span className="font-bold tracking-tight text-white">Bet Assistant</span>
@@ -71,16 +91,16 @@ export default async function DashboardPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden min-h-[calc(100vh-72px)] md:min-h-screen">
         {/* Orbs */}
         <div className="absolute top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-brand-teal/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="w-full max-w-5xl space-y-8 z-10">
-          <header className="flex justify-between items-end">
+        <div className="w-full max-w-5xl space-y-6 md:space-y-8 z-10 flex flex-col h-full md:h-auto justify-center">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
             <div>
-              <h1 className="text-4xl font-black text-white tracking-tight leading-none mb-2">Quant Terminal</h1>
-              <p className="text-slate-400">Welcome back, your institutional-grade betting advisor is ready.</p>
+              <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mb-1 md:mb-2">Quant Terminal</h1>
+              <p className="text-xs md:text-sm text-slate-400">Institutional-grade betting advisor.</p>
             </div>
             {!user.is_premium && (
                <Link href="/billing" className="px-5 py-2.5 bg-brand-teal text-background font-black text-xs rounded-lg hover:scale-[1.05] transition-all shadow-[0_0_20px_rgba(0,198,186,0.2)] flex items-center gap-2">
