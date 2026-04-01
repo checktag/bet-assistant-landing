@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import axios from "axios";
+
 import { authConfig } from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -15,25 +15,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
           
-          // FastAPI's OAuth2PasswordRequestForm requires x-www-form-urlencoded
           const params = new URLSearchParams();
           params.append('username', credentials?.email as string);
           params.append('password', credentials?.password as string);
 
-          const res = await axios.post(`${API_URL}/login`, params, {
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+          console.log(`[NextAuth] Attempting login to: ${API_URL}/login`);
+          const res = await fetch(`${API_URL}/login`, {
+            method: 'POST',
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
           });
 
-          if (res.data.access_token) {
-            // Fetch user info with the token
-            const userRes = await axios.get(`${API_URL}/me`, {
-              headers: { Authorization: `Bearer ${res.data.access_token}` }
+          if (!res.ok) {
+            console.error(`[NextAuth] API responds with status: ${res.status}`);
+            return null;
+          }
+
+          const data = await res.json();
+
+          if (data.access_token) {
+            console.log(`[NextAuth] Login successful. Fetching user info...`);
+            const userRes = await fetch(`${API_URL}/me`, {
+              headers: { Authorization: `Bearer ${data.access_token}` }
             });
-            return { ...userRes.data, accessToken: res.data.access_token, id: userRes.data.email };
+            
+            if (userRes.ok) {
+              const userData = await userRes.json();
+              return { ...userData, accessToken: data.access_token, id: userData.email };
+            }
           }
           return null;
         } catch (error) {
-          console.error("Auth error:", error);
+          console.error("[NextAuth] Native fetch error during authorize:", error);
           return null;
         }
       },
