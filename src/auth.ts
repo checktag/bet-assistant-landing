@@ -11,7 +11,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const res = await axios.post("http://localhost:8000/login", {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
             username: credentials?.email,
             password: credentials?.password,
           }, {
@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (res.data.access_token) {
             // Fetch user info with the token
-            const userRes = await axios.get("http://localhost:8000/me", {
+            const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
               headers: { Authorization: `Bearer ${res.data.access_token}` }
             });
             return { ...userRes.data, accessToken: res.data.access_token, id: userRes.data.email };

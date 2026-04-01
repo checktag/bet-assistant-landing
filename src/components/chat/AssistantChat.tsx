@@ -35,6 +35,7 @@ interface AssistantChatProps {
 }
 
 export default function AssistantChat({ accessToken }: AssistantChatProps) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "👋 Welcome to your Quant Assistant. How can I help you dominate the markets today?" }
   ]);
@@ -77,7 +78,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
           leagueArg = parts.slice(1).join("_").toLowerCase();
         }
         
-        const res = await axios.get("http://localhost:8000/scan", {
+        const res = await axios.get(`${API_URL}/scan`, {
           params: { date: dateArg, league: leagueArg },
           headers: { Authorization: `Bearer ${accessToken}` }
         });
@@ -92,7 +93,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
          const parts = userMsg.split(" ");
          const platform = parts[1] || "sportybet";
          const code = parts[2] || "";
-         const res = await axios.post("http://localhost:8000/check-slip", { platform, code, history: chatHistory }, {
+         const res = await axios.post(`${API_URL}/check-slip`, { platform, code, history: chatHistory }, {
            headers: { Authorization: `Bearer ${accessToken}` }
          });
          setMessages(prev => [...prev, { 
@@ -103,7 +104,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
          }]);
       } else {
         // AI Chat fallback
-        const res = await axios.post("http://localhost:8000/chat", { message: userMsg, history: chatHistory }, {
+        const res = await axios.post(`${API_URL}/chat`, { message: userMsg, history: chatHistory }, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         setMessages(prev => [...prev, { role: "assistant", content: res.data.response }]);
@@ -121,7 +122,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
   const handleBuildSlip = async (selections: Selection[]) => {
     setIsLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/generate-multi-code", {
+      const res = await axios.post(`${API_URL}/generate-multi-code`, {
         platform: "sportybet",
         selections: selections
       }, {
@@ -147,7 +148,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
 
     try {
       const results = await Promise.all(platforms.map(p => 
-        axios.post("http://localhost:8000/generate-multi-code", {
+        axios.post(`${API_URL}/generate-multi-code`, {
           platform: p,
           selections: selections
         }, {

@@ -20,7 +20,7 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:8000/signup", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
         email,
         password,
       });
