@@ -6,13 +6,11 @@ import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -27,11 +25,6 @@ export default function SignupPage() {
       return;
     }
     
-    if (!captchaToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-      setError("Please complete the security challenge to continue.");
-      return;
-    }
-
     setIsLoading(true);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
@@ -39,8 +32,7 @@ export default function SignupPage() {
     try {
       const res = await axios.post(`${API_URL}/signup`, {
         email,
-        password,
-        captcha_token: captchaToken
+        password
       });
 
       if (res.status === 200) {
@@ -152,13 +144,6 @@ export default function SignupPage() {
           </div>
 
           <div className="pt-2 flex justify-center scale-[0.85] md:scale-100 origin-center">
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <Turnstile 
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} 
-                onSuccess={(token) => setCaptchaToken(token)}
-                options={{ theme: 'dark' }}
-              />
-            )}
           </div>
 
           {error && (
@@ -167,7 +152,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={isLoading || (!captchaToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)}
+            disabled={isLoading}
             className="w-full bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center font-mono"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "DEPLOY AGENT"}

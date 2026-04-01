@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Mail, Lock, Bot } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -21,16 +19,10 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    if (!captchaToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-      setError("Please complete the security challenge to authenticate.");
-      return;
-    }
-
     try {
       const res = await signIn("credentials", {
         email,
         password,
-        captchaToken,
         redirect: false,
       });
 
@@ -104,13 +96,6 @@ export default function LoginPage() {
           </div>
 
           <div className="pt-2 flex justify-center scale-[0.85] md:scale-100 origin-center">
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <Turnstile 
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} 
-                onSuccess={(token) => setCaptchaToken(token)}
-                options={{ theme: 'dark' }}
-              />
-            )}
           </div>
 
           {error && (
@@ -128,7 +113,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isLoading || (!captchaToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)}
+            disabled={isLoading}
             className="w-full bg-white text-background font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center font-mono"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ENGAGE TERMINAL"}

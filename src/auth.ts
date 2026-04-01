@@ -10,7 +10,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        captchaToken: { label: "Captcha", type: "text" },
       },
       authorize: async (credentials) => {
         try {
@@ -19,9 +18,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const params = new URLSearchParams();
           params.append('username', credentials?.email as string);
           params.append('password', credentials?.password as string);
-          if (credentials?.captchaToken) {
-            params.append('client_secret', credentials.captchaToken as string);
-          }
 
           console.log(`[NextAuth] Attempting login to: ${API_URL}/login`);
           const res = await fetch(`${API_URL}/login`, {
