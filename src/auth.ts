@@ -11,22 +11,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-            username: credentials?.email,
-            password: credentials?.password,
-          }, {
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+          
+          // FastAPI's OAuth2PasswordRequestForm requires x-www-form-urlencoded
+          const params = new URLSearchParams();
+          params.append('username', credentials?.email as string);
+          params.append('password', credentials?.password as string);
+
+          const res = await axios.post(`${API_URL}/login`, params, {
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
           });
 
           if (res.data.access_token) {
             // Fetch user info with the token
-            const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+            const userRes = await axios.get(`${API_URL}/me`, {
               headers: { Authorization: `Bearer ${res.data.access_token}` }
             });
             return { ...userRes.data, accessToken: res.data.access_token, id: userRes.data.email };
           }
           return null;
         } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
       },

@@ -19,8 +19,10 @@ export default function SignupPage() {
     setIsLoading(true);
     setError("");
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
+      const res = await axios.post(`${API_URL}/signup`, {
         email,
         password,
       });
