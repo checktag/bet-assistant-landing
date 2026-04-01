@@ -1,8 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import axios from "axios";
+import { authConfig } from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -37,23 +39,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }): Promise<any> {
-      if (user) {
-        token.accessToken = (user as { accessToken?: string }).accessToken;
-        token.user = user;
-      }
-      return token;
-    },
-    async session({ session, token }): Promise<any> {
-      (session as { accessToken?: string }).accessToken = token.accessToken as string;
-      session.user = token.user as any;
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/auth/login",
-  },
-  trustHost: true,
-  secret: process.env.AUTH_SECRET,
 });
