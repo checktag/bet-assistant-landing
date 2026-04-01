@@ -49,9 +49,9 @@ export default function Home() {
              <a href="/#engine" className="hover:text-white transition-colors">Quant Engine</a>
              <a href="/#workflow" className="hover:text-white transition-colors">Workflow</a>
           </div>
-          <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="px-5 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-full transition-all hover:border-brand-teal/50 backdrop-blur-md shadow-[0_0_15px_rgba(0,113,206,0.15)] flex items-center">
-            Launch Bot
-          </a>
+          <Link href="/dashboard" className="px-5 py-2 py-2 text-sm bg-brand-teal text-background font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(0,198,186,0.3)] flex items-center">
+            Open Terminal
+          </Link>
         </div>
       </nav>
 
@@ -148,12 +148,12 @@ export default function Home() {
           </motion.p>
           
           <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 w-full md:w-auto px-4">
-            <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="group relative px-10 py-5 bg-white text-background font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
+            <Link href="/dashboard" className="group relative px-10 py-5 bg-white text-background font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2 group-hover:text-white transition-colors duration-300">
-                Connect Telegram Bot <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
+                Launch Web Dashboard <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
               </span>
-            </a>
+            </Link>
             <Link href="/docs" className="px-10 py-5 bg-white/5 border border-white/10 text-white text-lg font-medium rounded-full hover:bg-white/10 transition-all hover:border-brand-blue/40 backdrop-blur-md inline-flex items-center justify-center w-full md:w-auto whitespace-nowrap">
               How To Use
             </Link>
@@ -439,9 +439,9 @@ export default function Home() {
            <div className="absolute inset-0 bg-noise opacity-[0.25] mix-blend-overlay"></div>
            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight relative z-10">Stop guessing. <br/>Start <span className="text-gradient">Executing.</span></h2>
            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto relative z-10">Deploy the bot to your Telegram infrastructure right now and gain immediate mathematical parity over the market.</p>
-           <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="relative z-10 px-12 py-6 bg-white text-background font-black text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 inline-block">
-             Initialize Telegram Bot
-           </a>
+           <Link href="/auth/signup" className="relative z-10 px-12 py-6 bg-white text-background font-black text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 inline-block uppercase tracking-widest">
+             Start 14-Day Free Trial
+           </Link>
         </motion.div>
       </section>
 
