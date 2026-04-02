@@ -26,7 +26,7 @@ interface Selection {
 interface Message {
   role: "user" | "assistant";
   content: string;
-  type?: "text" | "scan" | "slip" | "convert";
+  type?: "text" | "scan" | "slip" | "convert" | "codes";
   data?: any;
 }
 
@@ -134,18 +134,30 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
     }
   };
 
-  const handleBuildSlip = async (selections: Selection[]) => {
+  const handleBuildSlip = async (selections: Selection[], singlePlatform?: string) => {
     setIsLoading(true);
+    const platforms = singlePlatform
+      ? [singlePlatform]
+      : ["sportybet", "bet9ja", "1xbet", "betway", "betwinner", "msport", "22bet"];
     try {
-      const res = await axios.post(`${API_URL}/generate-multi-code`, {
-        platform: "sportybet",
-        selections: selections
-      }, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const results = await Promise.all(
+        platforms.map(p =>
+          axios.post(`${API_URL}/generate-multi-code`, { platform: p, selections }, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          }).then(r => ({ platform: p, code: r.data.code as string }))
+            .catch(() => ({ platform: p, code: "[Match Error]" }))
+        )
+      );
+      // Show the premium codes card
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: `🎯 **Slip Generated Successfully!**\n\nYour SportyBet booking code: **${res.data.code}**.\n\nGood luck! 🚀`
+        content: singlePlatform
+          ? `🎯 **${singlePlatform.charAt(0).toUpperCase() + singlePlatform.slice(1)} code generated!**`
+          : "🎟️ **Multi-Platform Codes Ready!**",
+        type: "codes",
+        data: results
       }]);
-    } catch (err: unknown) {
+    } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "⚠️ Failed to generate booking code. Please try again." }]);
     } finally {
       setIsLoading(false);
@@ -153,28 +165,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
   };
 
   const handleBuildAllSlips = async (selections: any[]) => {
-    setIsLoading(true);
-    const platforms = ["sportybet", "bet9ja", "1xbet", "betway", "betwinner", "msport", "22bet"];
-    let finalSummary = "🎟️ **Multi-Platform Booking Codes Generated!**\n\n";
-    try {
-      const results = await Promise.all(platforms.map(p =>
-        axios.post(`${API_URL}/generate-multi-code`, { platform: p, selections }, {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        }).catch(() => ({ data: { code: "[Fixture Match Error]" } }))
-      ));
-      results.forEach((res: { data: { code: string } }, i: number) => {
-        const label = platforms[i].charAt(0).toUpperCase() + platforms[i].slice(1);
-        finalSummary += `✅ **${label}:** \`${res.data.code}\`\n`;
-      });
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: finalSummary + "\n_(Copy and paste these codes into the corresponding apps!)_"
-      }]);
-    } catch (err: unknown) {
-      setMessages(prev => [...prev, { role: "assistant", content: "⚠️ Failed to generate codes. Please try again." }]);
-    } finally {
-      setIsLoading(false);
-    }
+    await handleBuildSlip(selections); // reuse the same multi-platform logic
   };
 
   const parseCuratedSelections = (text: string) => {
@@ -281,21 +272,29 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                   {/* AI Curated Selection */}
                   {curated.length > 0 && (
                     <div className="mt-4 p-4 bg-brand-teal/5 rounded-2xl border border-brand-teal/20">
-                      <div className="text-[10px] font-bold text-brand-teal uppercase tracking-widest mb-3 italic">Assistant Selection</div>
+                      <div className="text-[10px] font-bold text-brand-teal uppercase tracking-widest mb-3 italic">AI Curated Selections ({curated.length})</div>
                       <div className="space-y-2 mb-4">
                         {curated.map((c, ci) => (
-                          <div key={ci} className="flex justify-between text-xs">
-                            <span className="text-white font-medium">{c.match}</span>
-                            <span className="text-slate-400">{c.market} @ {c.odds}</span>
+                          <div key={ci} className="flex justify-between text-xs p-2 bg-black/20 rounded-lg">
+                            <span className="text-white font-medium truncate flex-1">{c.match}</span>
+                            <span className="text-slate-400 shrink-0 ml-2">{c.market} @ <span className="text-brand-teal font-bold">{c.odds}</span></span>
                           </div>
                         ))}
                       </div>
-                      <button
-                        onClick={() => handleBuildSlip(curated)}
-                        className="w-full py-2 bg-brand-teal text-background text-[10px] font-bold rounded-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(0,198,186,0.4)]"
-                      >
-                        BUILD THIS SLIP (SPORTYBET)
-                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleBuildSlip(curated, "sportybet")}
+                          className="py-2 bg-brand-teal text-background text-[10px] font-bold rounded-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(0,198,186,0.3)]"
+                        >
+                          SportyBet Only
+                        </button>
+                        <button
+                          onClick={() => handleBuildSlip(curated)}
+                          className="py-2 bg-white/8 border border-white/10 text-white text-[10px] font-bold rounded-lg hover:bg-white/12 transition-all"
+                        >
+                          All 7 Platforms
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -340,6 +339,38 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                           <div className="text-[10px] text-slate-500 mt-1">Our models require a 2% EV edge to recommend a bet. Check back in an hour!</div>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* BOOKING CODES card — used by both scan and AI chat slip generation */}
+                  {m.type === "codes" && m.data && (
+                    <div className="mt-3 space-y-2">
+                      <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-3">Booking Codes</div>
+                      {(m.data as { platform: string; code: string }[]).map((r, ri) => {
+                        const isError = r.code.startsWith("[");
+                        const label = r.platform.charAt(0).toUpperCase() + r.platform.slice(1);
+                        return (
+                          <div key={ri} className={`flex items-center justify-between gap-3 p-2.5 rounded-xl border text-xs ${
+                            isError
+                              ? "bg-red-400/5 border-red-400/10 text-slate-500"
+                              : "bg-white/4 border-white/8 hover:border-brand-teal/20 transition-all"
+                          }`}>
+                            <span className="font-bold text-slate-300 w-20 shrink-0">{label}</span>
+                            <span className={`font-mono flex-1 truncate ${ isError ? "text-red-400/60 text-[10px]" : "text-brand-teal font-bold" }`}>
+                              {r.code}
+                            </span>
+                            {!isError && (
+                              <button
+                                onClick={() => navigator.clipboard.writeText(r.code)}
+                                className="text-[9px] text-slate-500 hover:text-white px-2 py-1 bg-white/5 rounded-lg transition-all shrink-0"
+                              >
+                                Copy
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                      <div className="text-[9px] text-slate-600 italic mt-1">Copy the code for your preferred bookmaker and load it in-app.</div>
                     </div>
                   )}
 
