@@ -57,15 +57,15 @@ export default async function DashboardPage() {
             <span>Slip Tracker</span>
             {!user.is_premium && <Crown className="w-3 h-3 text-yellow-500 ml-auto" />}
           </Link>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+          <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <BarChart3 className="w-4 h-4" /> Analytics
-          </a>
-          <a href="/calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+          </Link>
+          <a href="/#calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <CreditCard className="w-4 h-4" /> Bet Calculator
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <Settings className="w-4 h-4" /> Settings
-          </a>
+          </Link>
         </nav>
 
         {/* User Card */}

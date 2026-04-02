@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useScroll, useTransform, Variants, AnimatePresence } from "framer-motion";
-import { ArrowRight, Bot, Zap, Calculator, TerminalSquare, Activity, Globe, Lock, CheckCircle2, ShieldCheck, Banknote, CircleDollarSign, Coins, TrendingDown, AlertOctagon, TrendingUp, Shield, Cpu, Network, ChevronDown, Star, MessageSquare } from "lucide-react";
-import { useRef, useState } from "react";
+import { ArrowRight, Bot, Zap, Calculator, TerminalSquare, Activity, Globe, Lock, CheckCircle2, ShieldCheck, Banknote, CircleDollarSign, Coins, TrendingDown, AlertOctagon, TrendingUp, Shield, Cpu, Network, ChevronDown, Star, MessageSquare, PlusCircle, Trash2, BarChart2, DollarSign } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 
 // Smooth Animation Variants that satisfy strict TypeScript typing
@@ -10,6 +10,321 @@ const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
 };
+
+// ─── Bet Calculator Sub-Components (embedded inline on landing page) ──────────
+const CALC_TABS = [
+  { id: "parlay",  label: "Parlay Builder",  icon: <Calculator className="w-4 h-4" /> },
+  { id: "kelly",   label: "Kelly Criterion",  icon: <TrendingUp className="w-4 h-4" /> },
+  { id: "roi",     label: "ROI Tracker",      icon: <BarChart2  className="w-4 h-4" /> },
+  { id: "streak",  label: "Streak Analyzer",  icon: <DollarSign className="w-4 h-4" /> },
+];
+
+interface ParlayLeg  { id: number; name: string; odds: string; }
+interface BetRecord  { id: number; stake: string; result: "won" | "lost"; odds: string; }
+
+function LandingParlayCalc() {
+  const [stake, setStake] = useState("100");
+  const [legs, setLegs] = useState<ParlayLeg[]>([
+    { id: 1, name: "Man City Win", odds: "1.45" },
+    { id: 2, name: "Over 2.5",     odds: "1.80" },
+    { id: 3, name: "BTTS Yes",     odds: "1.65" },
+  ]);
+  const addLeg    = () => setLegs(p => [...p, { id: Date.now(), name: "", odds: "1.50" }]);
+  const removeLeg = (id: number) => setLegs(p => p.filter(l => l.id !== id));
+  const updateLeg = (id: number, field: keyof ParlayLeg, val: string) =>
+    setLegs(p => p.map(l => l.id === id ? { ...l, [field]: val } : l));
+  const combined  = legs.reduce((a, l) => a * (parseFloat(l.odds) || 1), 1);
+  const payout    = (parseFloat(stake) || 0) * combined;
+  const profit    = payout - (parseFloat(stake) || 0);
+  const breakEven = (1 / combined) * 100;
+  return (
+    <div className="space-y-5">
+      <div className="p-1 bg-black/30 border border-white/10 rounded-2xl">
+        <div className="flex items-center gap-3 px-4 py-2">
+          <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Stake (₦)</span>
+          <input type="number" value={stake} onChange={e => setStake(e.target.value)}
+            className="flex-1 bg-transparent text-white text-right font-mono text-lg font-bold outline-none" placeholder="100" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Selections ({legs.length})</span>
+          <button onClick={addLeg} className="flex items-center gap-1 text-xs text-brand-teal hover:text-brand-teal/80 font-bold transition-colors">
+            <PlusCircle className="w-3.5 h-3.5" /> Add
+          </button>
+        </div>
+        <AnimatePresence>
+          {legs.map((leg, i) => (
+            <motion.div key={leg.id} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 20 }}
+              className="flex items-center gap-3 p-3 bg-black/30 border border-white/10 rounded-xl">
+              <span className="text-[10px] font-black text-slate-600 w-4 shrink-0">#{i+1}</span>
+              <input type="text" value={leg.name} onChange={e => updateLeg(leg.id, "name", e.target.value)}
+                placeholder="Selection name..." className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-700 min-w-0" />
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] text-slate-600">@</span>
+                <input type="number" value={leg.odds} onChange={e => updateLeg(leg.id, "odds", e.target.value)}
+                  step="0.01" min="1" className="w-14 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-sm text-brand-teal font-mono text-right outline-none focus:border-brand-teal/50" />
+                <button onClick={() => removeLeg(leg.id)} className="text-slate-700 hover:text-red-400 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { label: "Combined Odds",   value: combined.toFixed(2)+"x",                             color: "text-white" },
+          { label: "Payout",          value: "₦"+Math.round(payout).toLocaleString(),              color: "text-green-400" },
+          { label: "Profit",          value: "₦"+Math.round(profit).toLocaleString(),              color: profit >= 0 ? "text-green-400" : "text-red-400" },
+          { label: "Break-Even Prob", value: breakEven.toFixed(1)+"%",                            color: "text-brand-blue" },
+        ].map((r, i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
+            <div className={`text-lg font-black ${r.color}`}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="p-3 bg-brand-teal/5 border border-brand-teal/20 rounded-xl text-[11px] text-slate-400 leading-relaxed">
+        💡 <strong className="text-brand-teal">Break-even prob</strong> = how often all selections must win for long-run profit.
+      </div>
+    </div>
+  );
+}
+
+function LandingKellyCalc() {
+  const [bankroll, setBankroll] = useState("50000");
+  const [winProb,  setWinProb]  = useState("65");
+  const [odds,     setOdds]     = useState("1.80");
+  const [fraction, setFraction] = useState("25");
+  const b = (parseFloat(odds) || 1) - 1;
+  const p = (parseFloat(winProb) || 0) / 100;
+  const q = 1 - p;
+  const kellyFull     = b > 0 ? ((b * p - q) / b) : 0;
+  const kellyFraction = kellyFull * (parseFloat(fraction) || 25) / 100;
+  const optimalStake  = (parseFloat(bankroll) || 0) * Math.max(0, kellyFraction);
+  const expectedProfit = optimalStake * b * p - optimalStake * q;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[
+          { label: "Bankroll (₦)",        value: bankroll,  set: setBankroll,  hint: "Total capital" },
+          { label: "Decimal Odds",         value: odds,      set: setOdds,      hint: "Bookmaker price" },
+          { label: "Win Probability (%)",  value: winProb,   set: setWinProb,   hint: "Your estimated win chance" },
+          { label: "Kelly Fraction (%)",   value: fraction,  set: setFraction,  hint: "25% = Quarter-Kelly" },
+        ].map((f, i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">{f.label}</label>
+            <input type="number" value={f.value} onChange={e => f.set(e.target.value)}
+              className="w-full bg-transparent text-xl font-black text-white outline-none font-mono" />
+            <div className="text-[10px] text-slate-600 mt-1 italic">{f.hint}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Full Kelly",                            value: `${(kellyFull*100).toFixed(2)}%`,             color: "text-slate-400" },
+          { label: `Optimal Stake (${fraction}% Kelly)`,    value: `₦${Math.round(optimalStake).toLocaleString()}`, color: "text-brand-teal" },
+          { label: "Expected Profit/Bet",                   value: `₦${Math.round(expectedProfit).toLocaleString()}`, color: expectedProfit >= 0 ? "text-green-400" : "text-red-400" },
+        ].map((r, i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
+            <div className={`text-lg font-black ${r.color}`}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="p-3 bg-brand-blue/5 border border-brand-blue/20 rounded-xl text-[11px] text-slate-400 leading-relaxed">
+        💡 <strong className="text-brand-blue">Kelly Criterion</strong> sizes bets by your mathematical edge. Use <strong>25% (Quarter-Kelly)</strong> to reduce variance.
+      </div>
+    </div>
+  );
+}
+
+function LandingROITracker() {
+  const [bets, setBets]         = useState<BetRecord[]>([
+    { id: 1, stake: "1000", result: "won",  odds: "1.80" },
+    { id: 2, stake: "500",  result: "lost", odds: "2.10" },
+    { id: 3, stake: "2000", result: "won",  odds: "1.50" },
+  ]);
+  const [newStake,  setNewStake]  = useState("1000");
+  const [newOdds,   setNewOdds]   = useState("1.80");
+  const [newResult, setNewResult] = useState<"won"|"lost">("won");
+  const totalStaked  = bets.reduce((s, b) => s + parseFloat(b.stake||"0"), 0);
+  const totalReturns = bets.reduce((s, b) => b.result==="won" ? s + parseFloat(b.stake||"0")*parseFloat(b.odds||"1") : s, 0);
+  const netProfit    = totalReturns - totalStaked;
+  const roi          = totalStaked > 0 ? (netProfit / totalStaked) * 100 : 0;
+  const winRate      = bets.length > 0 ? (bets.filter(b => b.result==="won").length / bets.length) * 100 : 0;
+  const addBet = () => setBets(p => [...p, { id: Date.now(), stake: newStake, result: newResult, odds: newOdds }]);
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { label: "Total Staked",   value: `₦${totalStaked.toLocaleString()}`,              color: "text-white" },
+          { label: "Total Returns",  value: `₦${Math.round(totalReturns).toLocaleString()}`,  color: "text-brand-teal" },
+          { label: "Net Profit",     value: `₦${Math.round(netProfit).toLocaleString()}`,     color: netProfit >= 0 ? "text-green-400" : "text-red-400" },
+          { label: "ROI",            value: `${roi.toFixed(1)}%`,                             color: roi >= 0 ? "text-brand-teal" : "text-red-400" },
+        ].map((s, i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{s.label}</div>
+            <div className={`text-lg font-black ${s.color}`}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="p-3 bg-black/30 border border-white/10 rounded-xl">
+        <div className="flex justify-between mb-2">
+          <span className="text-xs font-bold text-slate-400">Win Rate</span>
+          <span className="text-xs font-black text-brand-teal">{winRate.toFixed(0)}% ({bets.filter(b=>b.result==="won").length}/{bets.length})</span>
+        </div>
+        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-brand-blue to-brand-teal rounded-full transition-all duration-500" style={{ width: `${winRate}%` }} />
+        </div>
+      </div>
+      <div className="p-3 bg-black/30 border border-white/10 rounded-xl space-y-3">
+        <div className="text-xs font-black text-slate-500 uppercase tracking-wider">Add a Bet</div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input type="number" value={newStake} onChange={e => setNewStake(e.target.value)} placeholder="Stake"
+            className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-brand-teal/50" />
+          <input type="number" value={newOdds} onChange={e => setNewOdds(e.target.value)} step="0.01" placeholder="Odds"
+            className="w-24 bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-brand-teal/50" />
+          <div className="flex gap-2">
+            {(["won","lost"] as const).map(r => (
+              <button key={r} onClick={() => setNewResult(r)}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${newResult===r?(r==="won"?"bg-green-400/10 text-green-400 border-green-400/30":"bg-red-400/10 text-red-400 border-red-400/30"):"bg-white/5 text-slate-500 border-white/10"}`}>
+                {r==="won"?"✅ Won":"❌ Lost"}
+              </button>
+            ))}
+          </div>
+          <button onClick={addBet} className="px-4 py-2.5 bg-brand-teal text-background font-black text-xs rounded-xl hover:scale-105 transition-all">Add</button>
+        </div>
+      </div>
+      <div className="space-y-2 max-h-40 overflow-y-auto">
+        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">History</div>
+        {bets.slice().reverse().map((b, i) => (
+          <div key={b.id} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${b.result==="won"?"bg-green-400/5 border-green-400/10":"bg-red-400/5 border-red-400/10"}`}>
+            <span>{b.result==="won"?"✅":"❌"}</span>
+            <span className="text-slate-400 flex-1">@{b.odds}</span>
+            <span className={`font-bold ${b.result==="won"?"text-green-400":"text-red-400"}`}>
+              {b.result==="won"?"+₦"+Math.round(parseFloat(b.stake)*(parseFloat(b.odds)-1)).toLocaleString():"-₦"+parseFloat(b.stake).toLocaleString()}
+            </span>
+            <button onClick={() => setBets(p => p.filter(x => x.id !== b.id))} className="text-slate-700 hover:text-red-400 transition-colors ml-1">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LandingStreakAnalyzer() {
+  const [oddsHistory,  setOddsHistory]  = useState("1.45, 1.42, 1.47, 1.43, 1.46, 1.50, 1.44");
+  const [currentOdds,  setCurrentOdds]  = useState("1.45");
+  const [stakePerBet,  setStakePerBet]  = useState("1000");
+  const [periods,      setPeriods]      = useState("7");
+  const historicalOdds = oddsHistory.split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const avgOdds        = historicalOdds.length > 0 ? historicalOdds.reduce((a,b)=>a+b,0)/historicalOdds.length : 0;
+  const currentNum     = parseFloat(currentOdds)||0;
+  const oddsDeviation  = avgOdds > 0 ? ((currentNum-avgOdds)/avgOdds)*100 : 0;
+  const impliedProb    = currentNum > 0 ? (1/currentNum)*100 : 0;
+  const avgImpliedProb = avgOdds > 0 ? (1/avgOdds)*100 : 0;
+  const edgeVsAvg      = impliedProb - avgImpliedProb;
+  const variance       = historicalOdds.length>1 ? historicalOdds.reduce((v,o)=>v+Math.pow(o-avgOdds,2),0)/(historicalOdds.length-1) : 0;
+  const consistency    = Math.max(0, 100-(Math.sqrt(variance)/avgOdds)*1000);
+  const totalStake     = parseFloat(stakePerBet)*parseInt(periods);
+  const expectedReturn = totalStake*currentNum*(impliedProb/100);
+  return (
+    <div className="space-y-4">
+      <div className="p-3 bg-black/30 border border-white/10 rounded-xl">
+        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">Historical Odds (comma-separated)</label>
+        <input type="text" value={oddsHistory} onChange={e => setOddsHistory(e.target.value)}
+          placeholder="1.45, 1.42..." className="w-full bg-transparent text-sm text-brand-teal font-mono outline-none placeholder:text-slate-700" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Current Odds",     value: currentOdds, set: setCurrentOdds, hint: "Today's price" },
+          { label: "Stake/Bet (₦)",   value: stakePerBet, set: setStakePerBet, hint: "Per bet stake" },
+          { label: "# Periods (Days)", value: periods,     set: setPeriods,     hint: "Duration" },
+        ].map((f,i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">{f.label}</label>
+            <input type="text" value={f.value} onChange={e => f.set(e.target.value)}
+              className="w-full bg-transparent text-xl font-black text-white outline-none font-mono" />
+            <div className="text-[10px] text-slate-600 mt-0.5 italic">{f.hint}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Avg Odds",        value: avgOdds.toFixed(2)+"x",                                               color: "text-slate-300" },
+          { label: "Odds Deviation",  value: `${oddsDeviation>=0?"+":""}${oddsDeviation.toFixed(1)}%`,             color: Math.abs(oddsDeviation)>5?"text-yellow-400":"text-brand-teal" },
+          { label: "Edge vs Avg",     value: `${edgeVsAvg>=0?"+":""}${edgeVsAvg.toFixed(2)}%`,                     color: edgeVsAvg>=0?"text-red-400":"text-green-400" },
+          { label: "Consistency",     value: `${consistency.toFixed(0)}/100`,                                       color: consistency>70?"text-green-400":consistency>40?"text-yellow-400":"text-red-400" },
+          { label: "Total Outlay",    value: `₦${totalStake.toLocaleString()}`,                                     color: "text-white" },
+          { label: "Expected Return", value: `₦${Math.round(expectedReturn).toLocaleString()}`,                     color: expectedReturn>totalStake?"text-green-400":"text-red-400" },
+        ].map((r,i) => (
+          <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
+            <div className={`text-lg font-black ${r.color}`}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      {Math.abs(oddsDeviation)>8 && (
+        <div className="p-3 bg-yellow-400/5 border border-yellow-400/20 rounded-xl text-[11px] text-yellow-400">
+          ⚠️ <strong>Odds Drift Detected!</strong> {Math.abs(oddsDeviation).toFixed(1)}% from the {periods}-period average — check for sharps activity.
+        </div>
+      )}
+      <div className="p-3 bg-brand-teal/5 border border-brand-teal/20 rounded-xl text-[11px] text-slate-400">
+        💡 <strong className="text-brand-teal">Consistency Score</strong> above 70/100 = stable market. Below 40/100 = sharp money movement — be cautious.
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+function CalcWrapper() {
+  const [activeCalcTab, setActiveCalcTab] = useState("parlay");
+  return (
+    <div>
+      {/* Tab bar — horizontally scrollable on mobile */}
+      <div className="flex overflow-x-auto scrollbar-hide border-b border-white/5 bg-black/20 px-4 md:px-8 gap-1 py-3">
+        {CALC_TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveCalcTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 ${
+              activeCalcTab === tab.id
+                ? "bg-brand-teal text-background border-brand-teal shadow-[0_0_16px_rgba(0,198,186,0.3)]"
+                : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeCalcTab}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="p-5 md:p-8"
+        >
+          <h3 className="text-base md:text-xl font-black text-white mb-5 tracking-tight">
+            {CALC_TABS.find(t => t.id === activeCalcTab)?.label}
+          </h3>
+          {activeCalcTab === "parlay" && <LandingParlayCalc />}
+          {activeCalcTab === "kelly"  && <LandingKellyCalc />}
+          {activeCalcTab === "roi"    && <LandingROITracker />}
+          {activeCalcTab === "streak" && <LandingStreakAnalyzer />}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
@@ -50,7 +365,7 @@ export default function Home() {
              <a href="/#engine" className="hover:text-white transition-colors">Quant Engine</a>
              <a href="/#workflow" className="hover:text-white transition-colors">Workflow</a>
              <a href="/#faq" className="hover:text-white transition-colors">FAQ</a>
-             <Link href="/calculator" className="hover:text-white transition-colors">Calculator</Link>
+             <a href="/#calculator" className="hover:text-white transition-colors">Calculator</a>
           </div>
           <Link href="/dashboard" className="px-5 py-2 py-2 text-sm bg-brand-teal text-background font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(0,198,186,0.3)] flex items-center">
             Open Terminal
@@ -426,34 +741,110 @@ export default function Home() {
                    </div>
                 </motion.div>
               ))}
-           </div>
+            </div>
+          </div>
+        </section>
+
+      {/* ─── Bet Calculator Section ─── */}
+      <section id="calculator" className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5 overflow-hidden">
+        <div className="absolute top-0 right-[-10%] w-[40vw] h-[40vw] bg-brand-blue/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-12">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-brand-teal mb-4">Free Tools</p>
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
+              Bet <span className="text-gradient">Calculator</span>
+            </h2>
+            <p className="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
+              Four professional-grade calculators used by quant bettors worldwide. No sign-up required.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="bg-[#0A0F1C]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl"
+          >
+            <CalcWrapper />
+          </motion.div>
         </div>
       </section>
 
       {/* ─── Partners / Credibility Section ─── */}
       <section className="relative z-20 py-20 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-12">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600 mb-4">Powered By & Integrated With</p>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-14">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600 mb-4">Powered By &amp; Integrated With</p>
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">The Infrastructure Behind <span className="text-gradient">Every Edge</span></h2>
           </motion.div>
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-wrap justify-center gap-6 md:gap-10">
             {[
-              { name: "The Odds API", desc: "Live global market odds", tag: "Data" },
-              { name: "Rapid API", desc: "Real-time football stats", tag: "Data" },
-              { name: "OpenAI GPT", desc: "AI reasoning & analysis", tag: "AI" },
-              { name: "SportyBet", desc: "Booking code generation", tag: "Platform" },
-              { name: "Bet9ja", desc: "Nigeria's #1 bookmaker", tag: "Platform" },
-              { name: "1xBet", desc: "Global market access", tag: "Platform" },
-              { name: "Resend", desc: "Transactional email delivery", tag: "Infrastructure" },
-              { name: "Railway", desc: "Edge-deployed backend", tag: "Infrastructure" },
+              { name: "The Odds API", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#0d1f3c"/>
+                  <text x="20" y="26" textAnchor="middle" fontSize="14" fontWeight="900" fill="#00C6BA" fontFamily="monospace">O∆</text>
+                </svg>
+              )},
+              { name: "RapidAPI", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#0e1a35"/>
+                  <polygon points="12,28 20,11 28,28" fill="none" stroke="#0171CE" strokeWidth="3" strokeLinejoin="round"/>
+                  <circle cx="20" cy="11" r="3" fill="#0171CE"/>
+                </svg>
+              )},
+              { name: "OpenAI", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#111"/>
+                  <path d="M20 9 C13 9 9 13.5 9 19.5 C9 23.5 11.5 27 16 28.5 L16 32 L20 30 L24 32 L24 28.5 C28.5 27 31 23.5 31 19.5 C31 13.5 27 9 20 9Z" fill="#10a37f" opacity="0.9"/>
+                  <circle cx="20" cy="19.5" r="4.5" fill="#111"/>
+                </svg>
+              )},
+              { name: "SportyBet", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#007a38"/>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">SB</text>
+                </svg>
+              )},
+              { name: "Bet9ja", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#005880"/>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">B9</text>
+                </svg>
+              )},
+              { name: "1xBet", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#1b3566"/>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1X</text>
+                </svg>
+              )},
+              { name: "Resend", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#18181b"/>
+                  <rect x="9" y="13" width="22" height="15" rx="2.5" stroke="white" strokeWidth="2" fill="none"/>
+                  <path d="M9 16 L20 23 L31 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )},
+              { name: "Railway", logo: (
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <rect width="40" height="40" rx="8" fill="#0B0D0E"/>
+                  <rect x="11" y="11" width="7" height="18" rx="2" fill="#7C3AED"/>
+                  <rect x="22" y="11" width="7" height="18" rx="2" fill="#5B21B6"/>
+                  <rect x="11" y="31" width="18" height="2.5" rx="1.25" fill="#7C3AED"/>
+                </svg>
+              )},
             ].map((p, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                className="p-5 rounded-2xl bg-white/3 border border-white/8 hover:border-brand-teal/30 hover:bg-white/5 transition-all group"
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07, type: "spring", stiffness: 180, damping: 14 }}
+                className="flex flex-col items-center gap-2.5 group cursor-default"
               >
-                <div className="text-[10px] font-black text-brand-teal uppercase tracking-widest mb-2">{p.tag}</div>
-                <div className="text-sm font-bold text-white group-hover:text-brand-teal transition-colors">{p.name}</div>
-                <div className="text-[11px] text-slate-500 mt-1">{p.desc}</div>
+                <div className="w-16 h-16 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center group-hover:border-brand-teal/40 group-hover:scale-110 group-hover:bg-white/8 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+                  {p.logo}
+                </div>
+                <span className="text-[11px] font-semibold text-slate-500 group-hover:text-slate-300 transition-colors tracking-wide">{p.name}</span>
               </motion.div>
             ))}
           </motion.div>
@@ -461,44 +852,131 @@ export default function Home() {
       </section>
 
       {/* ─── Reviews Section ─── */}
-      <section className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-14">
+      <section className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[40vw] bg-brand-teal/4 blur-[130px] rounded-full pointer-events-none" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-16">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-brand-teal mb-4">From The Community</p>
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">What Real Operators Are Saying</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">Over 2,000 bettors upgraded from gut-feeling to institutional-grade execution.</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">What Real Operators Are Saying</h2>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { name: "Ade_Lagos", handle: "@ade.sporty", avatar: "AL", rating: 5, review: "This thing is genuinely insane. I ran /scan on a Thursday night and hit a +14% EV edge on a Serie A match that I would have absolutely NEVER found manually. The confidence score made me trust it enough to stake real money. Won the bet. This is the tool serious bettors need.", tag: "Market Scanner", color: "brand-teal" },
-              { name: "QuantBettor_KE", handle: "@quantbettor", avatar: "QK", rating: 5, review: "I've tried every AI betting tool out there. Most are just dressed up guesswork. But this one actually shows you the Expected Value calculation and explains exactly WHY it's a good bet. The Poisson model under the hood is legit. I've been consistently profitable for 6 weeks.", tag: "Quant Engine", color: "brand-blue" },
-              { name: "Miracle_Abuja", handle: "@miracle.tips", avatar: "MA", rating: 5, review: "The slip tracker feature is a game changer for premium. I added my Saturday accumulator and got a Telegram notification at halftime saying 'momentum shift detected — cashout recommended.' I cashed at 3.2x instead of losing at full time. That notification literally saved my stake.", tag: "Slip Tracker", color: "green-400" },
-              { name: "GhanaQuant", handle: "@ghana.quant", avatar: "GQ", rating: 5, review: "I use the Kelly Criterion calculator every single week now. Before I was staking random amounts based on how confident I felt. Now I put in the odds and my bankroll and it tells me exactly the mathematically optimal amount. My drawdowns have decreased by 40% since I started.", tag: "Bet Calculator", color: "brand-teal" },
-              { name: "SlyviaTips", handle: "@slyvia.t", avatar: "ST", rating: 5, review: "Honestly the /checkslip EV analysis is what got me. I pasted in a code my friend sent me and the AI broke down every single game, told me which ones were EV+ and which were dead weight. Removed two games, rebuilt the slip, and ended up winning. This AI is genuinely sharp.", tag: "Check Slip", color: "brand-blue" },
-              { name: "Femi_Trader", handle: "@femi.variance", avatar: "FT", rating: 5, review: "The 14-day trial is not a gimmick. I used all 14 days seriously, ran weekend scans every Friday and followed the top EV bets strictly. By day 9 I was already in profit and upgraded to Premium. The Telegram integration and push notifications alone are worth the subscription.", tag: "Premium", color: "yellow-400" },
-            ].map((r, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="p-6 rounded-2xl bg-white/3 border border-white/8 hover:border-white/15 transition-all flex flex-col gap-4"
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            {/* Card 1 — Hero Quote spotlight */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-5 relative rounded-3xl overflow-hidden p-8 flex flex-col justify-between min-h-[380px]"
+              style={{ background: "linear-gradient(135deg, rgba(0,198,186,0.13) 0%, rgba(0,113,206,0.07) 55%, rgba(3,6,14,1) 100%)" }}
+            >
+              <div className="absolute inset-0 border border-brand-teal/20 rounded-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-teal/10 rounded-full blur-[70px] pointer-events-none" />
+              {/* Giant decorative quote */}
+              <div className="text-[140px] leading-none font-black text-brand-teal/8 absolute top-0 left-4 select-none pointer-events-none">&ldquo;</div>
+              <div className="relative z-10 mt-10">
+                <p className="text-lg md:text-xl font-medium text-white leading-relaxed">
+                  &ldquo;I ran <span className="text-brand-teal font-black">/scan</span> on a Thursday and hit a{" "}
+                  <span className="text-brand-teal font-black">+14% EV edge</span> on a Serie A match I&apos;d have never found manually. Confidence score made me trust it. Won the bet. This is the tool serious bettors need.&rdquo;
+                </p>
+              </div>
+              <div className="relative z-10 mt-8 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(0,198,186,0.3)]">AL</div>
+                  <div>
+                    <div className="text-sm font-bold text-white">Ade_Lagos</div>
+                    <div className="text-[11px] text-slate-400">@ade.sporty · Market Scanner</div>
+                  </div>
+                </div>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right column */}
+            <div className="lg:col-span-7 flex flex-col gap-6">
+
+              {/* Card 2 — Stat spotlight */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="rounded-3xl p-7 flex flex-col md:flex-row gap-6 items-center relative overflow-hidden"
+                style={{ background: "linear-gradient(135deg, rgba(0,113,206,0.12) 0%, rgba(3,6,14,1) 80%)" }}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full bg-${r.color}/10 border border-${r.color}/20 flex items-center justify-center text-xs font-black text-${r.color}`}>{r.avatar}</div>
-                    <div>
-                      <div className="text-sm font-bold text-white">{r.name}</div>
-                      <div className="text-[10px] text-slate-500">{r.handle}</div>
+                <div className="absolute inset-0 border border-brand-blue/20 rounded-3xl pointer-events-none" />
+                <div className="shrink-0 relative z-10 text-center md:text-left">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-brand-blue to-cyan-400 leading-none">40%</div>
+                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1.5">Less Drawdown</div>
+                </div>
+                <div className="relative z-10 flex-1">
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    &ldquo;Before, I was staking random amounts based on gut feel. The{" "}
+                    <span className="text-brand-blue font-bold">Kelly Criterion calculator</span> now tells me the mathematically optimal stake every single week. My drawdowns dropped 40% since I started.&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3 mt-5">
+                    <div className="w-9 h-9 rounded-full bg-brand-blue/20 border border-brand-blue/30 flex items-center justify-center text-xs font-black text-brand-blue">GQ</div>
+                    <div className="flex-1">
+                      <div className="text-xs font-bold text-white">GhanaQuant</div>
+                      <div className="text-[10px] text-slate-500">@ghana.quant · Bet Calculator</div>
+                    </div>
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-3 h-3 text-yellow-400 fill-yellow-400" />)}
                     </div>
                   </div>
-                  <div className="flex gap-0.5">{
-                    Array.from({ length: r.rating }).map((_, si) => <Star key={si} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)
-                  }</div>
                 </div>
-                <p className="text-sm text-slate-400 leading-relaxed flex-1">&ldquo;{r.review}&rdquo;</p>
-                <div className={`self-start text-[10px] font-black text-${r.color} bg-${r.color}/10 border border-${r.color}/20 px-3 py-1 rounded-full uppercase tracking-wider`}>{r.tag}</div>
               </motion.div>
-            ))}
+
+              {/* Card 3 — Terminal-style notification */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.28 }}
+                className="rounded-3xl overflow-hidden border border-green-500/15"
+              >
+                {/* Mac window chrome */}
+                <div className="bg-[#0a0f1c] px-5 py-3 flex items-center gap-2 border-b border-white/5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                  <span className="ml-3 text-[10px] font-mono text-slate-600">slip_tracker_notification.log</span>
+                </div>
+                <div className="bg-[#060913] p-6">
+                  <div className="font-mono text-sm space-y-1.5 mb-5">
+                    <p className="text-green-400 font-bold">✅ SLIP TRACKER — Halftime Update</p>
+                    <p className="text-slate-500 text-xs">Code: <span className="text-white">BC-SAT-MRC</span> &nbsp;·&nbsp; Platform: <span className="text-white">SportyBet</span></p>
+                    <div className="pt-2" />
+                    <p className="text-yellow-400">⚠️  Momentum shift detected · Game 3.</p>
+                    <p className="text-slate-300">Recommendation: <span className="text-green-400 font-bold">CASHOUT NOW @ 3.2x</span></p>
+                    <p className="text-slate-600 text-xs">— AI Advisory Engine · 17:34 HRS</p>
+                  </div>
+                  <div className="pt-4 border-t border-white/5 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/25 flex items-center justify-center text-xs font-black text-green-400 shrink-0">MA</div>
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-300 leading-relaxed">&ldquo;I got this exact notification at halftime and cashed out at 3.2x. The AI called it perfectly — Game 3 lost at full time. That push literally saved my stake.&rdquo;</p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="flex-1">
+                          <span className="text-xs font-bold text-white">Miracle_Abuja</span>
+                          <span className="text-[10px] text-slate-500 ml-2">@miracle.tips · Slip Tracker</span>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-3 h-3 text-yellow-400 fill-yellow-400" />)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* ─── FAQ Section ─── */}
       <section id="faq" className="relative z-20 py-24 px-6 border-t border-white/5">
