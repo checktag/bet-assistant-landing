@@ -26,7 +26,7 @@ interface Selection {
 interface Message {
   role: "user" | "assistant";
   content: string;
-  type?: "text" | "scan" | "slip" | "convert" | "codes";
+  type?: "text" | "scan" | "slip" | "convert" | "codes" | "onboarding";
   data?: any;
 }
 
@@ -57,7 +57,11 @@ const MetricGlossary = () => (
 export default function AssistantChat({ accessToken }: AssistantChatProps) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "👋 Welcome to your Quant Assistant. How can I help you dominate the markets today?" }
+    {
+      role: "assistant",
+      content: "👋 **Welcome to Quant Assistant** — your institutional-grade betting AI.\nType a command below or click **QUICK ACTIONS** to get started.",
+      type: "onboarding"
+    }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -82,28 +86,60 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
     const chatHistory = messages.map(m => ({ role: m.role, content: m.content })).slice(-10);
 
     try {
+      // ── /help ─────────────────────────────────────────────────────────────
+      if (userMsg.toLowerCase() === "/help") {
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: "📚 **Command Reference** — everything you can do here.",
+          type: "onboarding"
+        }]);
+        setIsLoading(false);
+        return;
+      }
+
+      // ── /scan ─────────────────────────────────────────────────────────────
       if (userMsg.toLowerCase().startsWith("/scan")) {
         const parts = userMsg.split(" ");
         let dateArg = null;
         let leagueArg = null;
 
-        if (parts[1] === "upcoming" || parts[1] === "weekend") {
-          dateArg = parts[1];
-        } else if (parts[1] && parts[1].match(/\d{4}-\d{2}-\d{2}/)) {
-          dateArg = parts[1];
-        } else if (parts[1]) {
-          leagueArg = parts.slice(1).join("_").toLowerCase();
+        // Extract risk keyword from anywhere in the command
+        const RISK_KEYWORDS: Record<string, string> = {
+          high: "high", "high-stake": "high", stake: "high",
+          moderate: "moderate", balanced: "moderate", mid: "moderate",
+          low: "low", spread: "low", many: "low",
+        };
+        const riskArg = parts.slice(1).find(p => RISK_KEYWORDS[p.toLowerCase()]) || null;
+        const riskProfile = riskArg ? RISK_KEYWORDS[riskArg.toLowerCase()] : "moderate";
+
+        // Remove the risk keyword, then parse remaining args
+        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()]);
+
+        if (remaining[0] === "upcoming" || remaining[0] === "weekend") {
+          dateArg = remaining[0];
+        } else if (remaining[0] && remaining[0].match(/\d{4}-\d{2}-\d{2}/)) {
+          dateArg = remaining[0];
+        } else if (remaining.length > 0) {
+          leagueArg = remaining.join("_").toLowerCase();
         }
 
         const res = await axios.get(`${API_URL}/scan`, {
-          params: { date: dateArg, league: leagueArg },
+          params: { date: dateArg, league: leagueArg, risk: riskProfile },
           headers: { Authorization: `Bearer ${accessToken}` }
         });
+
+        const PROFILE_META: Record<string, { label: string; desc: string; cap: string }> = {
+          high:     { label: "High-Stake",  desc: "5–7 picks · tight odds · 75%+ confidence",        cap: "up to 7" },
+          moderate: { label: "Moderate",    desc: "8–20 picks · balanced odds · 60%+ confidence",    cap: "up to 20" },
+          low:      { label: "Spread",      desc: "20–40 picks · wide odds · max market coverage",   cap: "up to 40" },
+        };
+        const meta = PROFILE_META[riskProfile] || PROFILE_META.moderate;
+
         setMessages(prev => [...prev, {
           role: "assistant",
-          content: `🔍 **Market Scan Complete!**\nScanned **${res.data.total_matches || 'hundreds of'}** raw fixtures from ${leagueArg ? leagueArg.replace("_", " ") : 'Global Markets'} (${dateArg ? dateArg : 'Next 24h'}).`,
+          content: `🔍 **Market Scan Complete!** Scanned **${res.data.total_matches || 'hundreds of'}** fixtures from ${leagueArg ? leagueArg.replace(/_/g, " ") : "Global Markets"} (${dateArg || "Next 24h"}) — **${meta.label}** profile, ${meta.cap} picks.`,
           type: "scan",
-          data: res.data.bets
+          data: { bets: res.data.bets, risk_profile: riskProfile, meta }
         }]);
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
         const parts = userMsg.split(" ");
@@ -217,28 +253,101 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-full mt-4 w-[85vw] max-w-[288px] bg-[#060913]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 top-full mt-3 w-[92vw] max-w-[340px] bg-[#060913]/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
               >
-                <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] mb-3">Institutional Tools</div>
-                <div className="grid gap-2">
-                  {[
-                    { cmd: "/scan", label: "MARKET SCAN", desc: "Global search for +EV edges", icon: <Globe className="w-4 h-4" /> },
-                    { cmd: "/scan weekend", label: "WEEKEND SCAN", desc: "Saturday & Sunday fixtures", icon: <Clock className="w-4 h-4" /> },
-                    { cmd: "/checkslip sportybet ", label: "CHECK SLIP", desc: "EV + Confidence analysis per game", icon: <Zap className="w-4 h-4" /> },
-                    { cmd: "/convert sportybet bet9ja ", label: "CONVERT", desc: "Move slip between platforms", icon: <Calculator className="w-4 h-4" /> }
-                  ].map((action, ai) => (
-                    <button
-                      key={ai}
-                      onClick={() => { setInput(action.cmd); setIsMenuOpen(false); }}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 text-left transition-all border border-transparent hover:border-white/10"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-brand-teal shrink-0">{action.icon}</div>
-                      <div>
-                        <div className="text-[10px] font-black text-white">{action.label}</div>
-                        <div className="text-[9px] text-slate-500 leading-tight">{action.desc}</div>
-                      </div>
-                    </button>
-                  ))}
+                <div className="max-h-[70vh] overflow-y-auto p-4 space-y-4 scrollbar-hide">
+
+                  {/* SCAN GROUP */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="w-3 h-3 text-brand-teal" />
+                      <span className="text-[9px] font-black text-brand-teal uppercase tracking-[0.2em]">Market Scan</span>
+                    </div>
+                    <div className="grid gap-1.5">
+                      {[
+                        { cmd: "/scan",                label: "Today's Scan",        desc: "Global +EV edges in the next 24h" },
+                        { cmd: "/scan weekend",        label: "Weekend Scan",         desc: "Sat & Sun fixtures with best edges" },
+                        { cmd: "/scan upcoming",       label: "72h Upcoming",         desc: "All fixtures in the next 3 days" },
+                        { cmd: "/scan 2026-04-05",     label: "Specific Date",        desc: "Scan a custom date (YYYY-MM-DD)" },
+                        { cmd: "/scan premier league", label: "Premier League",       desc: "EPL fixtures only" },
+                        { cmd: "/scan serie_a",        label: "Serie A",             desc: "Italian league fixtures" },
+                        { cmd: "/scan bundesliga",     label: "Bundesliga",           desc: "German Bundesliga fixtures" },
+                        { cmd: "/scan champions_league",label: "Champions League",   desc: "UCL fixtures" },
+                      ].map((a, i) => (
+                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
+                          <code className="text-[9px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono">{a.cmd}</code>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors">{a.label}</div>
+                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/5" />
+
+                  {/* SLIP TOOLS GROUP */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap className="w-3 h-3 text-brand-blue" />
+                      <span className="text-[9px] font-black text-brand-blue uppercase tracking-[0.2em]">Slip Tools</span>
+                    </div>
+                    <div className="grid gap-1.5">
+                      {[
+                        { cmd: "/checkslip sportybet ",  label: "Check SportyBet Slip",  desc: "Paste your booking code after the space" },
+                        { cmd: "/checkslip bet9ja ",     label: "Check Bet9ja Slip",     desc: "AI EV + confidence per game" },
+                        { cmd: "/checkslip betway ",     label: "Check Betway Slip",     desc: "Full slip analysis with edge score" },
+                        { cmd: "/checkslip 1xbet ",      label: "Check 1xBet Slip",      desc: "Cashout vs hold recommendation" },
+                      ].map((a, i) => (
+                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
+                          <code className="text-[9px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-white group-hover:text-brand-blue transition-colors">{a.label}</div>
+                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/5" />
+
+                  {/* CONVERT GROUP */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calculator className="w-3 h-3 text-purple-400" />
+                      <span className="text-[9px] font-black text-purple-400 uppercase tracking-[0.2em]">Convert Slip</span>
+                    </div>
+                    <div className="grid gap-1.5">
+                      {[
+                        { cmd: "/convert sportybet bet9ja ",  label: "SportyBet → Bet9ja",   desc: "Convert and paste your code" },
+                        { cmd: "/convert bet9ja sportybet ",  label: "Bet9ja → SportyBet",   desc: "" },
+                        { cmd: "/convert sportybet betway ",  label: "SportyBet → Betway",   desc: "" },
+                        { cmd: "/convert sportybet 1xbet ",   label: "SportyBet → 1xBet",    desc: "" },
+                      ].map((a, i) => (
+                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
+                          <code className="text-[9px] font-black text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-white group-hover:text-purple-400 transition-colors">{a.label}</div>
+                            {a.desc && <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/5" />
+
+                  {/* HELP */}
+                  <button onClick={() => { setInput("/help"); setIsMenuOpen(false); }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/3 hover:bg-white/6 border border-white/8 transition-all">
+                    <span className="text-[10px] font-black text-slate-400">📖 View Full Command Guide</span>
+                  </button>
+
                 </div>
               </motion.div>
             )}
@@ -269,7 +378,91 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanContent}</ReactMarkdown>
                   </div>
 
-                  {/* AI Curated Selection */}
+                  {/* Onboarding / Help Card */}
+                  {m.type === "onboarding" && (
+                    <div className="mt-3 space-y-4">
+
+                      {/* Scan commands */}
+                      <div className="p-4 rounded-2xl bg-brand-teal/5 border border-brand-teal/15 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-3.5 h-3.5 text-brand-teal" />
+                          <span className="text-[10px] font-black text-brand-teal uppercase tracking-wider">Market Scan</span>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { cmd: "/scan",                 desc: "Global +EV edges — next 24 hours" },
+                            { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
+                            { cmd: "/scan upcoming",        desc: "All fixtures in the next 72 hours" },
+                            { cmd: "/scan 2026-04-05",      desc: "Specific date (YYYY-MM-DD)" },
+                            { cmd: "/scan premier league",  desc: "Filter by league name" },
+                            { cmd: "/scan champions_league",desc: "Champions League only" },
+                          ].map((c, ci) => (
+                            <button key={ci} onClick={() => setInput(c.cmd)}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all group">
+                              <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
+                              <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Slip tools */}
+                      <div className="p-4 rounded-2xl bg-brand-blue/5 border border-brand-blue/15 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-3.5 h-3.5 text-brand-blue" />
+                          <span className="text-[10px] font-black text-brand-blue uppercase tracking-wider">Slip Analysis</span>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { cmd: "/checkslip sportybet ABC123", desc: "Decode & analyse a SportyBet slip" },
+                            { cmd: "/checkslip bet9ja XYZ789",   desc: "Analyse a Bet9ja booking code" },
+                            { cmd: "/checkslip betway CODE",     desc: "Betway slip EV + cashout advice" },
+                            { cmd: "/checkslip 1xbet CODE",      desc: "1xBet slip breakdown" },
+                          ].map((c, ci) => (
+                            <button key={ci} onClick={() => setInput(c.cmd)}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-blue/10 border border-transparent hover:border-brand-blue/30 text-left transition-all group">
+                              <code className="text-[10px] font-black text-brand-blue font-mono shrink-0 whitespace-nowrap">{c.cmd}</code>
+                              <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Convert */}
+                      <div className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/15 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Calculator className="w-3.5 h-3.5 text-purple-400" />
+                          <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">Convert Slip</span>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { cmd: "/convert sportybet bet9ja CODE",  desc: "Move a slip from SportyBet to Bet9ja" },
+                            { cmd: "/convert bet9ja sportybet CODE",  desc: "Bet9ja → SportyBet" },
+                            { cmd: "/convert sportybet betway CODE",  desc: "SportyBet → Betway" },
+                            { cmd: "/convert sportybet 1xbet CODE",   desc: "SportyBet → 1xBet" },
+                          ].map((c, ci) => (
+                            <button key={ci} onClick={() => setInput(c.cmd)}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all group">
+                              <code className="text-[10px] font-black text-purple-400 font-mono shrink-0 whitespace-nowrap">{c.cmd}</code>
+                              <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* AI Chat tip */}
+                      <div className="p-3 rounded-xl bg-white/3 border border-white/8 flex items-start gap-2">
+                        <Bot className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-slate-400 leading-relaxed">
+                          <strong className="text-white">💬 Free-text chat also works!</strong> Ask anything — <em>&ldquo;Which teams are on a win streak today?&rdquo;</em>, <em>&ldquo;Should I cash out my Arsenal slip?&rdquo;</em>, or <em>&ldquo;Give me a 3-game parlay for tonight.&rdquo;</em>
+                          The AI will embed clickable selections automatically.
+                        </p>
+                      </div>
+
+                      <div className="text-[9px] text-slate-600 italic text-center">Click any command above to load it into the input box → then hit Send.</div>
+                    </div>
+                  )}
+
                   {curated.length > 0 && (
                     <div className="mt-4 p-4 bg-brand-teal/5 rounded-2xl border border-brand-teal/20">
                       <div className="text-[10px] font-bold text-brand-teal uppercase tracking-widest mb-3 italic">AI Curated Selections ({curated.length})</div>
@@ -299,48 +492,72 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                   )}
 
                   {/* SCAN Results */}
-                  {m.type === "scan" && m.data && (
-                    <div className="mt-4 grid grid-cols-1 gap-2">
-                      {m.data.length > 0 ? (
-                        <>
-                          <MetricGlossary />
-                          <div className="flex items-center justify-between px-1 mb-1">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top 5 Edges Found</span>
-                            <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
-                          </div>
-                          {m.data.slice(0, 5).map((bet: Prediction, bi: number) => (
-                            <div key={bi} className="p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:border-brand-teal/30 transition-all">
-                              <div className="flex-1">
-                                <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors">{bet.match}</div>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <div className="text-[10px] text-slate-400 capitalize">{bet.market} @ {bet.odds}</div>
-                                  <span className="w-1 h-1 rounded-full bg-white/20" />
-                                  <div className="text-[10px] text-slate-500 font-mono italic">
-                                    Kickoff: {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
+                  {m.type === "scan" && m.data && (() => {
+                    // Support both old shape (array) and new shape ({bets, risk_profile, meta})
+                    const bets: Prediction[] = Array.isArray(m.data) ? m.data : m.data.bets ?? [];
+                    const riskProfile: string = Array.isArray(m.data) ? "moderate" : (m.data.risk_profile ?? "moderate");
+                    const meta = Array.isArray(m.data) ? { label: "Moderate", desc: "8–20 picks · balanced" } : (m.data.meta ?? {});
+
+                    const PROFILE_STYLE: Record<string, { badge: string; glow: string; dot: string }> = {
+                      high:     { badge: "bg-yellow-400/10 border-yellow-400/25 text-yellow-300", glow: "border-yellow-400/20",  dot: "bg-yellow-400" },
+                      moderate: { badge: "bg-brand-teal/10 border-brand-teal/25 text-brand-teal",  glow: "border-brand-teal/20", dot: "bg-brand-teal" },
+                      low:      { badge: "bg-purple-400/10 border-purple-400/25 text-purple-300", glow: "border-purple-400/20", dot: "bg-purple-400" },
+                    };
+                    const style = PROFILE_STYLE[riskProfile] ?? PROFILE_STYLE.moderate;
+
+                    return (
+                      <div className="mt-4 grid grid-cols-1 gap-2">
+                        {bets.length > 0 ? (
+                          <>
+                            {/* Risk Profile Badge */}
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border mb-1 ${style.badge}`}>
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
+                              <div className="flex-1 min-w-0">
+                                <span className="text-[10px] font-black uppercase tracking-wide">{meta.label ?? riskProfile} Profile</span>
+                                <span className="text-[9px] opacity-70 ml-2">{meta.desc}</span>
+                              </div>
+                              <span className="text-[9px] font-bold opacity-60 shrink-0">{bets.length} picks</span>
+                            </div>
+
+                            <MetricGlossary />
+                            <div className="flex items-center justify-between px-1 mb-1">
+                              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">All Edges Found</span>
+                              <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
+                            </div>
+                            {bets.map((bet: Prediction, bi: number) => (
+                              <div key={bi} className={`p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${style.glow} transition-all`}>
+                                <div className="flex-1">
+                                  <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors">{bet.match}</div>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <div className="text-[10px] text-slate-400 capitalize">{bet.market} @ {bet.odds}</div>
+                                    <span className="w-1 h-1 rounded-full bg-white/20" />
+                                    <div className="text-[10px] text-slate-500 font-mono italic">
+                                      Kickoff: {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
+                                    </div>
                                   </div>
                                 </div>
+                                <div className="text-right space-y-0.5">
+                                  <div className="text-[10px] font-bold text-green-400">+{bet.ev_edge}% EV</div>
+                                  <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
+                                </div>
                               </div>
-                              <div className="text-right space-y-0.5">
-                                <div className="text-[10px] font-bold text-green-400">+{bet.ev_edge}% EV</div>
-                                <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
-                              </div>
-                            </div>
-                          ))}
-                          <button
-                            onClick={() => handleBuildAllSlips(m.data)}
-                            className="w-full mt-2 py-2 bg-brand-teal/10 hover:bg-brand-teal/20 border border-brand-teal/20 text-brand-teal text-[10px] font-bold rounded-lg transition-all uppercase tracking-widest"
-                          >
-                            Generate All Booking Codes
-                          </button>
-                        </>
-                      ) : (
+                            ))}
+                            <button
+                              onClick={() => handleBuildAllSlips(bets)}
+                              className="w-full mt-2 py-2 bg-brand-teal/10 hover:bg-brand-teal/20 border border-brand-teal/20 text-brand-teal text-[10px] font-bold rounded-lg transition-all uppercase tracking-widest"
+                            >
+                              Generate All Booking Codes
+                            </button>
+                          </>
+                        ) : (
                         <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-center">
                           <div className="text-xs text-slate-400">No high-confidence edges found right now.</div>
                           <div className="text-[10px] text-slate-500 mt-1">Our models require a 2% EV edge to recommend a bet. Check back in an hour!</div>
                         </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* BOOKING CODES card — used by both scan and AI chat slip generation */}
                   {m.type === "codes" && m.data && (
@@ -430,23 +647,24 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
 
       {/* Input */}
       <form onSubmit={handleSend} className="p-4 md:p-6 bg-white/5 border-t border-white/5">
-        <div className="relative group">
+        <div className="flex items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me to /scan markets, or type /checkslip sportybet CODE..."
-            className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl px-4 md:px-6 py-3 md:py-4 text-[16px] md:text-sm text-white placeholder:text-slate-600 outline-none transition-all shadow-inner"
+            className="flex-1 min-w-0 bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl px-4 md:px-6 py-3 md:py-4 text-[16px] md:text-sm text-white placeholder:text-slate-600 outline-none transition-all shadow-inner"
           />
           <button
             type="submit"
             disabled={isLoading || !input}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-brand-teal text-background rounded-xl flex items-center justify-center hover:scale-[1.05] disabled:opacity-50 disabled:hover:scale-100 transition-all active:scale-95"
+            className="shrink-0 w-10 h-10 bg-brand-teal text-background rounded-xl flex items-center justify-center hover:scale-[1.05] disabled:opacity-50 disabled:hover:scale-100 transition-all active:scale-95"
           >
             <Send className="w-5 h-5" />
           </button>
         </div>
       </form>
+
     </div>
   );
 }
