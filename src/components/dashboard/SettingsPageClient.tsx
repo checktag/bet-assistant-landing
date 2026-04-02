@@ -5,10 +5,9 @@ import Link from "next/link";
 import axios from "axios";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, BarChart3, Settings, CreditCard,
-  Crown, BellRing, ShieldCheck, Send, CheckCircle2,
-  Loader2, Link as LinkIcon, Unlink, User, Lock,
-  Moon, Globe, Bell, ChevronRight, AlertCircle
+  LayoutDashboard, BarChart3, Settings, Radar,
+  Crown, BellRing, Send, CheckCircle2,
+  Loader2, Link as LinkIcon, Unlink, Lock, AlertCircle
 } from "lucide-react";
 
 interface SettingsPageClientProps {
@@ -50,11 +49,24 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <button
       onClick={onToggle}
-      className={`relative w-10 h-5 rounded-full transition-all border ${
-        on ? "bg-brand-teal border-brand-teal" : "bg-white/10 border-white/20"
+      aria-checked={on}
+      role="switch"
+      className={`relative flex items-center w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${
+        on
+          ? "bg-brand-teal shadow-[0_0_12px_rgba(0,198,186,0.45)]"
+          : "bg-white/10"
       }`}
     >
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`} />
+      {/* Track border */}
+      <span className={`absolute inset-0 rounded-full border transition-all duration-300 ${on ? "border-brand-teal/60" : "border-white/15"}`} />
+      {/* Knob */}
+      <span
+        className={`absolute w-5 h-5 rounded-full shadow-md transition-all duration-300 ${
+          on
+            ? "translate-x-[26px] bg-white"
+            : "translate-x-[2px] bg-white/70"
+        }`}
+      />
     </button>
   );
 }
@@ -155,14 +167,14 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
           <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
+          <Link href="/dashboard?tab=tracker" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+            <Radar className="w-4 h-4" /> Slip Tracker
+          </Link>
           <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <BarChart3 className="w-4 h-4" /> Analytics
           </Link>
           <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/8 text-white border border-white/10 font-medium">
             <Settings className="w-4 h-4" /> Settings
-          </Link>
-          <Link href="/calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <CreditCard className="w-4 h-4" /> Bet Calculator
           </Link>
         </nav>
       </aside>

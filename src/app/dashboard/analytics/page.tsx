@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, BarChart3, Settings, Radar, CreditCard,
-  Crown, TrendingUp, TrendingDown, Zap, Target, Activity,
+  LayoutDashboard, BarChart3, Settings, Radar,
+  TrendingUp, TrendingDown, Zap, Target, Activity,
   ArrowUpRight, ArrowDownRight, AlertCircle, CheckCircle2
 } from "lucide-react";
 
@@ -97,14 +97,14 @@ export default function AnalyticsPage() {
           <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
+          <Link href="/dashboard?tab=tracker" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+            <Radar className="w-4 h-4" /> Slip Tracker
+          </Link>
           <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-medium">
             <BarChart3 className="w-4 h-4" /> Analytics
           </Link>
           <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <Settings className="w-4 h-4" /> Settings
-          </Link>
-          <Link href="/calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <CreditCard className="w-4 h-4" /> Bet Calculator
           </Link>
         </nav>
       </aside>

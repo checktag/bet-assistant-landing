@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AssistantChat from "@/components/chat/AssistantChat";
 import SlipTracker from "@/components/dashboard/SlipTracker";
-import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, CreditCard, Radar } from "lucide-react";
+import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, Radar } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/auth";
 
@@ -60,9 +60,6 @@ export default async function DashboardPage() {
           <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <BarChart3 className="w-4 h-4" /> Analytics
           </Link>
-          <a href="/#calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <CreditCard className="w-4 h-4" /> Bet Calculator
-          </a>
           <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <Settings className="w-4 h-4" /> Settings
           </Link>
