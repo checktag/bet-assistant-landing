@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AssistantChat from "@/components/chat/AssistantChat";
-import { Crown, Clock, LogOut, LayoutDashboard, Settings, HelpCircle, BarChart3, CreditCard } from "lucide-react";
+import SlipTracker from "@/components/dashboard/SlipTracker";
+import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, CreditCard, Radar } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/auth";
 
@@ -15,7 +16,6 @@ export default async function DashboardPage() {
   const user = session.user as any;
   const now = new Date();
   
-  // Use trial_ends_at or created_at + 14d if missing
   const trialEnds = new Date(user.trial_ends_at || (new Date(user.created_at || now).getTime() + 14 * 86400000));
   const daysLeft = Math.max(0, Math.ceil((trialEnds.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
@@ -52,11 +52,16 @@ export default async function DashboardPage() {
           <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-teal/10 text-brand-teal font-medium border border-brand-teal/20">
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
+          <Link href="/dashboard?tab=tracker" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${user.is_premium ? 'hover:bg-white/5 text-slate-400 hover:text-white' : 'text-slate-600 cursor-not-allowed'}`}>
+            <Radar className="w-4 h-4" />
+            <span>Slip Tracker</span>
+            {!user.is_premium && <Crown className="w-3 h-3 text-yellow-500 ml-auto" />}
+          </Link>
           <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <BarChart3 className="w-4 h-4" /> Analytics
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <CreditCard className="w-4 h-4" /> Billing
+          <a href="/calculator" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
+            <CreditCard className="w-4 h-4" /> Bet Calculator
           </a>
           <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
             <Settings className="w-4 h-4" /> Settings
@@ -110,6 +115,26 @@ export default async function DashboardPage() {
           </header>
 
           <AssistantChat accessToken={(session as any).accessToken} />
+
+          {/* Slip Tracker Section */}
+          <div className="pt-4 border-t border-white/5">
+            <div className="flex items-center gap-3 mb-6">
+              <Radar className="w-5 h-5 text-brand-teal" />
+              <h2 className="text-lg font-black text-white tracking-tight">Slip Tracker</h2>
+              {user.is_premium ? (
+                <span className="text-[10px] font-bold text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-2 py-0.5 rounded-full">Premium</span>
+              ) : (
+                <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Crown className="w-2.5 h-2.5" /> Upgrade Required
+                </span>
+              )}
+            </div>
+            <SlipTracker
+              accessToken={(session as any).accessToken}
+              telegramLinked={user.telegram_linked}
+              isPremium={user.is_premium}
+            />
+          </div>
         </div>
       </main>
     </div>
