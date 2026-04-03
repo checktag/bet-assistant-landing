@@ -116,7 +116,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
                   <div className="flex-1 min-w-0 pr-3">
                     <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors truncate">{bet.match}</div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <div className="text-[10px] text-slate-400 capitalize whitespace-nowrap">{bet.market} @ {bet.odds}</div>
+                      <div className="text-[10px] text-slate-400 capitalize">{bet.market} @ {bet.odds}</div>
                       <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
                       <div className="text-[10px] text-slate-500 font-mono italic truncate">
                         {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
@@ -155,8 +155,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "👋 **Welcome to Quant Assistant** — your institutional-grade betting AI.\nType a command below or click **QUICK ACTIONS** to get started.",
-      type: "onboarding"
+      content: "👋 **Welcome back, Operative.**\nYour Quant Terminal is active. Type a command or click **QUICK ACTIONS** to begin scanning.",
     }
   ]);
   const [input, setInput] = useState("");
@@ -518,7 +517,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${m.role === "assistant" ? "bg-brand-blue/20 text-brand-blue" : "bg-white/10 text-white"}`}>
                   {m.role === "assistant" ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                 </div>
-                <div className={`max-w-[80%] rounded-2xl p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
+                <div className={`max-w-[92%] md:max-w-[80%] rounded-2xl p-3 md:p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
                   <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m.role === "assistant" ? "prose-invert markdown-content" : ""}`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanContent}</ReactMarkdown>
                   </div>
@@ -588,7 +587,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all group">
-                              <code className="text-[10px] font-black text-purple-400 font-mono shrink-0 whitespace-nowrap">{c.cmd}</code>
+                              <code className="text-[10px] font-black text-purple-400 font-mono shrink-0 break-all">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
                             </button>
                           ))}
