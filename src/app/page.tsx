@@ -779,57 +779,22 @@ export default function Home() {
           </motion.div>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-wrap justify-center gap-6 md:gap-10">
             {[
-              { name: "The Odds API", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#0d1f3c"/>
-                  <text x="20" y="26" textAnchor="middle" fontSize="14" fontWeight="900" fill="#00C6BA" fontFamily="monospace">O∆</text>
-                </svg>
-              )},
-              { name: "RapidAPI", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#0e1a35"/>
-                  <polygon points="12,28 20,11 28,28" fill="none" stroke="#0171CE" strokeWidth="3" strokeLinejoin="round"/>
-                  <circle cx="20" cy="11" r="3" fill="#0171CE"/>
-                </svg>
-              )},
-              { name: "OpenAI", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#111"/>
-                  <path d="M20 9 C13 9 9 13.5 9 19.5 C9 23.5 11.5 27 16 28.5 L16 32 L20 30 L24 32 L24 28.5 C28.5 27 31 23.5 31 19.5 C31 13.5 27 9 20 9Z" fill="#10a37f" opacity="0.9"/>
-                  <circle cx="20" cy="19.5" r="4.5" fill="#111"/>
-                </svg>
-              )},
               { name: "SportyBet", logo: (
                 <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
                   <rect width="40" height="40" rx="8" fill="#007a38"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">SB</text>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">SportyBet</text>
                 </svg>
               )},
               { name: "Bet9ja", logo: (
                 <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
                   <rect width="40" height="40" rx="8" fill="#005880"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">B9</text>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">Bet9ja</text>
                 </svg>
               )},
               { name: "1xBet", logo: (
                 <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
                   <rect width="40" height="40" rx="8" fill="#1b3566"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1X</text>
-                </svg>
-              )},
-              { name: "Resend", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#18181b"/>
-                  <rect x="9" y="13" width="22" height="15" rx="2.5" stroke="white" strokeWidth="2" fill="none"/>
-                  <path d="M9 16 L20 23 L31 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )},
-              { name: "Railway", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#0B0D0E"/>
-                  <rect x="11" y="11" width="7" height="18" rx="2" fill="#7C3AED"/>
-                  <rect x="22" y="11" width="7" height="18" rx="2" fill="#5B21B6"/>
-                  <rect x="11" y="31" width="18" height="2.5" rx="1.25" fill="#7C3AED"/>
+                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1xBet</text>
                 </svg>
               )},
             ].map((p, i) => (
