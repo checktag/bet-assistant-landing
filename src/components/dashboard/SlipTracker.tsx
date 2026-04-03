@@ -132,7 +132,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
             </div>
           </div>
           <a
-            href="https://t.me/BetAssistantBot"
+            href="https://t.me/BetAssistant_AI_bot"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-lg hover:scale-105 transition-all whitespace-nowrap"

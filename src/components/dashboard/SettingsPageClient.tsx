@@ -257,13 +257,13 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                       <span className="text-xs font-bold text-white">Open the Bet Assistant Telegram bot</span>
                     </div>
                     <a
-                      href="https://t.me/BetAssistantBot"
+                      href="https://t.me/BetAssistant_AI_bot"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-4 py-2.5 bg-[#229ED9] hover:bg-[#1a8ab8] text-white rounded-xl text-xs font-bold transition-all w-fit"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      Open @BetAssistantBot
+                      Open @BetAssistantAI Bot
                     </a>
                     <p className="text-[11px] text-slate-500">Send the bot the command: <code className="text-brand-teal font-mono bg-white/5 px-1.5 py-0.5 rounded">/link</code></p>
                   </div>
