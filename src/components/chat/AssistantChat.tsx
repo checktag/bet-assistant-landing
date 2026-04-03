@@ -255,7 +255,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
       }
     } catch (error: any) {
       const errorMsg = error.response?.data?.detail === "TRIAL_EXPIRED"
-        ? "🚨 Your 14-day trial has expired. Upgrade to Premium to continue scanning!"
+        ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
         : "⚠️ Sorry, I encountered an error processing that request.";
       setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
     } finally {

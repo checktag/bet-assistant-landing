@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { motion } from "framer-motion";
+import DashboardSidebar from "./DashboardSidebar";
 import {
   LayoutDashboard, BarChart3, Settings, Radar,
   Crown, BellRing, Send, CheckCircle2,
@@ -158,26 +159,12 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       </div>
 
       {/* Sidebar */}
-      <aside className="hidden md:flex w-64 border-r border-white/5 bg-[#060913] flex-col p-6 space-y-8 h-screen sticky top-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 overflow-hidden rounded-lg"><img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" /></div>
-          <span className="font-bold tracking-tight text-white">Bet Assistant</span>
-        </div>
-        <nav className="flex-1 space-y-2">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <LayoutDashboard className="w-4 h-4" /> Dashboard
-          </Link>
-          <Link href="/dashboard?tab=tracker" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <Radar className="w-4 h-4" /> Slip Tracker
-          </Link>
-          <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <BarChart3 className="w-4 h-4" /> Analytics
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/8 text-white border border-white/10 font-medium">
-            <Settings className="w-4 h-4" /> Settings
-          </Link>
-        </nav>
-      </aside>
+      <DashboardSidebar 
+        isPremium={user.is_premium} 
+        activePath="/dashboard/settings" 
+        userEmail={user.email} 
+        userInitial={user.email[0].toUpperCase()} 
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">

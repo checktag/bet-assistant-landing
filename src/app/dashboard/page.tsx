@@ -4,6 +4,7 @@ import AssistantChat from "@/components/chat/AssistantChat";
 import SlipTracker from "@/components/dashboard/SlipTracker";
 import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, Radar } from "lucide-react";
 import Link from "next/link";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { signOut } from "@/auth";
 
 export default async function DashboardPage() {
@@ -16,7 +17,7 @@ export default async function DashboardPage() {
   const user = session.user as any;
   const now = new Date();
   
-  const trialEnds = new Date(user.trial_ends_at || (new Date(user.created_at || now).getTime() + 14 * 86400000));
+  const trialEnds = new Date(user.trial_ends_at || (new Date(user.created_at || now).getTime() + 7 * 86400000));
   const daysLeft = Math.max(0, Math.ceil((trialEnds.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
   return (
@@ -41,56 +42,12 @@ export default async function DashboardPage() {
         </form>
       </div>
 
-      {/* Sidebar Desktop */}
-      <aside className="hidden md:flex w-64 border-r border-white/5 bg-[#060913] flex-col p-6 space-y-8 h-screen sticky top-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 overflow-hidden rounded-lg"><img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" /></div>
-          <span className="font-bold tracking-tight text-white">Bet Assistant</span>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-teal/10 text-brand-teal font-medium border border-brand-teal/20">
-            <LayoutDashboard className="w-4 h-4" /> Dashboard
-          </Link>
-          <Link href="/dashboard?tab=tracker" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${user.is_premium ? 'hover:bg-white/5 text-slate-400 hover:text-white' : 'text-slate-600 cursor-not-allowed'}`}>
-            <Radar className="w-4 h-4" />
-            <span>Slip Tracker</span>
-            {!user.is_premium && <Crown className="w-3 h-3 text-yellow-500 ml-auto" />}
-          </Link>
-          <Link href="/dashboard/analytics" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <BarChart3 className="w-4 h-4" /> Analytics
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all">
-            <Settings className="w-4 h-4" /> Settings
-          </Link>
-        </nav>
-
-        {/* User Card */}
-        <div className="mt-auto p-4 rounded-2xl bg-white/5 border border-white/10 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold">
-              {user.email[0].toUpperCase()}
-            </div>
-            <div className="overflow-hidden">
-              <div className="text-xs font-bold text-white truncate">{user.email}</div>
-              <div className="flex items-center gap-1">
-                {user.is_premium ? (
-                  <span className="text-[10px] text-brand-teal font-bold flex items-center gap-1"><Crown className="w-2.5 h-2.5" /> PREMIUM</span>
-                ) : (
-                  <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> TRIAL: {daysLeft}D LEFT</span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-white/5">
-             <form action={async () => { "use server"; await signOut(); }}>
-               <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors">
-                 <LogOut className="w-3.5 h-3.5" /> SIGN OUT
-               </button>
-             </form>
-          </div>
-        </div>
-      </aside>
+      <DashboardSidebar 
+        isPremium={user.is_premium} 
+        activePath="/dashboard" 
+        userEmail={user.email} 
+        userInitial={user.email[0].toUpperCase()} 
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden min-h-[calc(100vh-72px)] md:min-h-screen">

@@ -89,7 +89,7 @@ export default function SignupPage() {
           </div>
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Commission</h1>
-            <p className="text-slate-400 text-sm">Initialize 14-day Quant Trial.</p>
+            <p className="text-slate-400 text-sm">Initialize 7-day Quant Trial.</p>
           </div>
         </div>
 
