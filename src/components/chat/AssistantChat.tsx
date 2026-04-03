@@ -14,6 +14,7 @@ interface Prediction {
   ev_edge: number;
   model_prob: number;
   commence_time: string;
+  profiles?: string[];
 }
 
 interface Selection {
@@ -53,6 +54,101 @@ const MetricGlossary = () => (
     </div>
   </div>
 );
+
+// Interactive component to handle client-side profile switching
+const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips: (picks: any[]) => void }) => {
+  const allBets: Prediction[] = data?.bets || [];
+  const [activeTab, setActiveTab] = useState<string>(data?.default_tab || "moderate");
+
+  const PROFILE_TABS = [
+    { id: "high",     label: "High-Stake", style: "border-yellow-400/20 text-yellow-300",  bg: "bg-yellow-400/10", activeBg: "bg-yellow-400", dot: "bg-yellow-400" },
+    { id: "moderate", label: "Moderate",   style: "border-brand-teal/20 text-brand-teal",  bg: "bg-brand-teal/10", activeBg: "bg-brand-teal", dot: "bg-brand-teal" },
+    { id: "low",      label: "Spread",     style: "border-purple-400/20 text-purple-300",  bg: "bg-purple-400/10", activeBg: "bg-purple-400", dot: "bg-purple-400" },
+  ];
+
+  // Filter bets based on their backend-annotated profiles list
+  // Sort High-Stake by Confidence first; Moderate/Spread by EV first
+  const filteredBets = allBets
+    .filter(b => b.profiles?.includes(activeTab))
+    .sort((a, b) => activeTab === "high" ? (b.model_prob - a.model_prob) : (b.ev_edge - a.ev_edge));
+
+  // Cap picks correctly client-side
+  const maxPicks = activeTab === "high" ? 7 : activeTab === "moderate" ? 20 : 40;
+  const slicedBets = filteredBets.slice(0, maxPicks);
+
+  return (
+    <div className="mt-4 flex flex-col gap-3">
+      {/* Risk Profile Selector Tabs */}
+      <div className="flex p-1 bg-black/40 rounded-xl border border-white/5">
+        {PROFILE_TABS.map(tab => {
+          const isActive = activeTab === tab.id;
+          const count = allBets.filter(b => b.profiles?.includes(tab.id)).length;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
+                isActive ? `${tab.bg} border ${tab.style}` : "hover:bg-white/5 border border-transparent opacity-50 hover:opacity-100"
+              }`}
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                {isActive && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
+                <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? '' : 'text-white'}`}>{tab.label}</span>
+              </div>
+              <span className={`text-[9px] font-mono ${isActive ? '' : 'text-slate-500'}`}>{count} picks</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {slicedBets.length > 0 ? (
+        <>
+          <MetricGlossary />
+          <div className="flex items-center justify-between px-1 mb-1">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top Edges in {activeTab}</span>
+            <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
+          </div>
+          <div className="grid gap-2">
+            {slicedBets.map((bet: Prediction, bi: number) => {
+              const tabDef = PROFILE_TABS.find(t => t.id === activeTab)!;
+              return (
+                <div key={bi} className={`p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${tabDef.style.split(' ')[0]} transition-all`}>
+                  <div className="flex-1 min-w-0 pr-3">
+                    <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors truncate">{bet.match}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="text-[10px] text-slate-400 capitalize whitespace-nowrap">{bet.market} @ {bet.odds}</div>
+                      <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                      <div className="text-[10px] text-slate-500 font-mono italic truncate">
+                        {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right space-y-0.5 shrink-0">
+                    <div className="text-[10px] font-bold text-green-400">+{bet.ev_edge}% EV</div>
+                    <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => onBuildSlips(slicedBets)}
+            className={`w-full mt-2 py-2.5 rounded-lg border text-[10px] font-bold transition-all uppercase tracking-widest ${
+              PROFILE_TABS.find(t => t.id === activeTab)?.bg
+            } ${PROFILE_TABS.find(t => t.id === activeTab)?.style.replace('text-', 'border-').replace('/20', '/40')} hover:brightness-125`}
+          >
+            Generate Booking Codes
+          </button>
+        </>
+      ) : (
+        <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-center">
+          <div className="text-xs text-slate-400">No {activeTab} edges found right now.</div>
+          <div className="text-[10px] text-slate-500 mt-1">Our models require a strict edge to recommend bets here. Try a different profile.</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function AssistantChat({ accessToken }: AssistantChatProps) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
@@ -128,18 +224,15 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
 
-        const PROFILE_META: Record<string, { label: string; desc: string; cap: string }> = {
-          high:     { label: "High-Stake",  desc: "5–7 picks · tight odds · 75%+ confidence",        cap: "up to 7" },
-          moderate: { label: "Moderate",    desc: "8–20 picks · balanced odds · 60%+ confidence",    cap: "up to 20" },
-          low:      { label: "Spread",      desc: "20–40 picks · wide odds · max market coverage",   cap: "up to 40" },
-        };
-        const meta = PROFILE_META[riskProfile] || PROFILE_META.moderate;
+        const totalBets = res.data.bets?.length ?? 0;
+        const scope = leagueArg ? leagueArg.replace(/_/g, " ") : "Global Markets";
+        const window = dateArg || "Next 24h";
 
         setMessages(prev => [...prev, {
           role: "assistant",
-          content: `🔍 **Market Scan Complete!** Scanned **${res.data.total_matches || 'hundreds of'}** fixtures from ${leagueArg ? leagueArg.replace(/_/g, " ") : "Global Markets"} (${dateArg || "Next 24h"}) — **${meta.label}** profile, ${meta.cap} picks.`,
+          content: `🔍 **Market Scan Complete!** Found **${totalBets} +EV picks** from ${scope} (${window}). Select a risk profile below to filter and build your slip.`,
           type: "scan",
-          data: { bets: res.data.bets, risk_profile: riskProfile, meta }
+          data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches }
         }]);
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
         const parts = userMsg.split(" ");
@@ -263,26 +356,78 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                       <Globe className="w-3 h-3 text-brand-teal" />
                       <span className="text-[9px] font-black text-brand-teal uppercase tracking-[0.2em]">Market Scan</span>
                     </div>
-                    <div className="grid gap-1.5">
-                      {[
-                        { cmd: "/scan",                label: "Today's Scan",        desc: "Global +EV edges in the next 24h" },
-                        { cmd: "/scan weekend",        label: "Weekend Scan",         desc: "Sat & Sun fixtures with best edges" },
-                        { cmd: "/scan upcoming",       label: "72h Upcoming",         desc: "All fixtures in the next 3 days" },
-                        { cmd: "/scan 2026-04-05",     label: "Specific Date",        desc: "Scan a custom date (YYYY-MM-DD)" },
-                        { cmd: "/scan premier league", label: "Premier League",       desc: "EPL fixtures only" },
-                        { cmd: "/scan serie_a",        label: "Serie A",             desc: "Italian league fixtures" },
-                        { cmd: "/scan bundesliga",     label: "Bundesliga",           desc: "German Bundesliga fixtures" },
-                        { cmd: "/scan champions_league",label: "Champions League",   desc: "UCL fixtures" },
-                      ].map((a, i) => (
-                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
-                          <code className="text-[9px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono">{a.cmd}</code>
-                          <div className="min-w-0">
-                            <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors">{a.label}</div>
-                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
-                          </div>
-                        </button>
-                      ))}
+
+                    {/* High-Stake */}
+                    <div className="mb-2">
+                      <div className="flex items-center gap-1.5 mb-1 px-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
+                        <span className="text-[8px] font-black text-yellow-400 uppercase tracking-widest">High-Stake · 5–7 picks</span>
+                      </div>
+                      <div className="grid gap-1">
+                        {[
+                          { cmd: "/scan high",          label: "Today (High-Stake)",   desc: "Tight odds · 75%+ confidence" },
+                          { cmd: "/scan high weekend",  label: "Weekend High-Stake",   desc: "Sat & Sun · big stake picks" },
+                          { cmd: "/scan high upcoming", label: "72h High-Stake",       desc: "Next 3 days · safest picks" },
+                        ].map((a, i) => (
+                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-yellow-400/5 text-left transition-all group border border-transparent hover:border-yellow-400/20">
+                            <code className="text-[9px] font-black text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-bold text-white group-hover:text-yellow-300 transition-colors truncate">{a.label}</div>
+                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Moderate */}
+                    <div className="mb-2">
+                      <div className="flex items-center gap-1.5 mb-1 px-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-teal shrink-0" />
+                        <span className="text-[8px] font-black text-brand-teal uppercase tracking-widest">Moderate · 8–20 picks</span>
+                      </div>
+                      <div className="grid gap-1">
+                        {[
+                          { cmd: "/scan moderate",           label: "Today (Moderate)",      desc: "Balanced odds & confidence" },
+                          { cmd: "/scan moderate weekend",   label: "Weekend Moderate",      desc: "Sat & Sun · balanced picks" },
+                          { cmd: "/scan moderate bundesliga",label: "Bundesliga Moderate",   desc: "German league edges" },
+                          { cmd: "/scan moderate premier league", label: "EPL Moderate",     desc: "Premier League edges" },
+                        ].map((a, i) => (
+                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-brand-teal/5 text-left transition-all group border border-transparent hover:border-brand-teal/20">
+                            <code className="text-[9px] font-black text-brand-teal bg-brand-teal/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
+                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Spread */}
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-1 px-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+                        <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Spread · 20–40 picks</span>
+                      </div>
+                      <div className="grid gap-1">
+                        {[
+                          { cmd: "/scan spread",            label: "Today (Spread)",        desc: "Wide odds · max coverage" },
+                          { cmd: "/scan spread upcoming",   label: "72h Spread",            desc: "Next 3 days · large selection" },
+                          { cmd: "/scan spread champions_league", label: "UCL Spread",      desc: "Champions League · all edges" },
+                        ].map((a, i) => (
+                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-purple-400/5 text-left transition-all group border border-transparent hover:border-purple-400/20">
+                            <code className="text-[9px] font-black text-purple-400 bg-purple-400/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-bold text-white group-hover:text-purple-300 transition-colors truncate">{a.label}</div>
+                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -491,73 +636,10 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                     </div>
                   )}
 
-                  {/* SCAN Results */}
-                  {m.type === "scan" && m.data && (() => {
-                    // Support both old shape (array) and new shape ({bets, risk_profile, meta})
-                    const bets: Prediction[] = Array.isArray(m.data) ? m.data : m.data.bets ?? [];
-                    const riskProfile: string = Array.isArray(m.data) ? "moderate" : (m.data.risk_profile ?? "moderate");
-                    const meta = Array.isArray(m.data) ? { label: "Moderate", desc: "8–20 picks · balanced" } : (m.data.meta ?? {});
-
-                    const PROFILE_STYLE: Record<string, { badge: string; glow: string; dot: string }> = {
-                      high:     { badge: "bg-yellow-400/10 border-yellow-400/25 text-yellow-300", glow: "border-yellow-400/20",  dot: "bg-yellow-400" },
-                      moderate: { badge: "bg-brand-teal/10 border-brand-teal/25 text-brand-teal",  glow: "border-brand-teal/20", dot: "bg-brand-teal" },
-                      low:      { badge: "bg-purple-400/10 border-purple-400/25 text-purple-300", glow: "border-purple-400/20", dot: "bg-purple-400" },
-                    };
-                    const style = PROFILE_STYLE[riskProfile] ?? PROFILE_STYLE.moderate;
-
-                    return (
-                      <div className="mt-4 grid grid-cols-1 gap-2">
-                        {bets.length > 0 ? (
-                          <>
-                            {/* Risk Profile Badge */}
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border mb-1 ${style.badge}`}>
-                              <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
-                              <div className="flex-1 min-w-0">
-                                <span className="text-[10px] font-black uppercase tracking-wide">{meta.label ?? riskProfile} Profile</span>
-                                <span className="text-[9px] opacity-70 ml-2">{meta.desc}</span>
-                              </div>
-                              <span className="text-[9px] font-bold opacity-60 shrink-0">{bets.length} picks</span>
-                            </div>
-
-                            <MetricGlossary />
-                            <div className="flex items-center justify-between px-1 mb-1">
-                              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">All Edges Found</span>
-                              <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
-                            </div>
-                            {bets.map((bet: Prediction, bi: number) => (
-                              <div key={bi} className={`p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${style.glow} transition-all`}>
-                                <div className="flex-1">
-                                  <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors">{bet.match}</div>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    <div className="text-[10px] text-slate-400 capitalize">{bet.market} @ {bet.odds}</div>
-                                    <span className="w-1 h-1 rounded-full bg-white/20" />
-                                    <div className="text-[10px] text-slate-500 font-mono italic">
-                                      Kickoff: {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="text-right space-y-0.5">
-                                  <div className="text-[10px] font-bold text-green-400">+{bet.ev_edge}% EV</div>
-                                  <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
-                                </div>
-                              </div>
-                            ))}
-                            <button
-                              onClick={() => handleBuildAllSlips(bets)}
-                              className="w-full mt-2 py-2 bg-brand-teal/10 hover:bg-brand-teal/20 border border-brand-teal/20 text-brand-teal text-[10px] font-bold rounded-lg transition-all uppercase tracking-widest"
-                            >
-                              Generate All Booking Codes
-                            </button>
-                          </>
-                        ) : (
-                        <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-center">
-                          <div className="text-xs text-slate-400">No high-confidence edges found right now.</div>
-                          <div className="text-[10px] text-slate-500 mt-1">Our models require a 2% EV edge to recommend a bet. Check back in an hour!</div>
-                        </div>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  {/* SCAN Results — Interactive Tab Component */}
+                  {m.type === "scan" && m.data && (
+                    <InteractiveScanResult data={m.data} onBuildSlips={handleBuildAllSlips} />
+                  )}
 
                   {/* BOOKING CODES card — used by both scan and AI chat slip generation */}
                   {m.type === "codes" && m.data && (
