@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { motion } from "framer-motion";
 import DashboardSidebar from "./DashboardSidebar";
+import MobileNav from "./MobileNav";
 import {
   LayoutDashboard, BarChart3, Settings, Radar,
   Crown, BellRing, Send, CheckCircle2,
@@ -152,11 +153,11 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
   return (
     <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
 
-      {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]">
-        <span className="text-sm font-black text-white">Settings</span>
-        <Link href="/dashboard" className="text-xs text-slate-500 hover:text-white transition-colors">← Back</Link>
-      </div>
+      <MobileNav 
+        isPremium={user.is_premium} 
+        userInitial={user.email?.[0]?.toUpperCase() || "S"} 
+        userEmail={user.email || "Settings"} 
+      />
 
       {/* Sidebar */}
       <DashboardSidebar 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import MobileNav from "@/components/dashboard/MobileNav";
 import {
   LayoutDashboard, BarChart3, Settings, Radar,
   TrendingUp, TrendingDown, Zap, Target, Activity,
@@ -85,11 +86,11 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
 
-      {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]">
-        <span className="text-sm font-black text-white">Analytics</span>
-        <Link href="/dashboard" className="text-xs text-slate-500 hover:text-white transition-colors">← Back</Link>
-      </div>
+      <MobileNav 
+        isPremium={user?.is_premium ?? false} 
+        userInitial={user?.email?.[0]?.toUpperCase() || "A"} 
+        userEmail={user?.email || "Analytics"} 
+      />
 
       {/* Sidebar */}
       <DashboardSidebar 

@@ -5,6 +5,7 @@ import SlipTracker from "@/components/dashboard/SlipTracker";
 import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, Radar } from "lucide-react";
 import Link from "next/link";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import MobileNav from "@/components/dashboard/MobileNav";
 import { signOut } from "@/auth";
 
 export default async function DashboardPage() {
@@ -22,25 +23,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
-      {/* Mobile Top Navigation */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-teal/10 flex items-center justify-center border border-brand-teal/20 text-brand-teal font-bold">{user.email[0].toUpperCase()}</div>
-          <div className="flex flex-col">
-            <span className="font-bold tracking-tight text-white text-sm">Bet Assistant</span>
-            {user.is_premium ? (
-              <span className="text-[9px] text-brand-teal font-bold flex items-center gap-1"><Crown className="w-2.5 h-2.5" /> PREMIUM</span>
-            ) : (
-              <span className="text-[9px] text-slate-400 font-bold flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {daysLeft}D LEFT</span>
-            )}
-          </div>
-        </div>
-        <form action={async () => { "use server"; await signOut(); }}>
-          <button className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
+      <MobileNav 
+        isPremium={user.is_premium} 
+        userInitial={user.email[0].toUpperCase()} 
+        userEmail={user.email} 
+      />
 
       <DashboardSidebar 
         isPremium={user.is_premium} 

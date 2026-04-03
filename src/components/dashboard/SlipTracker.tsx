@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Trash2, RefreshCw, Loader2, Bot, Crown, Link as LinkIcon, CheckCircle2, XCircle, DollarSign, Clock } from "lucide-react";
+import Link from "next/link";
 
 interface TrackedSlip {
   id: number;
@@ -131,14 +132,12 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
               Get real-time cashout alerts sent directly to your Telegram when the AI detects a momentum shift.
             </div>
           </div>
-          <a
-            href="https://t.me/BetAssistant_AI_bot"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/dashboard/settings"
             className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-lg hover:scale-105 transition-all whitespace-nowrap"
           >
-            Link Now
-          </a>
+            Go to Settings
+          </Link>
         </motion.div>
       )}
 
