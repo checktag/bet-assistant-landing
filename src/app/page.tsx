@@ -13,29 +13,29 @@ const fadeUp: Variants = {
 
 // ─── Bet Calculator Sub-Components (embedded inline on landing page) ──────────
 const CALC_TABS = [
-  { id: "parlay",  label: "Parlay Builder",  icon: <Calculator className="w-4 h-4" /> },
-  { id: "kelly",   label: "Kelly Criterion",  icon: <TrendingUp className="w-4 h-4" /> },
-  { id: "roi",     label: "ROI Tracker",      icon: <BarChart2  className="w-4 h-4" /> },
-  { id: "streak",  label: "Streak Analyzer",  icon: <DollarSign className="w-4 h-4" /> },
+  { id: "parlay", label: "Parlay Builder", icon: <Calculator className="w-4 h-4" /> },
+  { id: "kelly", label: "Kelly Criterion", icon: <TrendingUp className="w-4 h-4" /> },
+  { id: "roi", label: "ROI Tracker", icon: <BarChart2 className="w-4 h-4" /> },
+  { id: "streak", label: "Streak Analyzer", icon: <DollarSign className="w-4 h-4" /> },
 ];
 
-interface ParlayLeg  { id: number; name: string; odds: string; }
-interface BetRecord  { id: number; stake: string; result: "won" | "lost"; odds: string; }
+interface ParlayLeg { id: number; name: string; odds: string; }
+interface BetRecord { id: number; stake: string; result: "won" | "lost"; odds: string; }
 
 function LandingParlayCalc() {
   const [stake, setStake] = useState("100");
   const [legs, setLegs] = useState<ParlayLeg[]>([
     { id: 1, name: "Man City Win", odds: "1.45" },
-    { id: 2, name: "Over 2.5",     odds: "1.80" },
-    { id: 3, name: "BTTS Yes",     odds: "1.65" },
+    { id: 2, name: "Over 2.5", odds: "1.80" },
+    { id: 3, name: "BTTS Yes", odds: "1.65" },
   ]);
-  const addLeg    = () => setLegs(p => [...p, { id: Date.now(), name: "", odds: "1.50" }]);
+  const addLeg = () => setLegs(p => [...p, { id: Date.now(), name: "", odds: "1.50" }]);
   const removeLeg = (id: number) => setLegs(p => p.filter(l => l.id !== id));
   const updateLeg = (id: number, field: keyof ParlayLeg, val: string) =>
     setLegs(p => p.map(l => l.id === id ? { ...l, [field]: val } : l));
-  const combined  = legs.reduce((a, l) => a * (parseFloat(l.odds) || 1), 1);
-  const payout    = (parseFloat(stake) || 0) * combined;
-  const profit    = payout - (parseFloat(stake) || 0);
+  const combined = legs.reduce((a, l) => a * (parseFloat(l.odds) || 1), 1);
+  const payout = (parseFloat(stake) || 0) * combined;
+  const profit = payout - (parseFloat(stake) || 0);
   const breakEven = (1 / combined) * 100;
   return (
     <div className="space-y-5">
@@ -57,7 +57,7 @@ function LandingParlayCalc() {
           {legs.map((leg, i) => (
             <motion.div key={leg.id} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 20 }}
               className="flex items-center gap-3 p-3 bg-black/30 border border-white/10 rounded-xl">
-              <span className="text-[10px] font-black text-slate-600 w-4 shrink-0">#{i+1}</span>
+              <span className="text-[10px] font-black text-slate-600 w-4 shrink-0">#{i + 1}</span>
               <input type="text" value={leg.name} onChange={e => updateLeg(leg.id, "name", e.target.value)}
                 placeholder="Selection name..." className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-700 min-w-0" />
               <div className="flex items-center gap-2 shrink-0">
@@ -74,10 +74,10 @@ function LandingParlayCalc() {
       </div>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Combined Odds",   value: combined.toFixed(2)+"x",                             color: "text-white" },
-          { label: "Payout",          value: "₦"+Math.round(payout).toLocaleString(),              color: "text-green-400" },
-          { label: "Profit",          value: "₦"+Math.round(profit).toLocaleString(),              color: profit >= 0 ? "text-green-400" : "text-red-400" },
-          { label: "Break-Even Prob", value: breakEven.toFixed(1)+"%",                            color: "text-brand-blue" },
+          { label: "Combined Odds", value: combined.toFixed(2) + "x", color: "text-white" },
+          { label: "Payout", value: "₦" + Math.round(payout).toLocaleString(), color: "text-green-400" },
+          { label: "Profit", value: "₦" + Math.round(profit).toLocaleString(), color: profit >= 0 ? "text-green-400" : "text-red-400" },
+          { label: "Break-Even Prob", value: breakEven.toFixed(1) + "%", color: "text-brand-blue" },
         ].map((r, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
@@ -94,24 +94,24 @@ function LandingParlayCalc() {
 
 function LandingKellyCalc() {
   const [bankroll, setBankroll] = useState("50000");
-  const [winProb,  setWinProb]  = useState("65");
-  const [odds,     setOdds]     = useState("1.80");
+  const [winProb, setWinProb] = useState("65");
+  const [odds, setOdds] = useState("1.80");
   const [fraction, setFraction] = useState("25");
   const b = (parseFloat(odds) || 1) - 1;
   const p = (parseFloat(winProb) || 0) / 100;
   const q = 1 - p;
-  const kellyFull     = b > 0 ? ((b * p - q) / b) : 0;
+  const kellyFull = b > 0 ? ((b * p - q) / b) : 0;
   const kellyFraction = kellyFull * (parseFloat(fraction) || 25) / 100;
-  const optimalStake  = (parseFloat(bankroll) || 0) * Math.max(0, kellyFraction);
+  const optimalStake = (parseFloat(bankroll) || 0) * Math.max(0, kellyFraction);
   const expectedProfit = optimalStake * b * p - optimalStake * q;
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
-          { label: "Bankroll (₦)",        value: bankroll,  set: setBankroll,  hint: "Total capital" },
-          { label: "Decimal Odds",         value: odds,      set: setOdds,      hint: "Bookmaker price" },
-          { label: "Win Probability (%)",  value: winProb,   set: setWinProb,   hint: "Your estimated win chance" },
-          { label: "Kelly Fraction (%)",   value: fraction,  set: setFraction,  hint: "25% = Quarter-Kelly" },
+          { label: "Bankroll (₦)", value: bankroll, set: setBankroll, hint: "Total capital" },
+          { label: "Decimal Odds", value: odds, set: setOdds, hint: "Bookmaker price" },
+          { label: "Win Probability (%)", value: winProb, set: setWinProb, hint: "Your estimated win chance" },
+          { label: "Kelly Fraction (%)", value: fraction, set: setFraction, hint: "25% = Quarter-Kelly" },
         ].map((f, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">{f.label}</label>
@@ -123,9 +123,9 @@ function LandingKellyCalc() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: "Full Kelly",                            value: `${(kellyFull*100).toFixed(2)}%`,             color: "text-slate-400" },
-          { label: `Optimal Stake (${fraction}% Kelly)`,    value: `₦${Math.round(optimalStake).toLocaleString()}`, color: "text-brand-teal" },
-          { label: "Expected Profit/Bet",                   value: `₦${Math.round(expectedProfit).toLocaleString()}`, color: expectedProfit >= 0 ? "text-green-400" : "text-red-400" },
+          { label: "Full Kelly", value: `${(kellyFull * 100).toFixed(2)}%`, color: "text-slate-400" },
+          { label: `Optimal Stake (${fraction}% Kelly)`, value: `₦${Math.round(optimalStake).toLocaleString()}`, color: "text-brand-teal" },
+          { label: "Expected Profit/Bet", value: `₦${Math.round(expectedProfit).toLocaleString()}`, color: expectedProfit >= 0 ? "text-green-400" : "text-red-400" },
         ].map((r, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
@@ -141,28 +141,28 @@ function LandingKellyCalc() {
 }
 
 function LandingROITracker() {
-  const [bets, setBets]         = useState<BetRecord[]>([
-    { id: 1, stake: "1000", result: "won",  odds: "1.80" },
-    { id: 2, stake: "500",  result: "lost", odds: "2.10" },
-    { id: 3, stake: "2000", result: "won",  odds: "1.50" },
+  const [bets, setBets] = useState<BetRecord[]>([
+    { id: 1, stake: "1000", result: "won", odds: "1.80" },
+    { id: 2, stake: "500", result: "lost", odds: "2.10" },
+    { id: 3, stake: "2000", result: "won", odds: "1.50" },
   ]);
-  const [newStake,  setNewStake]  = useState("1000");
-  const [newOdds,   setNewOdds]   = useState("1.80");
-  const [newResult, setNewResult] = useState<"won"|"lost">("won");
-  const totalStaked  = bets.reduce((s, b) => s + parseFloat(b.stake||"0"), 0);
-  const totalReturns = bets.reduce((s, b) => b.result==="won" ? s + parseFloat(b.stake||"0")*parseFloat(b.odds||"1") : s, 0);
-  const netProfit    = totalReturns - totalStaked;
-  const roi          = totalStaked > 0 ? (netProfit / totalStaked) * 100 : 0;
-  const winRate      = bets.length > 0 ? (bets.filter(b => b.result==="won").length / bets.length) * 100 : 0;
+  const [newStake, setNewStake] = useState("1000");
+  const [newOdds, setNewOdds] = useState("1.80");
+  const [newResult, setNewResult] = useState<"won" | "lost">("won");
+  const totalStaked = bets.reduce((s, b) => s + parseFloat(b.stake || "0"), 0);
+  const totalReturns = bets.reduce((s, b) => b.result === "won" ? s + parseFloat(b.stake || "0") * parseFloat(b.odds || "1") : s, 0);
+  const netProfit = totalReturns - totalStaked;
+  const roi = totalStaked > 0 ? (netProfit / totalStaked) * 100 : 0;
+  const winRate = bets.length > 0 ? (bets.filter(b => b.result === "won").length / bets.length) * 100 : 0;
   const addBet = () => setBets(p => [...p, { id: Date.now(), stake: newStake, result: newResult, odds: newOdds }]);
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Total Staked",   value: `₦${totalStaked.toLocaleString()}`,              color: "text-white" },
-          { label: "Total Returns",  value: `₦${Math.round(totalReturns).toLocaleString()}`,  color: "text-brand-teal" },
-          { label: "Net Profit",     value: `₦${Math.round(netProfit).toLocaleString()}`,     color: netProfit >= 0 ? "text-green-400" : "text-red-400" },
-          { label: "ROI",            value: `${roi.toFixed(1)}%`,                             color: roi >= 0 ? "text-brand-teal" : "text-red-400" },
+          { label: "Total Staked", value: `₦${totalStaked.toLocaleString()}`, color: "text-white" },
+          { label: "Total Returns", value: `₦${Math.round(totalReturns).toLocaleString()}`, color: "text-brand-teal" },
+          { label: "Net Profit", value: `₦${Math.round(netProfit).toLocaleString()}`, color: netProfit >= 0 ? "text-green-400" : "text-red-400" },
+          { label: "ROI", value: `${roi.toFixed(1)}%`, color: roi >= 0 ? "text-brand-teal" : "text-red-400" },
         ].map((s, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{s.label}</div>
@@ -173,7 +173,7 @@ function LandingROITracker() {
       <div className="p-3 bg-black/30 border border-white/10 rounded-xl">
         <div className="flex justify-between mb-2">
           <span className="text-xs font-bold text-slate-400">Win Rate</span>
-          <span className="text-xs font-black text-brand-teal">{winRate.toFixed(0)}% ({bets.filter(b=>b.result==="won").length}/{bets.length})</span>
+          <span className="text-xs font-black text-brand-teal">{winRate.toFixed(0)}% ({bets.filter(b => b.result === "won").length}/{bets.length})</span>
         </div>
         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-brand-blue to-brand-teal rounded-full transition-all duration-500" style={{ width: `${winRate}%` }} />
@@ -187,10 +187,10 @@ function LandingROITracker() {
           <input type="number" value={newOdds} onChange={e => setNewOdds(e.target.value)} step="0.01" placeholder="Odds"
             className="w-24 bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-brand-teal/50" />
           <div className="flex gap-2">
-            {(["won","lost"] as const).map(r => (
+            {(["won", "lost"] as const).map(r => (
               <button key={r} onClick={() => setNewResult(r)}
-                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${newResult===r?(r==="won"?"bg-green-400/10 text-green-400 border-green-400/30":"bg-red-400/10 text-red-400 border-red-400/30"):"bg-white/5 text-slate-500 border-white/10"}`}>
-                {r==="won"?"✅ Won":"❌ Lost"}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${newResult === r ? (r === "won" ? "bg-green-400/10 text-green-400 border-green-400/30" : "bg-red-400/10 text-red-400 border-red-400/30") : "bg-white/5 text-slate-500 border-white/10"}`}>
+                {r === "won" ? "✅ Won" : "❌ Lost"}
               </button>
             ))}
           </div>
@@ -200,11 +200,11 @@ function LandingROITracker() {
       <div className="space-y-2 max-h-40 overflow-y-auto">
         <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">History</div>
         {bets.slice().reverse().map((b, i) => (
-          <div key={b.id} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${b.result==="won"?"bg-green-400/5 border-green-400/10":"bg-red-400/5 border-red-400/10"}`}>
-            <span>{b.result==="won"?"✅":"❌"}</span>
+          <div key={b.id} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${b.result === "won" ? "bg-green-400/5 border-green-400/10" : "bg-red-400/5 border-red-400/10"}`}>
+            <span>{b.result === "won" ? "✅" : "❌"}</span>
             <span className="text-slate-400 flex-1">@{b.odds}</span>
-            <span className={`font-bold ${b.result==="won"?"text-green-400":"text-red-400"}`}>
-              {b.result==="won"?"+₦"+Math.round(parseFloat(b.stake)*(parseFloat(b.odds)-1)).toLocaleString():"-₦"+parseFloat(b.stake).toLocaleString()}
+            <span className={`font-bold ${b.result === "won" ? "text-green-400" : "text-red-400"}`}>
+              {b.result === "won" ? "+₦" + Math.round(parseFloat(b.stake) * (parseFloat(b.odds) - 1)).toLocaleString() : "-₦" + parseFloat(b.stake).toLocaleString()}
             </span>
             <button onClick={() => setBets(p => p.filter(x => x.id !== b.id))} className="text-slate-700 hover:text-red-400 transition-colors ml-1">
               <Trash2 className="w-3 h-3" />
@@ -217,21 +217,21 @@ function LandingROITracker() {
 }
 
 function LandingStreakAnalyzer() {
-  const [oddsHistory,  setOddsHistory]  = useState("1.45, 1.42, 1.47, 1.43, 1.46, 1.50, 1.44");
-  const [currentOdds,  setCurrentOdds]  = useState("1.45");
-  const [stakePerBet,  setStakePerBet]  = useState("1000");
-  const [periods,      setPeriods]      = useState("7");
+  const [oddsHistory, setOddsHistory] = useState("1.45, 1.42, 1.47, 1.43, 1.46, 1.50, 1.44");
+  const [currentOdds, setCurrentOdds] = useState("1.45");
+  const [stakePerBet, setStakePerBet] = useState("1000");
+  const [periods, setPeriods] = useState("7");
   const historicalOdds = oddsHistory.split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-  const avgOdds        = historicalOdds.length > 0 ? historicalOdds.reduce((a,b)=>a+b,0)/historicalOdds.length : 0;
-  const currentNum     = parseFloat(currentOdds)||0;
-  const oddsDeviation  = avgOdds > 0 ? ((currentNum-avgOdds)/avgOdds)*100 : 0;
-  const impliedProb    = currentNum > 0 ? (1/currentNum)*100 : 0;
-  const avgImpliedProb = avgOdds > 0 ? (1/avgOdds)*100 : 0;
-  const edgeVsAvg      = impliedProb - avgImpliedProb;
-  const variance       = historicalOdds.length>1 ? historicalOdds.reduce((v,o)=>v+Math.pow(o-avgOdds,2),0)/(historicalOdds.length-1) : 0;
-  const consistency    = Math.max(0, 100-(Math.sqrt(variance)/avgOdds)*1000);
-  const totalStake     = parseFloat(stakePerBet)*parseInt(periods);
-  const expectedReturn = totalStake*currentNum*(impliedProb/100);
+  const avgOdds = historicalOdds.length > 0 ? historicalOdds.reduce((a, b) => a + b, 0) / historicalOdds.length : 0;
+  const currentNum = parseFloat(currentOdds) || 0;
+  const oddsDeviation = avgOdds > 0 ? ((currentNum - avgOdds) / avgOdds) * 100 : 0;
+  const impliedProb = currentNum > 0 ? (1 / currentNum) * 100 : 0;
+  const avgImpliedProb = avgOdds > 0 ? (1 / avgOdds) * 100 : 0;
+  const edgeVsAvg = impliedProb - avgImpliedProb;
+  const variance = historicalOdds.length > 1 ? historicalOdds.reduce((v, o) => v + Math.pow(o - avgOdds, 2), 0) / (historicalOdds.length - 1) : 0;
+  const consistency = Math.max(0, 100 - (Math.sqrt(variance) / avgOdds) * 1000);
+  const totalStake = parseFloat(stakePerBet) * parseInt(periods);
+  const expectedReturn = totalStake * currentNum * (impliedProb / 100);
   return (
     <div className="space-y-4">
       <div className="p-3 bg-black/30 border border-white/10 rounded-xl">
@@ -241,10 +241,10 @@ function LandingStreakAnalyzer() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: "Current Odds",     value: currentOdds, set: setCurrentOdds, hint: "Today's price" },
-          { label: "Stake/Bet (₦)",   value: stakePerBet, set: setStakePerBet, hint: "Per bet stake" },
-          { label: "# Periods (Days)", value: periods,     set: setPeriods,     hint: "Duration" },
-        ].map((f,i) => (
+          { label: "Current Odds", value: currentOdds, set: setCurrentOdds, hint: "Today's price" },
+          { label: "Stake/Bet (₦)", value: stakePerBet, set: setStakePerBet, hint: "Per bet stake" },
+          { label: "# Periods (Days)", value: periods, set: setPeriods, hint: "Duration" },
+        ].map((f, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">{f.label}</label>
             <input type="text" value={f.value} onChange={e => f.set(e.target.value)}
@@ -255,20 +255,20 @@ function LandingStreakAnalyzer() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { label: "Avg Odds",        value: avgOdds.toFixed(2)+"x",                                               color: "text-slate-300" },
-          { label: "Odds Deviation",  value: `${oddsDeviation>=0?"+":""}${oddsDeviation.toFixed(1)}%`,             color: Math.abs(oddsDeviation)>5?"text-yellow-400":"text-brand-teal" },
-          { label: "Edge vs Avg",     value: `${edgeVsAvg>=0?"+":""}${edgeVsAvg.toFixed(2)}%`,                     color: edgeVsAvg>=0?"text-red-400":"text-green-400" },
-          { label: "Consistency",     value: `${consistency.toFixed(0)}/100`,                                       color: consistency>70?"text-green-400":consistency>40?"text-yellow-400":"text-red-400" },
-          { label: "Total Outlay",    value: `₦${totalStake.toLocaleString()}`,                                     color: "text-white" },
-          { label: "Expected Return", value: `₦${Math.round(expectedReturn).toLocaleString()}`,                     color: expectedReturn>totalStake?"text-green-400":"text-red-400" },
-        ].map((r,i) => (
+          { label: "Avg Odds", value: avgOdds.toFixed(2) + "x", color: "text-slate-300" },
+          { label: "Odds Deviation", value: `${oddsDeviation >= 0 ? "+" : ""}${oddsDeviation.toFixed(1)}%`, color: Math.abs(oddsDeviation) > 5 ? "text-yellow-400" : "text-brand-teal" },
+          { label: "Edge vs Avg", value: `${edgeVsAvg >= 0 ? "+" : ""}${edgeVsAvg.toFixed(2)}%`, color: edgeVsAvg >= 0 ? "text-red-400" : "text-green-400" },
+          { label: "Consistency", value: `${consistency.toFixed(0)}/100`, color: consistency > 70 ? "text-green-400" : consistency > 40 ? "text-yellow-400" : "text-red-400" },
+          { label: "Total Outlay", value: `₦${totalStake.toLocaleString()}`, color: "text-white" },
+          { label: "Expected Return", value: `₦${Math.round(expectedReturn).toLocaleString()}`, color: expectedReturn > totalStake ? "text-green-400" : "text-red-400" },
+        ].map((r, i) => (
           <div key={i} className="p-3 bg-black/30 border border-white/10 rounded-xl">
             <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{r.label}</div>
             <div className={`text-lg font-black ${r.color}`}>{r.value}</div>
           </div>
         ))}
       </div>
-      {Math.abs(oddsDeviation)>8 && (
+      {Math.abs(oddsDeviation) > 8 && (
         <div className="p-3 bg-yellow-400/5 border border-yellow-400/20 rounded-xl text-[11px] text-yellow-400">
           ⚠️ <strong>Odds Drift Detected!</strong> {Math.abs(oddsDeviation).toFixed(1)}% from the {periods}-period average — check for sharps activity.
         </div>
@@ -290,11 +290,10 @@ function CalcWrapper() {
           <button
             key={tab.id}
             onClick={() => setActiveCalcTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 ${
-              activeCalcTab === tab.id
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 ${activeCalcTab === tab.id
                 ? "bg-brand-teal text-background border-brand-teal shadow-[0_0_16px_rgba(0,198,186,0.3)]"
                 : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
-            }`}
+              }`}
           >
             {tab.icon}
             {tab.label}
@@ -315,8 +314,8 @@ function CalcWrapper() {
             {CALC_TABS.find(t => t.id === activeCalcTab)?.label}
           </h3>
           {activeCalcTab === "parlay" && <LandingParlayCalc />}
-          {activeCalcTab === "kelly"  && <LandingKellyCalc />}
-          {activeCalcTab === "roi"    && <LandingROITracker />}
+          {activeCalcTab === "kelly" && <LandingKellyCalc />}
+          {activeCalcTab === "roi" && <LandingROITracker />}
           {activeCalcTab === "streak" && <LandingStreakAnalyzer />}
         </motion.div>
       </AnimatePresence>
@@ -347,7 +346,7 @@ export default function Home() {
     <main className="relative min-h-screen bg-[#03060E] text-slate-200 overflow-hidden selection:bg-brand-teal selection:text-background">
       {/* Matured Global Noise Texture */}
       <div className="bg-noise opacity-[0.20] mix-blend-overlay"></div>
-      
+
       {/* Ambient Depth Orbs */}
       <div className="absolute top-[-15%] left-[-10%] w-[60vw] h-[60vw] bg-brand-blue/15 blur-[140px] rounded-full pointer-events-none mix-blend-screen" />
       <div className="absolute top-[40%] right-[-20%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[130px] rounded-full pointer-events-none mix-blend-screen" />
@@ -357,15 +356,15 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#03060E]/50 backdrop-blur-xl supports-[backdrop-filter]:bg-[#03060E]/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 overflow-hidden rounded-xl drop-shadow-[0_0_15px_rgba(0,198,186,0.4)] flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
-             <span className="text-md font-semibold tracking-wide text-white">Bet Assistant</span>
+            <div className="w-10 h-10 overflow-hidden rounded-xl drop-shadow-[0_0_15px_rgba(0,198,186,0.4)] flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
+            <span className="text-md font-semibold tracking-wide text-white">Bet Assistant</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-             <a href="/#features" className="hover:text-white transition-colors">Architecture</a>
-             <a href="/#engine" className="hover:text-white transition-colors">Quant Engine</a>
-             <a href="/#workflow" className="hover:text-white transition-colors">Workflow</a>
-             <a href="/#faq" className="hover:text-white transition-colors">FAQ</a>
-             <a href="/#calculator" className="hover:text-white transition-colors">Calculator</a>
+            <a href="/#features" className="hover:text-white transition-colors">Architecture</a>
+            <a href="/#engine" className="hover:text-white transition-colors">Quant Engine</a>
+            <a href="/#workflow" className="hover:text-white transition-colors">Workflow</a>
+            <a href="/#faq" className="hover:text-white transition-colors">FAQ</a>
+            <a href="/#calculator" className="hover:text-white transition-colors">Calculator</a>
           </div>
           <Link href="/dashboard" className="px-5 py-2 py-2 text-sm bg-brand-teal text-background font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(0,198,186,0.3)] flex items-center">
             Open Terminal
@@ -374,14 +373,14 @@ export default function Home() {
       </nav>
 
       {/* Hero Section with Parallax */}
-      <motion.section 
+      <motion.section
         ref={ref}
         style={{ y: yHero, opacity: opacityHero }}
         className="relative flex flex-col items-center justify-center min-h-screen px-4 pt-32 pb-20 z-10"
       >
         {/* Floating Narrative Objects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          
+
           {/* Aesthetic Floating Currencies */}
           <motion.div animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[20%] right-[15%] opacity-20 hidden lg:block">
             <CircleDollarSign className="w-16 h-16 text-green-400" />
@@ -394,8 +393,8 @@ export default function Home() {
           </motion.div>
 
           {/* Node 1: Math Equation */}
-          <motion.div 
-            animate={{ y: [0, -30, 0], rotate: [0, 4, 0] }} 
+          <motion.div
+            animate={{ y: [0, -30, 0], rotate: [0, 4, 0] }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-[28%] left-[22%] hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           >
@@ -404,8 +403,8 @@ export default function Home() {
           </motion.div>
 
           {/* Node 2: Value Detected */}
-          <motion.div 
-            animate={{ y: [0, 40, 0], rotate: [0, -4, 0] }} 
+          <motion.div
+            animate={{ y: [0, 40, 0], rotate: [0, -4, 0] }}
             transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute top-[35%] right-[22%] hidden lg:flex flex-col items-start p-4 bg-brand-blue/10 backdrop-blur-xl rounded-xl border border-brand-blue/20 shadow-[0_0_50px_rgba(0,113,206,0.3)]"
           >
@@ -414,8 +413,8 @@ export default function Home() {
           </motion.div>
 
           {/* Node 3: Slip Creation */}
-          <motion.div 
-            animate={{ y: [0, -20, 0], x: [0, 15, 0] }} 
+          <motion.div
+            animate={{ y: [0, -20, 0], x: [0, 15, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
             className="absolute bottom-[28%] left-[24%] hidden lg:flex items-center gap-3 p-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           >
@@ -423,14 +422,14 @@ export default function Home() {
               <CheckCircle2 className="w-4 h-4 text-green-400" />
             </div>
             <div>
-               <div className="text-[10px] uppercase tracking-wider text-slate-400">Auto-Slip Generated</div>
-               <div className="text-sm font-mono text-white font-bold tracking-widest">BC-9JA-8X</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-400">Auto-Slip Generated</div>
+              <div className="text-sm font-mono text-white font-bold tracking-widest">BC-9JA-8X</div>
             </div>
           </motion.div>
 
           {/* Node 4: AI Cashout Resize to match */}
-          <motion.div 
-            animate={{ y: [0, -35, 0], x: [0, -15, 0] }} 
+          <motion.div
+            animate={{ y: [0, -35, 0], x: [0, -15, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
             className="absolute top-[60%] right-[24%] hidden lg:flex flex-col p-4 bg-[#0A0F1C]/80 backdrop-blur-xl rounded-xl border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.25)]"
           >
@@ -443,7 +442,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <motion.div 
+        <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
@@ -455,16 +454,16 @@ export default function Home() {
           </motion.div>
 
           <motion.h1 variants={fadeUp} className="text-5xl md:text-6xl lg:text-8xl font-black tracking-[-0.04em] text-white mb-8 leading-[1.05]">
-            Institutional-Grade <br/>
+            Institutional-Grade <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-400 to-brand-teal drop-shadow-sm">
               Quantitative Betting.
             </span>
           </motion.h1>
-          
+
           <motion.p variants={fadeUp} className="text-lg md:text-2xl text-slate-400 mb-12 max-w-3xl leading-relaxed font-light">
             Unleash the full mathematical power of an AI analysis engine directly inside Telegram. We automatically scan 55+ global leagues to find structurally mispriced, profitable variance edges.
           </motion.p>
-          
+
           <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 w-full md:w-auto px-4">
             <Link href="/dashboard" className="group relative px-6 md:px-10 py-4 md:py-5 bg-white text-background font-bold text-base md:text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -485,7 +484,7 @@ export default function Home() {
           <p className="text-center text-xs font-semibold tracking-widest uppercase text-slate-500">Natively Scanning Markets Across</p>
         </div>
         <div className="flex overflow-hidden whitespace-nowrap opacity-60">
-          <motion.div 
+          <motion.div
             initial={{ x: 0 }}
             animate={{ x: "-50%" }}
             transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
@@ -511,18 +510,18 @@ export default function Home() {
       {/* Metrics / Statistics Segment */}
       <section id="engine" className="relative z-20 px-6 py-32 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
-              <h4 className="text-5xl font-black text-white mb-2 tracking-tight">55<span className="text-brand-teal">+</span></h4>
-              <p className="text-slate-400 font-medium">Global Leagues Scanned</p>
-           </motion.div>
-           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
-              <h4 className="text-5xl font-black text-white mb-2 tracking-tight">1.30<span className="text-brand-blue">x</span></h4>
-              <p className="text-slate-400 font-medium">Strict Minimum Variance Odds</p>
-           </motion.div>
-           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
-              <h4 className="text-5xl font-black text-white mb-2 tracking-tight">0<span className="text-brand-teal">ms</span></h4>
-              <p className="text-slate-400 font-medium">In-Memory Deep Analysis</p>
-           </motion.div>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
+            <h4 className="text-5xl font-black text-white mb-2 tracking-tight">55<span className="text-brand-teal">+</span></h4>
+            <p className="text-slate-400 font-medium">Global Leagues Scanned</p>
+          </motion.div>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
+            <h4 className="text-5xl font-black text-white mb-2 tracking-tight">1.30<span className="text-brand-blue">x</span></h4>
+            <p className="text-slate-400 font-medium">Strict Minimum Variance Odds</p>
+          </motion.div>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center">
+            <h4 className="text-5xl font-black text-white mb-2 tracking-tight">0<span className="text-brand-teal">ms</span></h4>
+            <p className="text-slate-400 font-medium">In-Memory Deep Analysis</p>
+          </motion.div>
         </div>
       </section>
 
@@ -577,16 +576,16 @@ export default function Home() {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-blue/5 border border-brand-blue/20 shadow-[0_0_30px_rgba(0,113,206,0.1)]">
-               <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-6"><Calculator className="w-6 h-6 text-brand-blue" /></div>
-               <h3 className="text-2xl font-bold text-white mb-4">Cold Statistical Execution</h3>
-               <p className="text-slate-400 text-lg leading-relaxed mb-4">We completely eradicate human emotion, psychological fatigue, and bias from your strategy. The Quant Engine strictly executes upon positive Expected Value (+EV) discrepancies and absolutely rejects everything else, regardless of the media narrative or recent team form.</p>
-               <p className="text-slate-400 text-lg leading-relaxed">By enforcing an algorithmic filter that only signals plays when the mathematical edge exceeds a rigid fractional threshold, we mathematically force the odds back into your favor. If the numbers don't validate the investment, the system actively prevents you from betting.</p>
+              <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-6"><Calculator className="w-6 h-6 text-brand-blue" /></div>
+              <h3 className="text-2xl font-bold text-white mb-4">Cold Statistical Execution</h3>
+              <p className="text-slate-400 text-lg leading-relaxed mb-4">We completely eradicate human emotion, psychological fatigue, and bias from your strategy. The Quant Engine strictly executes upon positive Expected Value (+EV) discrepancies and absolutely rejects everything else, regardless of the media narrative or recent team form.</p>
+              <p className="text-slate-400 text-lg leading-relaxed">By enforcing an algorithmic filter that only signals plays when the mathematical edge exceeds a rigid fractional threshold, we mathematically force the odds back into your favor. If the numbers don't validate the investment, the system actively prevents you from betting.</p>
             </motion.div>
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-teal/5 border border-brand-teal/20 shadow-[0_0_30px_rgba(0,198,186,0.1)]">
-               <div className="w-12 h-12 rounded-xl bg-brand-teal/10 flex items-center justify-center mb-6"><Globe className="w-6 h-6 text-brand-teal" /></div>
-               <h3 className="text-2xl font-bold text-white mb-4">Total Data Neutralization</h3>
-               <p className="text-slate-400 text-lg leading-relaxed mb-4">You no longer waste hours passively scanning disjointed matches on sportsbook applications. The platform concurrently maps identical odds across 55+ global leagues the exact millisecond they are published digitally by interconnected bookmakers.</p>
-               <p className="text-slate-400 text-lg leading-relaxed">This instantaneous ingestion layer gives you the exact same computational reach as professional syndicates, providing total data parity. When an opening line is structurally mispriced across the Atlantic, your terminal alerts you instantly before the market inevitably corrects the inefficiency.</p>
+              <div className="w-12 h-12 rounded-xl bg-brand-teal/10 flex items-center justify-center mb-6"><Globe className="w-6 h-6 text-brand-teal" /></div>
+              <h3 className="text-2xl font-bold text-white mb-4">Total Data Neutralization</h3>
+              <p className="text-slate-400 text-lg leading-relaxed mb-4">You no longer waste hours passively scanning disjointed matches on sportsbook applications. The platform concurrently maps identical odds across 55+ global leagues the exact millisecond they are published digitally by interconnected bookmakers.</p>
+              <p className="text-slate-400 text-lg leading-relaxed">This instantaneous ingestion layer gives you the exact same computational reach as professional syndicates, providing total data parity. When an opening line is structurally mispriced across the Atlantic, your terminal alerts you instantly before the market inevitably corrects the inefficiency.</p>
             </motion.div>
           </div>
         </div>
@@ -594,7 +593,7 @@ export default function Home() {
 
       {/* Detailed Features Bento Grid */}
       <section id="features" className="relative z-20 max-w-7xl mx-auto px-6 pb-12">
-        <motion.div 
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -652,25 +651,25 @@ export default function Home() {
           {/* Terminal UI */}
           <motion.div variants={scaleIn} className="md:col-span-2 bg-[#0A0F1C] rounded-[2rem] p-0 border border-white/10 overflow-hidden flex flex-col md:flex-row items-center">
             <div className="p-10 flex-1">
-               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8">
-                 <TerminalSquare className="w-7 h-7 text-white" />
-               </div>
-               <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Terminal-Grade Response</h3>
-               <p className="text-slate-400 text-lg leading-relaxed">
-                 Designed directly for sophisticated users. No fluff. Run the physical `/scan` wrapper and intercept 55+ European and FIFA lines concurrently straight to your mobile device.
-               </p>
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8">
+                <TerminalSquare className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Terminal-Grade Response</h3>
+              <p className="text-slate-400 text-lg leading-relaxed">
+                Designed directly for sophisticated users. No fluff. Run the physical `/scan` wrapper and intercept 55+ European and FIFA lines concurrently straight to your mobile device.
+              </p>
             </div>
             <div className="flex-1 w-full bg-black/50 border-l border-white/5 h-full p-8 font-mono text-sm text-slate-400 relative">
-               <div className="absolute top-4 left-4 flex gap-2"><div className="w-3 h-3 rounded-full bg-red-500"/><div className="w-3 h-3 rounded-full bg-yellow-500"/><div className="w-3 h-3 rounded-full bg-green-500"/></div>
-               <div className="mt-8 space-y-2">
-                 <p className="text-white">$ /scan weekend</p>
-                 <p className="text-brand-teal opacity-80">🔍 Spinning up Quant Engine...</p>
-                 <p className="text-brand-teal opacity-80">📊 Found 55 live matches. Analyzing edge...</p>
-                 <p className="text-green-400 mt-4">🔥 Top +EV Value Bets Found:</p>
-                 <p>⚽ Italy vs Northern Ireland</p>
-                 <p>🎯 Market: Home @ 1.31</p>
-                 <p>📈 Edge (EV): +13.8%</p>
-               </div>
+              <div className="absolute top-4 left-4 flex gap-2"><div className="w-3 h-3 rounded-full bg-red-500" /><div className="w-3 h-3 rounded-full bg-yellow-500" /><div className="w-3 h-3 rounded-full bg-green-500" /></div>
+              <div className="mt-8 space-y-2">
+                <p className="text-white">$ /scan weekend</p>
+                <p className="text-brand-teal opacity-80">🔍 Spinning up Quant Engine...</p>
+                <p className="text-brand-teal opacity-80">📊 Found 55 live matches. Analyzing edge...</p>
+                <p className="text-green-400 mt-4">🔥 Top +EV Value Bets Found:</p>
+                <p>⚽ Italy vs Northern Ireland</p>
+                <p>🎯 Market: Home @ 1.31</p>
+                <p>📈 Edge (EV): +13.8%</p>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -688,62 +687,62 @@ export default function Home() {
           </motion.div>
         </div>
         <div className="max-w-4xl mx-auto relative z-10">
-           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-20">
-             <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">Execution <span className="text-gradient">Workflow</span></h2>
-             <p className="text-xl text-slate-400 font-light">From data ingestion to live slip generations in zero milliseconds.</p>
-           </motion.div>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">Execution <span className="text-gradient">Workflow</span></h2>
+            <p className="text-xl text-slate-400 font-light">From data ingestion to live slip generations in zero milliseconds.</p>
+          </motion.div>
 
-           <div className="space-y-16">
-              {[
-                { 
-                  step: "01", 
-                  title: "API Ingestion & Aggregation", 
-                  desc: "The platform securely hooks into global data providers via premium low-latency WebSockets and dedicated GraphQL pipelines. It constantly extracts an expansive, uninterrupted stream of live market pricing, injury updates, weather variables, and momentum swings across 55+ distinct premier and secondary leagues concurrently in the background. It effectively operates as an aggressive high-frequency parsing layer, scanning thousands of endpoints per second to ensure no highly valuable data fragmentation or pricing shift is ever missed.", 
-                  icon: <Activity className="w-6 h-6 text-brand-blue" /> 
-                },
-                { 
-                  step: "02", 
-                  title: "Mathematical Edge Identification", 
-                  desc: "Once the massive volume of data footprint is securely captured locally, our heavily optimized offline Quant Engine springs into action. It maps the incoming bookmaker lines into raw, intrinsic probabilities devoid of the standard house vigorish. Utilizing extremely advanced algebraic modeling, dynamic statistical calculations, and deeply historic Poisson distribution models, it rigorously searches for mathematically mispriced odds—immediately isolating explicit positive Expected Value (+EV) opportunities where the bookmaker's implied probability is fundamentally flawed.", 
-                  icon: <Calculator className="w-6 h-6 text-brand-teal" /> 
-                },
-                { 
-                  step: "03", 
-                  title: "Intelligent Slip Generation", 
-                  desc: "Upon mathematically validating an undeniable statistical edge, the system forcefully filters out the surrounding market noise. It skips the manual drafting process and immediately translates those highly profitable lines into playable configurations. Using automated traversal logic, it directly communicates with major supported bookmaker platforms to generate instant, universally playable 6-digit booking codes right into your interface. You simply copy, paste, and aggressively execute your capital without any friction or hesitation.", 
-                  icon: <Zap className="w-6 h-6 text-brand-blue" /> 
-                },
-                { 
-                  step: "04", 
-                  title: "Continuous Match Advisory", 
-                  desc: "Unlike standard static tools, execution is not the end of the lifecycle. The highly intelligent Bet Assistant continues to act as your autonomous watchdog long after the wager is finalized. Through advanced deep reasoning heuristics, it continuously monitors live scoreboards, tactical substitutions, and real-time momentum swings for every single one of your generated slips. If a sudden variance spike or dangerous momentum shift occurs against your position during play, you receive an instantaneous, actionable push notification strongly advising you to cash out securely in-profit before a late upset ruins the return.", 
-                  icon: <ShieldCheck className="w-6 h-6 text-brand-teal" /> 
-                }
-              ].map((item, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="flex gap-6 md:gap-10 items-start group"
-                >
-                   <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-brand-teal/50 group-hover:bg-brand-teal/10 transition-all duration-300 shadow-xl">
-                        {item.icon}
-                      </div>
-                      {i !== 3 && <div className="w-px h-24 bg-gradient-to-b from-white/10 to-transparent mt-4" />}
-                   </div>
-                   <div className="pt-2">
-                       <span className="text-brand-teal font-mono text-sm font-bold tracking-widest mb-2 block">PHASE {item.step}</span>
-                      <h4 className="text-2xl font-bold text-white mb-3">{item.title}</h4>
-                      <p className="text-slate-400 leading-relaxed text-lg">{item.desc}</p>
-                   </div>
-                </motion.div>
-              ))}
-            </div>
+          <div className="space-y-16">
+            {[
+              {
+                step: "01",
+                title: "API Ingestion & Aggregation",
+                desc: "The platform securely hooks into global data providers via premium low-latency WebSockets and dedicated GraphQL pipelines. It constantly extracts an expansive, uninterrupted stream of live market pricing, injury updates, weather variables, and momentum swings across 55+ distinct premier and secondary leagues concurrently in the background. It effectively operates as an aggressive high-frequency parsing layer, scanning thousands of endpoints per second to ensure no highly valuable data fragmentation or pricing shift is ever missed.",
+                icon: <Activity className="w-6 h-6 text-brand-blue" />
+              },
+              {
+                step: "02",
+                title: "Mathematical Edge Identification",
+                desc: "Once the massive volume of data footprint is securely captured locally, our heavily optimized offline Quant Engine springs into action. It maps the incoming bookmaker lines into raw, intrinsic probabilities devoid of the standard house vigorish. Utilizing extremely advanced algebraic modeling, dynamic statistical calculations, and deeply historic Poisson distribution models, it rigorously searches for mathematically mispriced odds—immediately isolating explicit positive Expected Value (+EV) opportunities where the bookmaker's implied probability is fundamentally flawed.",
+                icon: <Calculator className="w-6 h-6 text-brand-teal" />
+              },
+              {
+                step: "03",
+                title: "Intelligent Slip Generation",
+                desc: "Upon mathematically validating an undeniable statistical edge, the system forcefully filters out the surrounding market noise. It skips the manual drafting process and immediately translates those highly profitable lines into playable configurations. Using automated traversal logic, it directly communicates with major supported bookmaker platforms to generate instant, universally playable 6-digit booking codes right into your interface. You simply copy, paste, and aggressively execute your capital without any friction or hesitation.",
+                icon: <Zap className="w-6 h-6 text-brand-blue" />
+              },
+              {
+                step: "04",
+                title: "Continuous Match Advisory",
+                desc: "Unlike standard static tools, execution is not the end of the lifecycle. The highly intelligent Bet Assistant continues to act as your autonomous watchdog long after the wager is finalized. Through advanced deep reasoning heuristics, it continuously monitors live scoreboards, tactical substitutions, and real-time momentum swings for every single one of your generated slips. If a sudden variance spike or dangerous momentum shift occurs against your position during play, you receive an instantaneous, actionable push notification strongly advising you to cash out securely in-profit before a late upset ruins the return.",
+                icon: <ShieldCheck className="w-6 h-6 text-brand-teal" />
+              }
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="flex gap-6 md:gap-10 items-start group"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-brand-teal/50 group-hover:bg-brand-teal/10 transition-all duration-300 shadow-xl">
+                    {item.icon}
+                  </div>
+                  {i !== 3 && <div className="w-px h-24 bg-gradient-to-b from-white/10 to-transparent mt-4" />}
+                </div>
+                <div className="pt-2">
+                  <span className="text-brand-teal font-mono text-sm font-bold tracking-widest mb-2 block">PHASE {item.step}</span>
+                  <h4 className="text-2xl font-bold text-white mb-3">{item.title}</h4>
+                  <p className="text-slate-400 leading-relaxed text-lg">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
       {/* ─── Bet Calculator Section ─── */}
       <section id="calculator" className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5 overflow-hidden">
@@ -779,24 +778,30 @@ export default function Home() {
           </motion.div>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-wrap justify-center gap-6 md:gap-10">
             {[
-              { name: "SportyBet", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#007a38"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">SportyBet</text>
-                </svg>
-              )},
-              { name: "Bet9ja", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#005880"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">Bet9ja</text>
-                </svg>
-              )},
-              { name: "1xBet", logo: (
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#1b3566"/>
-                  <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1xBet</text>
-                </svg>
-              )},
+              {
+                name: "SportyBet", logo: (
+                  <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                    <rect width="40" height="40" rx="8" fill="#007a38" />
+                    <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">SportyBet</text>
+                  </svg>
+                )
+              },
+              {
+                name: "Bet9ja", logo: (
+                  <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                    <rect width="40" height="40" rx="8" fill="#005880" />
+                    <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">Bet9ja</text>
+                  </svg>
+                )
+              },
+              {
+                name: "1xBet", logo: (
+                  <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                    <rect width="40" height="40" rx="8" fill="#1b3566" />
+                    <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1xBet</text>
+                  </svg>
+                )
+              },
             ].map((p, i) => (
               <motion.div
                 key={i}
@@ -994,19 +999,19 @@ export default function Home() {
 
 
       <section className="relative z-20 py-32 px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand-blue/20 to-brand-teal/10 border border-brand-teal/20 p-12 md:p-20 text-center relative overflow-hidden backdrop-blur-3xl shadow-[0_0_100px_rgba(0,198,186,0.15)]"
         >
-           <div className="absolute inset-0 bg-noise opacity-[0.25] mix-blend-overlay"></div>
-           <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight relative z-10">Stop guessing. <br/>Start <span className="text-gradient">Executing.</span></h2>
-           <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto relative z-10">Deploy the bot to your Telegram infrastructure right now and gain immediate mathematical parity over the market.</p>
-           <Link href="/auth/signup" className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-white text-background font-black text-sm md:text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 flex items-center justify-center uppercase tracking-widest text-center w-full md:w-auto">
-             Start 7-Day Free Trial
-           </Link>
+          <div className="absolute inset-0 bg-noise opacity-[0.25] mix-blend-overlay"></div>
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight relative z-10">Stop guessing. <br />Start <span className="text-gradient">Executing.</span></h2>
+          <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto relative z-10">Deploy the bot to your Telegram infrastructure right now and gain immediate mathematical parity over the market.</p>
+          <Link href="/auth/signup" className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-white text-background font-black text-sm md:text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 flex items-center justify-center uppercase tracking-widest text-center w-full md:w-auto">
+            Start 7-Day Free Trial
+          </Link>
         </motion.div>
       </section>
 
@@ -1014,13 +1019,13 @@ export default function Home() {
       <footer className="border-t border-white/5 relative z-20 bg-[#03060E]">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
-             <span className="text-slate-300 font-bold tracking-wide">Bet Assistant</span>
+            <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
+            <span className="text-slate-300 font-bold tracking-wide">Bet Assistant</span>
           </div>
           <div className="flex gap-8 text-slate-500 text-sm font-medium">
-             <Link href="/privacy" className="hover:text-brand-teal transition-colors">Privacy Policy</Link>
-             <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
-             <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
+            <Link href="/privacy" className="hover:text-brand-teal transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
+            <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
           </div>
           <p className="text-slate-600 text-sm">© 2026 CTTS.</p>
         </div>
