@@ -2,19 +2,43 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy, Send, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import axios from "axios";
 
 interface MobileNavProps {
   isPremium: boolean;
   userInitial: string;
   userEmail: string;
+  username?: string;
+  credits?: number;
+  telegramJoined?: boolean;
 }
 
-export default function MobileNav({ isPremium, userInitial, userEmail }: MobileNavProps) {
+export default function MobileNav({ isPremium, userInitial, userEmail, username, credits = 0, telegramJoined = false }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const { data: session } = useSession();
   const pathname = usePathname();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+
+  const handleVerifyJoin = async () => {
+    if (!(session as any)?.accessToken) return;
+    setIsVerifying(true);
+    try {
+      await axios.post(`${API_URL}/confirm-telegram-join`, {}, {
+        headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+      });
+      setVerificationSuccess(true);
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      alert("Verification failed. Please ensure you have joined the group and linked your Telegram account in Settings.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const navItems = [
     { name: "Quant Terminal", path: "/dashboard",          icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -76,15 +100,44 @@ export default function MobileNav({ isPremium, userInitial, userEmail }: MobileN
             })}
           </div>
 
-          <div className="pb-10 space-y-4">
+          <div className="pb-10 space-y-6">
+            {!telegramJoined && (
+              <div className="space-y-3 px-2">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-teal/20 to-brand-blue/10 border border-brand-teal/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black text-brand-teal uppercase tracking-widest">Available Credits</span>
+                    <Zap className="w-3 h-3 text-brand-teal animate-pulse" />
+                  </div>
+                  <div className="text-xl font-black text-white flex items-baseline gap-1">
+                    {credits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={() => window.open("https://t.me/+KKXegSaFc1Y3MTQ0", "_blank")}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-background font-black text-xs uppercase tracking-wider hover:scale-105 transition-all"
+                >
+                  <Send className="w-4 h-4" /> 1. Join Telegram
+                </button>
+                <button 
+                  onClick={handleVerifyJoin}
+                  disabled={isVerifying || verificationSuccess}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-xs uppercase tracking-wider disabled:opacity-50"
+                >
+                  {isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : verificationSuccess ? <CheckCircle2 className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+                  {verificationSuccess ? "Claimed!" : "2. Claim 1,000 Credits"}
+                </button>
+              </div>
+            )}
+
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold">
                 {userInitial}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-white truncate">{userEmail}</div>
-                <div className="text-[10px] uppercase font-black tracking-widest text-slate-500">
-                  {isPremium ? <span className="text-brand-teal">Premium Member</span> : "Free Trial"}
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold text-white truncate">{username || userEmail}</div>
+                <div className="text-[10px] uppercase font-black tracking-widest mt-0.5">
+                  {isPremium ? <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span> : <span className="text-slate-500">TRIAL</span>}
                 </div>
               </div>
             </div>

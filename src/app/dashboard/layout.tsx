@@ -15,19 +15,25 @@ export default async function DashboardLayout({
   }
 
   const user = session.user as any;
+  const displayName = user.username || user.email;
+  const userInitial = displayName[0].toUpperCase();
 
   return (
     <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
       <MobileNav 
         isPremium={user.is_premium} 
-        userInitial={user.email[0].toUpperCase()} 
+        userInitial={userInitial} 
         userEmail={user.email} 
+        username={user.username}
+        credits={user.credits}
+        telegramJoined={user.telegram_joined}
       />
 
       <DashboardSidebar 
         isPremium={user.is_premium} 
         userEmail={user.email} 
-        userInitial={user.email[0].toUpperCase()} 
+        username={user.username}
+        userInitial={userInitial} 
         credits={user.credits}
         telegramJoined={user.telegram_joined}
       />

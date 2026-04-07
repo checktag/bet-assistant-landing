@@ -12,11 +12,12 @@ interface DashboardSidebarProps {
   isPremium: boolean;
   userInitial?: string;
   userEmail?: string;
+  username?: string;
   credits?: number;
   telegramJoined?: boolean;
 }
 
-export default function DashboardSidebar({ isPremium, userInitial = "U", userEmail = "User", credits = 0, telegramJoined = false }: DashboardSidebarProps) {
+export default function DashboardSidebar({ isPremium, userInitial = "U", userEmail = "User", username, credits = 0, telegramJoined = false }: DashboardSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const [isVerifying, setIsVerifying] = useState(false);
@@ -147,7 +148,7 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-white truncate">{userEmail}</div>
+              <div className="text-xs font-bold text-white truncate">{username || userEmail}</div>
               <div className="text-[10px] uppercase font-black tracking-widest mt-0.5">
                 {isPremium ? <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span> : <span className="text-slate-500">TRIAL</span>}
               </div>

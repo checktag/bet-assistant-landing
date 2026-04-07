@@ -126,6 +126,28 @@ export default function SignupPage() {
                 className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
               />
             </div>
+            {/* Password Hint */}
+            <div className="mt-2 space-y-1.5 px-4 py-2 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Security Protocol</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <div className={`flex items-center gap-1.5 text-[9px] ${password.length >= 8 ? "text-brand-teal/80" : "text-slate-600"}`}>
+                  <div className={`w-1 h-1 rounded-full ${password.length >= 8 ? "bg-brand-teal" : "bg-slate-700"}`} />
+                  8+ characters
+                </div>
+                <div className={`flex items-center gap-1.5 text-[9px] ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
+                  <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
+                  Aa mix
+                </div>
+                <div className={`flex items-center gap-1.5 text-[9px] ${/\d/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
+                  <div className={`w-1 h-1 rounded-full ${/\d/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
+                  Numbers
+                </div>
+                <div className={`flex items-center gap-1.5 text-[9px] ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
+                  <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
+                  Symbols
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
