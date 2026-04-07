@@ -24,11 +24,11 @@ export default function DashboardSidebar({ isPremium, activePath, userInitial = 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   const handleVerifyJoin = async () => {
-    if (!session?.accessToken) return;
+    if (!(session as any)?.accessToken) return;
     setIsVerifying(true);
     try {
       await axios.post(`${API_URL}/confirm-telegram-join`, {}, {
-        headers: { Authorization: `Bearer ${session.accessToken}` }
+        headers: { Authorization: `Bearer ${(session as any).accessToken}` }
       });
       setVerificationSuccess(true);
       // Refresh page to update credits globally
