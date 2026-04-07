@@ -4,12 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { motion } from "framer-motion";
-import DashboardSidebar from "./DashboardSidebar";
-import MobileNav from "./MobileNav";
 import {
-  LayoutDashboard, BarChart3, Settings, Radar,
   Crown, BellRing, Send, CheckCircle2,
-  Loader2, Link as LinkIcon, Unlink, Lock, AlertCircle
+  Loader2, LinkIcon, Unlink, Lock, AlertCircle
 } from "lucide-react";
 
 interface SettingsPageClientProps {
@@ -151,26 +148,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
   };
 
   return (
-    <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
-
-      <MobileNav 
-        isPremium={user.is_premium} 
-        userInitial={user.email?.[0]?.toUpperCase() || "S"} 
-        userEmail={user.email || "Settings"} 
-      />
-
-      {/* Sidebar */}
-      <DashboardSidebar 
-        isPremium={user.is_premium} 
-        activePath="/dashboard/settings" 
-        userEmail={user.email} 
-        userInitial={user.email[0].toUpperCase()} 
-      />
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-        <div className="absolute top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-brand-teal/4 blur-[130px] rounded-full pointer-events-none" />
-        <div className="max-w-2xl mx-auto space-y-6 relative z-10">
+    <div className="max-w-2xl mx-auto py-8 md:py-12 px-4 md:px-0 space-y-6 relative z-10">
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -378,7 +356,5 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
           </motion.div>
 
         </div>
-      </main>
-    </div>
   );
 }

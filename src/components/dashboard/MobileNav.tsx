@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator } from "lucide-react";
+import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
@@ -21,6 +21,8 @@ export default function MobileNav({ isPremium, userInitial, userEmail }: MobileN
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-5 h-5" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-5 h-5" /> },
     { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-5 h-5" /> },
+    { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-5 h-5" /> },
+    { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-5 h-5" /> },
     { name: "Settings",       path: "/dashboard/settings",    icon: <Settings className="w-5 h-5" /> },
   ];
 

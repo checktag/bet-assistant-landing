@@ -1,0 +1,47 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import MobileNav from "@/components/dashboard/MobileNav";
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    redirect("/auth/login");
+  }
+
+  const user = session.user as any;
+
+  return (
+    <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
+      <MobileNav 
+        isPremium={user.is_premium} 
+        userInitial={user.email[0].toUpperCase()} 
+        userEmail={user.email} 
+      />
+
+      <DashboardSidebar 
+        isPremium={user.is_premium} 
+        userEmail={user.email} 
+        userInitial={user.email[0].toUpperCase()} 
+        credits={user.credits}
+        telegramJoined={user.telegram_joined}
+      />
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col relative overflow-y-auto h-[calc(100vh-72px)] md:h-screen scrollbar-hide">
+        {/* Persistent Background Orbs */}
+        <div className="fixed top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-brand-teal/5 blur-[120px] rounded-full pointer-events-none z-0" />
+        <div className="fixed bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none z-0" />
+        
+        <div className="relative z-10 w-full">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}

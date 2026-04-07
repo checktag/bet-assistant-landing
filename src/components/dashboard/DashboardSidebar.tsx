@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, BarChart3, Settings, Radar, Crown, ChevronLeft, ChevronRight, LogOut, ArrowRightLeft, Calculator, Zap, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { LayoutDashboard, BarChart3, Settings, Radar, Crown, ChevronLeft, ChevronRight, LogOut, ArrowRightLeft, Calculator, Zap, Send, CheckCircle2, Loader2, Trophy } from "lucide-react";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 
 interface DashboardSidebarProps {
   isPremium: boolean;
-  activePath: string;
   userInitial?: string;
   userEmail?: string;
   credits?: number;
   telegramJoined?: boolean;
 }
 
-export default function DashboardSidebar({ isPremium, activePath, userInitial = "U", userEmail = "User", credits = 0, telegramJoined = false }: DashboardSidebarProps) {
+export default function DashboardSidebar({ isPremium, userInitial = "U", userEmail = "User", credits = 0, telegramJoined = false }: DashboardSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const { data: session } = useSession();
@@ -45,6 +46,8 @@ export default function DashboardSidebar({ isPremium, activePath, userInitial = 
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-4 h-4" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-4 h-4" /> },
     { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-4 h-4" /> },
+    { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-4 h-4" /> },
+    { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-4 h-4" /> },
     { name: "Settings",       path: "/dashboard/settings",    icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -65,15 +68,7 @@ export default function DashboardSidebar({ isPremium, activePath, userInitial = 
       {/* Nav */}
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => {
-          let isActive = false;
-          if (item.path === "/dashboard/tracker") {
-            // Note: Dashboard slip tracker might use ?tab=tracker or a different layout. 
-            // We use /dashboard?tab=tracker for standardizing tracking route in ui if we want.
-            // Let's rely on activePath mapping
-            isActive = activePath === "/dashboard/tracker";
-          } else {
-            isActive = activePath === item.path;
-          }
+          const isActive = pathname === item.path;
           const baseClasses = `relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all group overflow-hidden ${
             isActive ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20" : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`;

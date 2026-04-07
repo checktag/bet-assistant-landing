@@ -11,7 +11,7 @@ export default function ConvertPage() {
   if (!session) return null;
 
   return (
-    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8 py-8 md:py-12 px-4 md:px-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 text-center md:text-left">
         <div>
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">Code <span className="text-gradient">Converter</span></h1>

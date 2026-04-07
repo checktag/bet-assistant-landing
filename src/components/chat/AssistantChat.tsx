@@ -274,7 +274,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
     setIsLoading(true);
     const platforms = singlePlatform
       ? [singlePlatform]
-      : ["sportybet", "bet9ja", "1xbet", "betway", "betwinner", "msport", "22bet"];
+      : ["sportybet", "bet9ja", "1xbet"];
     try {
       const results = await Promise.all(
         platforms.map(p =>

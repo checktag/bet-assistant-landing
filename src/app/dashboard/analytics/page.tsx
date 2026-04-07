@@ -4,12 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import MobileNav from "@/components/dashboard/MobileNav";
 import {
-  LayoutDashboard, BarChart3, Settings, Radar,
-  TrendingUp, TrendingDown, Zap, Target, Activity,
-  ArrowUpRight, ArrowDownRight, AlertCircle, CheckCircle2
+  Zap, Target, Activity,
+  ArrowUpRight, ArrowDownRight, AlertCircle, CheckCircle2, TrendingUp
 } from "lucide-react";
 
 // Simulated stat data — in production wire to /api/my-stats
@@ -84,26 +81,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
-
-      <MobileNav 
-        isPremium={user?.is_premium ?? false} 
-        userInitial={user?.email?.[0]?.toUpperCase() || "A"} 
-        userEmail={user?.email || "Analytics"} 
-      />
-
-      {/* Sidebar */}
-      <DashboardSidebar 
-        isPremium={user?.is_premium ?? false} 
-        activePath="/dashboard/analytics" 
-        userEmail={user?.email || "Analytics"} 
-        userInitial={user?.email?.[0]?.toUpperCase() || "A"} 
-      />
-
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-brand-blue/4 blur-[120px] rounded-full pointer-events-none" />
-        <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+    <div className="max-w-6xl mx-auto py-8 md:py-12 px-4 md:px-0 space-y-8 relative z-10">
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -260,7 +238,5 @@ export default function AnalyticsPage() {
           </motion.div>
 
         </div>
-      </main>
-    </div>
   );
 }
