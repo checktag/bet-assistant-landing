@@ -253,10 +253,18 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
         setMessages(prev => [...prev, { role: "assistant", content: res.data.response }]);
       }
     } catch (error: any) {
-      const errorMsg = error.response?.data?.detail === "TRIAL_EXPIRED"
-        ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
-        : "⚠️ Sorry, I encountered an error processing that request.";
-      setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+      if (error.response?.status === 402) {
+        setMessages(prev => [...prev, { 
+          role: "assistant", 
+          content: "🚫 **Insufficient Credits!**\nYou've exhausted your available scan credits. Join our Telegram community to get **1,000 FREE credits** instantly, or upgrade to Premium for a one-time boost and unlimited Tracking features.",
+          type: "onboarding" //Reuse onboarding style for prominent display
+        }]);
+      } else {
+        const errorMsg = error.response?.data?.detail === "TRIAL_EXPIRED"
+          ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
+          : "⚠️ Sorry, I encountered an error processing that request.";
+        setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -355,101 +363,19 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                       <Globe className="w-3 h-3 text-brand-teal" />
                       <span className="text-[9px] font-black text-brand-teal uppercase tracking-[0.2em]">Market Scan</span>
                     </div>
-
-                    {/* High-Stake */}
-                    <div className="mb-2">
-                      <div className="flex items-center gap-1.5 mb-1 px-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
-                        <span className="text-[8px] font-black text-yellow-400 uppercase tracking-widest">High-Stake · 5–7 picks</span>
-                      </div>
-                      <div className="grid gap-1">
-                        {[
-                          { cmd: "/scan high",          label: "Today (High-Stake)",   desc: "Tight odds · 75%+ confidence" },
-                          { cmd: "/scan high weekend",  label: "Weekend High-Stake",   desc: "Sat & Sun · big stake picks" },
-                          { cmd: "/scan high upcoming", label: "72h High-Stake",       desc: "Next 3 days · safest picks" },
-                        ].map((a, i) => (
-                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-yellow-400/5 text-left transition-all group border border-transparent hover:border-yellow-400/20">
-                            <code className="text-[9px] font-black text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
-                            <div className="min-w-0">
-                              <div className="text-[9px] font-bold text-white group-hover:text-yellow-300 transition-colors truncate">{a.label}</div>
-                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Moderate */}
-                    <div className="mb-2">
-                      <div className="flex items-center gap-1.5 mb-1 px-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-teal shrink-0" />
-                        <span className="text-[8px] font-black text-brand-teal uppercase tracking-widest">Moderate · 8–20 picks</span>
-                      </div>
-                      <div className="grid gap-1">
-                        {[
-                          { cmd: "/scan moderate",           label: "Today (Moderate)",      desc: "Balanced odds & confidence" },
-                          { cmd: "/scan moderate weekend",   label: "Weekend Moderate",      desc: "Sat & Sun · balanced picks" },
-                          { cmd: "/scan moderate bundesliga",label: "Bundesliga Moderate",   desc: "German league edges" },
-                          { cmd: "/scan moderate premier league", label: "EPL Moderate",     desc: "Premier League edges" },
-                        ].map((a, i) => (
-                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-brand-teal/5 text-left transition-all group border border-transparent hover:border-brand-teal/20">
-                            <code className="text-[9px] font-black text-brand-teal bg-brand-teal/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
-                            <div className="min-w-0">
-                              <div className="text-[9px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
-                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Spread */}
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-1 px-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
-                        <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Spread · 20–40 picks</span>
-                      </div>
-                      <div className="grid gap-1">
-                        {[
-                          { cmd: "/scan spread",            label: "Today (Spread)",        desc: "Wide odds · max coverage" },
-                          { cmd: "/scan spread upcoming",   label: "72h Spread",            desc: "Next 3 days · large selection" },
-                          { cmd: "/scan spread champions_league", label: "UCL Spread",      desc: "Champions League · all edges" },
-                        ].map((a, i) => (
-                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg hover:bg-purple-400/5 text-left transition-all group border border-transparent hover:border-purple-400/20">
-                            <code className="text-[9px] font-black text-purple-400 bg-purple-400/10 px-1.5 py-0.5 rounded-md shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
-                            <div className="min-w-0">
-                              <div className="text-[9px] font-bold text-white group-hover:text-purple-300 transition-colors truncate">{a.label}</div>
-                              <div className="text-[8px] text-slate-600 truncate">{a.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-white/5" />
-
-                  {/* SLIP TOOLS GROUP */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-3 h-3 text-brand-blue" />
-                      <span className="text-[9px] font-black text-brand-blue uppercase tracking-[0.2em]">Slip Tools</span>
-                    </div>
-                    <div className="grid gap-1.5">
+                    <div className="grid gap-1">
                       {[
-                        { cmd: "/checkslip sportybet ",  label: "Check SportyBet Slip",  desc: "Paste your booking code after the space" },
-                        { cmd: "/checkslip bet9ja ",     label: "Check Bet9ja Slip",     desc: "AI EV + confidence per game" },
-                        { cmd: "/checkslip betway ",     label: "Check Betway Slip",     desc: "Full slip analysis with edge score" },
-                        { cmd: "/checkslip 1xbet ",      label: "Check 1xBet Slip",      desc: "Cashout vs hold recommendation" },
+                        { cmd: "/scan",          label: "Today's Scan",      desc: "Top edges for next 24h" },
+                        { cmd: "/scan upcoming", label: "Upcoming 72h",      desc: "Value picks for next 3 days" },
+                        { cmd: "/scan weekend",  label: "Weekend fixtures",  desc: "Saturday & Sunday value" },
+                        { cmd: "/scan high",     label: "High-Stake Scan",   desc: "Top 5 most confident picks" },
+                        { cmd: "/scan spread",   label: "Spread Scan",       desc: "Wide distribution parlay" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
-                          <code className="text-[9px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                          className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all group border border-transparent hover:border-brand-teal/20">
+                          <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
                           <div className="min-w-0">
-                            <div className="text-[10px] font-bold text-white group-hover:text-brand-blue transition-colors">{a.label}</div>
+                            <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
                             <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
                           </div>
                         </button>
@@ -459,25 +385,24 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
 
                   <div className="h-px bg-white/5" />
 
-                  {/* CONVERT GROUP */}
+                  {/* SLIP TOOLS GROUP */}
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Calculator className="w-3 h-3 text-purple-400" />
-                      <span className="text-[9px] font-black text-purple-400 uppercase tracking-[0.2em]">Convert Slip</span>
+                      <Zap className="w-3 h-3 text-brand-blue" />
+                      <span className="text-[9px] font-black text-brand-blue uppercase tracking-[0.2em]">Slip Analysis</span>
                     </div>
-                    <div className="grid gap-1.5">
+                    <div className="grid gap-1">
                       {[
-                        { cmd: "/convert sportybet bet9ja ",  label: "SportyBet → Bet9ja",   desc: "Convert and paste your code" },
-                        { cmd: "/convert bet9ja sportybet ",  label: "Bet9ja → SportyBet",   desc: "" },
-                        { cmd: "/convert sportybet betway ",  label: "SportyBet → Betway",   desc: "" },
-                        { cmd: "/convert sportybet 1xbet ",   label: "SportyBet → 1xBet",    desc: "" },
+                        { cmd: "/checkslip sportybet ",  label: "Check SportyBet",  desc: "Paste your code after space" },
+                        { cmd: "/checkslip bet9ja ",     label: "Check Bet9ja",     desc: "AI edge score per game" },
+                        { cmd: "/checkslip 1xbet ",      label: "Check 1xBet",      desc: "Cashout recommendation" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/5 text-left transition-all group">
-                          <code className="text-[9px] font-black text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-white/5 text-left transition-all group">
+                          <code className="text-[10px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
                           <div className="min-w-0">
-                            <div className="text-[10px] font-bold text-white group-hover:text-purple-400 transition-colors">{a.label}</div>
-                            {a.desc && <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>}
+                            <div className="text-[10px] font-bold text-white group-hover:text-brand-blue transition-colors">{a.label}</div>
+                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
                           </div>
                         </button>
                       ))}

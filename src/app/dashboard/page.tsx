@@ -34,6 +34,8 @@ export default async function DashboardPage() {
         activePath="/dashboard" 
         userEmail={user.email} 
         userInitial={user.email[0].toUpperCase()} 
+        credits={user.credits}
+        telegramJoined={user.telegram_joined}
       />
 
       {/* Main Content */}
@@ -45,7 +47,7 @@ export default async function DashboardPage() {
         <div className="w-full max-w-5xl space-y-6 md:space-y-8 z-10 flex flex-col h-full md:h-auto justify-center">
           <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
             <div>
-              <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mb-1 md:mb-2">Quant Terminal</h1>
+              <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mb-1 md:mb-2 text-gradient">Quant Terminal</h1>
               <p className="text-xs md:text-sm text-slate-400">Institutional-grade betting advisor.</p>
             </div>
             {!user.is_premium && (
@@ -56,26 +58,6 @@ export default async function DashboardPage() {
           </header>
 
           <AssistantChat accessToken={(session as any).accessToken} />
-
-          {/* Slip Tracker Section */}
-          <div className="pt-4 border-t border-white/5">
-            <div className="flex items-center gap-3 mb-6">
-              <Radar className="w-5 h-5 text-brand-teal" />
-              <h2 className="text-lg font-black text-white tracking-tight">Slip Tracker</h2>
-              {user.is_premium ? (
-                <span className="text-[10px] font-bold text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-2 py-0.5 rounded-full">Premium</span>
-              ) : (
-                <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Crown className="w-2.5 h-2.5" /> Upgrade Required
-                </span>
-              )}
-            </div>
-            <SlipTracker
-              accessToken={(session as any).accessToken}
-              telegramLinked={user.telegram_linked}
-              isPremium={user.is_premium}
-            />
-          </div>
         </div>
       </main>
     </div>

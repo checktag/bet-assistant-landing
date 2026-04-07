@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut } from "lucide-react";
+import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
@@ -17,10 +17,11 @@ export default function MobileNav({ isPremium, userInitial, userEmail }: MobileN
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Dashboard", path: "/dashboard",        icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: "Slip Tracker", path: "/dashboard/tracker", icon: <Radar className="w-5 h-5" />, premiumLock: !isPremium },
-    { name: "Analytics",   path: "/dashboard/analytics", icon: <BarChart3 className="w-5 h-5" /> },
-    { name: "Settings",    path: "/dashboard/settings",  icon: <Settings className="w-5 h-5" /> },
+    { name: "Quant Terminal", path: "/dashboard",          icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-5 h-5" />, premiumLock: !isPremium },
+    { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-5 h-5" /> },
+    { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-5 h-5" /> },
+    { name: "Settings",       path: "/dashboard/settings",    icon: <Settings className="w-5 h-5" /> },
   ];
 
   const toggleMenu = () => setIsOpen(!isOpen);
