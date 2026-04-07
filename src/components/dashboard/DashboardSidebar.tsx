@@ -55,21 +55,35 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
     <aside className={`hidden md:flex border-r border-white/5 bg-[#060913] flex-col p-4 space-y-8 h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
       
       {/* Header */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" /></div>
-          {!collapsed && <span className="font-bold tracking-tight text-white whitespace-nowrap">Bet Assistant</span>}
+      <div className={`flex items-center transition-all ${collapsed ? "justify-center" : "justify-between px-2"}`}>
+        <div className={`flex items-center ${collapsed ? "" : "gap-3"} overflow-hidden transition-all text-ellipsis`}>
+          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-lg border border-white/10">
+            <img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" />
+          </div>
+          {!collapsed && <span className="font-bold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-500">Bet Assistant</span>}
         </div>
-        <button onClick={() => setCollapsed(!collapsed)} className="text-slate-500 hover:text-white p-1 rounded-md hover:bg-white/5">
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {!collapsed && (
+          <button onClick={() => setCollapsed(!collapsed)} className="text-slate-500 hover:text-white p-1 rounded-md hover:bg-white/5 transition-all">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        )}
       </div>
+      
+      {collapsed && (
+        <button 
+          onClick={() => setCollapsed(false)} 
+          className="mx-auto w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all hover:scale-110 active:scale-95"
+          title="Expand Sidebar"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
-          const baseClasses = `relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all group overflow-hidden ${
+          const baseClasses = `relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all group overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
             isActive ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20" : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`;
 

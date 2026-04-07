@@ -136,7 +136,7 @@ export default function CodeConverter({ accessToken }: CodeConverterProps) {
         <button
           type="submit"
           disabled={isLoading || !code.trim() || fromPlatform === toPlatform}
-          className="w-full py-5 bg-brand-teal text-background font-black text-lg rounded-2xl shadow-[0_20px_40px_rgba(0,198,186,0.2)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all flex items-center justify-center gap-3 uppercase tracking-tighter"
+          className="w-full py-5 bg-brand-teal text-background font-black text-lg rounded-2xl shadow-[0_20px_40px_rgba(0,198,186,0.2)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 disabled:hover:scale-100 transition-all cursor-pointer flex items-center justify-center gap-3 uppercase tracking-tighter"
         >
           {isLoading ? (
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -176,14 +176,14 @@ export default function CodeConverter({ accessToken }: CodeConverterProps) {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <button
                     onClick={handleCopy}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black rounded-xl hover:scale-105 transition-all text-sm uppercase tracking-wide"
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all cursor-pointer text-sm uppercase tracking-wide"
                   >
                     {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     {copied ? "Copied!" : "Copy to Clipboard"}
                   </button>
                   <button
                     onClick={() => { setCode(""); setResult(null); }}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-black rounded-xl hover:bg-white/20 transition-all text-sm uppercase tracking-wide"
+                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-black rounded-xl hover:bg-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer text-sm uppercase tracking-wide"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Convert Another

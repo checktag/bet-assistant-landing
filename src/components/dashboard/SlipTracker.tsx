@@ -134,7 +134,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
           </div>
           <Link
             href="/dashboard/settings"
-            className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-lg hover:scale-105 transition-all whitespace-nowrap"
+            className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
           >
             Go to Settings
           </Link>
@@ -166,7 +166,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
           <button
             type="submit"
             disabled={isAdding || !newCode.trim()}
-            className="px-5 py-3 bg-brand-teal text-background font-black text-sm rounded-xl hover:scale-[1.02] disabled:opacity-50 transition-all flex items-center gap-2 whitespace-nowrap"
+            className="px-5 py-3 bg-brand-teal text-background font-black text-sm rounded-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap"
           >
             {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
             Track Slip
@@ -190,8 +190,8 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{slips.filter(s => s.status === "active").length} Active · {slips.length} Total</span>
-            <button onClick={fetchSlips} className="flex items-center gap-1 text-xs text-slate-500 hover:text-brand-teal transition-colors">
-              <RefreshCw className="w-3 h-3" /> Refresh
+            <button onClick={fetchSlips} className="flex items-center gap-1 text-xs text-slate-500 hover:text-brand-teal transition-colors cursor-pointer group">
+              <RefreshCw className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" /> Refresh
             </button>
           </div>
           <AnimatePresence>
@@ -261,7 +261,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
                                 <button
                                   key={opt.s}
                                   onClick={() => handleStatusUpdate(slip.id, opt.s)}
-                                  className={`flex items-center gap-1 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition-all hover:scale-105 ${opt.cls}`}
+                                  className={`flex items-center gap-1 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition-all cursor-pointer hover:scale-105 active:scale-95 ${opt.cls}`}
                                 >
                                   {opt.icon} {opt.label}
                                 </button>
@@ -271,7 +271,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
 
                           <button
                             onClick={() => handleDelete(slip.id)}
-                            className="flex items-center gap-1 text-[10px] text-slate-600 hover:text-red-400 transition-colors"
+                            className="flex items-center gap-1 text-[10px] text-slate-600 hover:text-red-400 transition-colors cursor-pointer hover:scale-105 active:scale-95"
                           >
                             <Trash2 className="w-3 h-3" /> Remove from tracker
                           </button>

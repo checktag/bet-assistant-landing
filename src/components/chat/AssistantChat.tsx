@@ -87,7 +87,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
+              className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer ${
                 isActive ? `${tab.bg} border ${tab.style}` : "hover:bg-white/5 border border-transparent opacity-50 hover:opacity-100"
               }`}
             >
@@ -133,7 +133,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
           </div>
           <button
             onClick={() => onBuildSlips(slicedBets)}
-            className={`w-full mt-2 py-2.5 rounded-lg border text-[10px] font-bold transition-all uppercase tracking-widest ${
+            className={`w-full mt-2 py-2.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest ${
               PROFILE_TABS.find(t => t.id === activeTab)?.bg
             } ${PROFILE_TABS.find(t => t.id === activeTab)?.style.replace('text-', 'border-').replace('/20', '/40')} hover:brightness-125`}
           >
@@ -343,7 +343,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
         <div className="relative">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${isMenuOpen ? "bg-brand-teal text-background" : "bg-white/5 text-slate-400 hover:text-white"}`}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer hover:scale-[1.05] active:scale-[0.95] ${isMenuOpen ? "bg-brand-teal text-background" : "bg-white/5 text-slate-400 hover:text-white"}`}
           >
             <Zap className="w-3.5 h-3.5" /> QUICK ACTIONS
           </button>
@@ -368,11 +368,11 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                         { cmd: "/scan",          label: "Today's Scan",      desc: "Top edges for next 24h" },
                         { cmd: "/scan upcoming", label: "Upcoming 72h",      desc: "Value picks for next 3 days" },
                         { cmd: "/scan weekend",  label: "Weekend fixtures",  desc: "Saturday & Sunday value" },
-                        { cmd: "/scan high",     label: "High-Stake Scan",   desc: "Top 5 most confident picks" },
-                        { cmd: "/scan spread",   label: "Spread Scan",       desc: "Wide distribution parlay" },
+                        { cmd: "/scan date ",    label: "Scan by Date",      desc: "Paste date after space" },
+                        { cmd: "/scan league ",  label: "Scan League",       desc: "Paste league name after space" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all group border border-transparent hover:border-brand-teal/20">
+                          className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
                           <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
                           <div className="min-w-0">
                             <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
@@ -398,7 +398,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                         { cmd: "/checkslip 1xbet ",      label: "Check 1xBet",      desc: "Cashout recommendation" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-white/5 text-left transition-all group">
+                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-white/5 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                           <code className="text-[10px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
                           <div className="min-w-0">
                             <div className="text-[10px] font-bold text-white group-hover:text-brand-blue transition-colors">{a.label}</div>
@@ -462,12 +462,12 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                             { cmd: "/scan",                 desc: "Global +EV edges — next 24 hours" },
                             { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
                             { cmd: "/scan upcoming",        desc: "All fixtures in the next 72 hours" },
-                            { cmd: "/scan 2026-04-05",      desc: "Specific date (YYYY-MM-DD)" },
-                            { cmd: "/scan premier league",  desc: "Filter by league name" },
-                            { cmd: "/scan champions_league",desc: "Champions League only" },
+                            { cmd: "/scan 2026-04-06",      desc: "Scan specific date (YYYY-MM-DD)" },
+                            { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
+                            { cmd: "/scan champions league",desc: "Champions League edges" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
-                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all group">
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
                             </button>
@@ -489,7 +489,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                             { cmd: "/checkslip 1xbet CODE",      desc: "1xBet slip breakdown" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
-                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-blue/10 border border-transparent hover:border-brand-blue/30 text-left transition-all group">
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-blue/10 border border-transparent hover:border-brand-blue/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-blue font-mono shrink-0 whitespace-nowrap">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
                             </button>
@@ -511,7 +511,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                             { cmd: "/convert sportybet 1xbet CODE",   desc: "SportyBet → 1xBet" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
-                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all group">
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-purple-400 font-mono shrink-0 break-all">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
                             </button>
@@ -585,7 +585,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                             {!isError && (
                               <button
                                 onClick={() => navigator.clipboard.writeText(r.code)}
-                                className="text-[9px] text-slate-500 hover:text-white px-2 py-1 bg-white/5 rounded-lg transition-all shrink-0"
+                                className="text-[9px] text-slate-500 hover:text-white px-2 py-1 bg-white/5 rounded-lg transition-all cursor-pointer hover:scale-[1.05] active:scale-[0.95] shrink-0"
                               >
                                 Copy
                               </button>

@@ -41,7 +41,7 @@ export function LandingParlayCalc() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Selections ({legs.length})</span>
-          <button onClick={addLeg} className="flex items-center gap-1 text-xs text-brand-teal hover:text-brand-teal/80 font-bold transition-colors">
+          <button onClick={addLeg} className="flex items-center gap-1 text-xs text-brand-teal hover:text-brand-teal/80 font-bold transition-all cursor-pointer hover:scale-105 active:scale-95">
             <PlusCircle className="w-3.5 h-3.5" /> Add
           </button>
         </div>
@@ -56,7 +56,7 @@ export function LandingParlayCalc() {
                 <span className="text-[10px] text-slate-600">@</span>
                 <input type="number" value={leg.odds} onChange={e => updateLeg(leg.id, "odds", e.target.value)}
                   step="0.01" min="1" className="w-14 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-sm text-brand-teal font-mono text-right outline-none focus:border-brand-teal/50" />
-                <button onClick={() => removeLeg(leg.id)} className="text-slate-700 hover:text-red-400 transition-colors">
+                <button onClick={() => removeLeg(leg.id)} className="text-slate-700 hover:text-red-400 transition-all cursor-pointer hover:scale-110 active:scale-90">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -181,12 +181,12 @@ export function LandingROITracker() {
           <div className="flex gap-2">
             {(["won", "lost"] as const).map(r => (
               <button key={r} onClick={() => setNewResult(r)}
-                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${newResult === r ? (r === "won" ? "bg-green-400/10 text-green-400 border-green-400/30" : "bg-red-400/10 text-red-400 border-red-400/30") : "bg-white/5 text-slate-500 border-white/10"}`}>
+                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${newResult === r ? (r === "won" ? "bg-green-400/10 text-green-400 border-green-400/30" : "bg-red-400/10 text-red-400 border-red-400/30") : "bg-white/5 text-slate-500 border-white/10"}`}>
                 {r === "won" ? "✅ Won" : "❌ Lost"}
               </button>
             ))}
           </div>
-          <button onClick={addBet} className="px-4 py-2.5 bg-brand-teal text-background font-black text-xs rounded-xl hover:scale-105 transition-all">Add</button>
+          <button onClick={addBet} className="px-4 py-2.5 bg-brand-teal text-background font-black text-xs rounded-xl hover:scale-105 active:scale-95 transition-all cursor-pointer">Add</button>
         </div>
       </div>
       <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -198,7 +198,7 @@ export function LandingROITracker() {
             <span className={`font-bold ${b.result === "won" ? "text-green-400" : "text-red-400"}`}>
               {b.result === "won" ? "+₦" + Math.round(parseFloat(b.stake) * (parseFloat(b.odds) - 1)).toLocaleString() : "-₦" + parseFloat(b.stake).toLocaleString()}
             </span>
-            <button onClick={() => setBets(p => p.filter(x => x.id !== b.id))} className="text-slate-700 hover:text-red-400 transition-colors ml-1">
+            <button onClick={() => setBets(p => p.filter(x => x.id !== b.id))} className="text-slate-700 hover:text-red-400 transition-all cursor-pointer hover:scale-110 active:scale-90 ml-1">
               <Trash2 className="w-3 h-3" />
             </button>
           </div>
@@ -281,7 +281,7 @@ export function CalcWrapper() {
           <button
             key={tab.id}
             onClick={() => setActiveCalcTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 ${activeCalcTab === tab.id
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${activeCalcTab === tab.id
                 ? "bg-brand-teal text-background border-brand-teal shadow-[0_0_16px_rgba(0,198,186,0.3)]"
                 : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
               }`}

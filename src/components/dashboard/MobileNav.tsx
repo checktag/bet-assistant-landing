@@ -60,7 +60,7 @@ export default function MobileNav({ isPremium, userInitial, userEmail }: MobileN
                   key={item.name} 
                   href={item.path === "/dashboard/tracker" ? "/dashboard?tab=tracker" : item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all border ${
+                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all border cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
                     isActive 
                       ? "bg-brand-blue/10 border-brand-blue/30 text-brand-blue" 
                       : "bg-white/5 border-white/5 text-slate-300"
@@ -91,7 +91,7 @@ export default function MobileNav({ isPremium, userInitial, userEmail }: MobileN
             
             <button 
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-sm"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               <LogOut className="w-4 h-4" /> SIGN OUT
             </button>
