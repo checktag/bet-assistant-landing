@@ -355,7 +355,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 className="absolute right-0 top-full mt-3 w-[92vw] max-w-[340px] bg-[#060913]/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
               >
-                <div className="max-h-[70vh] overflow-y-auto p-4 space-y-4 scrollbar-hide">
+                <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4 custom-scrollbar">
 
                   {/* SCAN GROUP */}
                   <div>
@@ -368,8 +368,8 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
                         { cmd: "/scan",          label: "Today's Scan",      desc: "Top edges for next 24h" },
                         { cmd: "/scan upcoming", label: "Upcoming 72h",      desc: "Value picks for next 3 days" },
                         { cmd: "/scan weekend",  label: "Weekend fixtures",  desc: "Saturday & Sunday value" },
-                        { cmd: "/scan date ",    label: "Scan by Date",      desc: "Paste date after space" },
-                        { cmd: "/scan league ",  label: "Scan League",       desc: "Paste league name after space" },
+                        { cmd: "/scan 2026-04-06 ", label: "Scan by Date",      desc: "e.g. /scan 2026-04-06" },
+                        { cmd: "/scan premier league ", label: "Scan League",  desc: "e.g. /scan premier league" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
                           className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
