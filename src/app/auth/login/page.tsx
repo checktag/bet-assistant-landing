@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck, AlertCircle } from "lucide-react";
@@ -8,7 +8,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthOverlay from "@/components/auth/AuthOverlay";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -149,5 +149,17 @@ export default function LoginPage() {
         ) : null}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-teal" />
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

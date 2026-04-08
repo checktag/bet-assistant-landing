@@ -1,13 +1,10 @@
+import { Suspense } from "react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AssistantChat from "@/components/chat/AssistantChat";
-import SlipTracker from "@/components/dashboard/SlipTracker";
-import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, Radar } from "lucide-react";
+import { Crown } from "lucide-react";
 import Link from "next/link";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import MobileNav from "@/components/dashboard/MobileNav";
 import DashboardOnboarding from "@/components/dashboard/DashboardOnboarding";
-import { signOut } from "@/auth";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -20,7 +17,6 @@ export default async function DashboardPage() {
   const now = new Date();
   
   const trialEnds = new Date(user.trial_ends_at || (new Date(user.created_at || now).getTime() + 7 * 86400000));
-  const daysLeft = Math.max(0, Math.ceil((trialEnds.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 flex flex-col justify-center min-h-full py-8 md:py-12 px-4 md:px-0">
@@ -37,7 +33,10 @@ export default async function DashboardPage() {
       </header>
 
       <AssistantChat accessToken={(session as any).accessToken} />
-      <DashboardOnboarding user={user} accessToken={(session as any).accessToken} />
+      
+      <Suspense fallback={null}>
+        <DashboardOnboarding user={user} accessToken={(session as any).accessToken} />
+      </Suspense>
     </div>
   );
 }
