@@ -138,7 +138,7 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
                   }}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-xs uppercase tracking-wider transition-all"
                 >
-                  <Zap className="w-4 h-4" /> Claim 1,000 Credits
+                  <Zap className="w-4 h-4" /> Claim 100 Credits
                 </button>
               </div>
             )}

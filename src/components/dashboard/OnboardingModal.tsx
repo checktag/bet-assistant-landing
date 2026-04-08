@@ -1,9 +1,8 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Send, CheckCircle2, Loader2, X, Sparkles, AlertCircle } from "lucide-react";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -14,6 +13,7 @@ interface OnboardingModalProps {
 }
 
 export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode, onSuccess }: OnboardingModalProps) {
+  const { update } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [pollingStatus, setPollingStatus] = useState<"idle" | "handshaking" | "verifying">("idle");
@@ -41,6 +41,9 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
             setIsSuccess(true);
             setPollingStatus("idle");
             clearInterval(interval);
+            // Trigger session update to refresh credits in real-time
+            await update();
+            
             setTimeout(() => {
               onSuccess();
               onClose();
@@ -55,7 +58,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, isSuccess, accessToken, onSuccess, onClose]);
+  }, [isOpen, isSuccess, accessToken, onSuccess, onClose, update]);
 
   if (!isOpen) return null;
 
@@ -100,7 +103,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                     <CheckCircle2 className="w-12 h-12" />
                   </div>
                   <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Clearance Granted</h2>
-                  <p className="text-brand-teal font-black uppercase tracking-widest text-xs">1,000 Credits Injected</p>
+                  <p className="text-brand-teal font-black uppercase tracking-widest text-xs">100 Credits Injected</p>
                 </motion.div>
               ) : (
                 <motion.div key="form" className="w-full flex flex-col items-center">
@@ -114,7 +117,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                    </h2>
                    
                    <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-10 max-w-xs">
-                     Link your Telegram identity to initialize your terminal and claim **1,000 Credits**.
+                     Link your Telegram identity to initialize your terminal and claim **100 Credits**.
                    </p>
 
                    {/* Instruction Card */}

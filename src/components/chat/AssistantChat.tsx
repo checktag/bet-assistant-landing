@@ -6,6 +6,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useSession } from "next-auth/react";
 
 interface Prediction {
   match: string;
@@ -151,6 +152,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
 };
 
 export default function AssistantChat({ accessToken }: AssistantChatProps) {
+  const { update } = useSession();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -233,6 +235,9 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
           type: "scan",
           data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches }
         }]);
+
+        // Sync Credits Pulse
+        await update();
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
         const parts = userMsg.split(" ");
         const platform = parts[1] || "sportybet";
@@ -246,11 +251,17 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
           type: "slip",
           data: res.data.data
         }]);
+
+        // Sync Credits Pulse
+        await update();
       } else {
         const res = await axios.post(`${API_URL}/chat`, { message: userMsg, history: chatHistory }, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         setMessages(prev => [...prev, { role: "assistant", content: res.data.response }]);
+        
+        // Sync Credits Pulse
+        await update();
       }
     } catch (error: any) {
       if (error.response?.status === 402) {

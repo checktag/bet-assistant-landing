@@ -143,7 +143,7 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
                 onClick={() => router.push("/dashboard?onboard=true")}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-[11px] uppercase tracking-wider hover:bg-brand-teal/20 transition-all"
               >
-                <Zap className="w-3.5 h-3.5" /> Claim 1,000 Credits
+                <Zap className="w-3.5 h-3.5" /> Claim 100 Credits
               </button>
             </div>
           )}

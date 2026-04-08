@@ -26,11 +26,13 @@ export const authConfig = {
           token.lastRefreshed = Date.now();
         }
 
-        // Periodically refresh user data from backend (every 60 seconds)
-        // This ensures credits and premium status stay in sync
+        // Background sync interval (300 seconds / 5 mins)
+        // Manual updates (credits/onboarding) now use 'trigger: update' for instant sync
         const now = Date.now();
-        if (token.accessToken && (!token.lastRefreshed || (now - (token.lastRefreshed as number)) > 60000)) {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+        const REFRESH_THRESHOLD = 300000;
+        
+        if (token.accessToken && (!token.lastRefreshed || (now - (token.lastRefreshed as number)) > REFRESH_THRESHOLD)) {
+          const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
           try {
             const res = await fetch(`${API_URL}/me`, {
               headers: { Authorization: `Bearer ${token.accessToken}` }
@@ -40,11 +42,10 @@ export const authConfig = {
               token.user = { ...userData, accessToken: token.accessToken };
               token.lastRefreshed = now;
             } else if (res.status === 401) {
-              // Sign out if token is invalid
               return null;
             }
           } catch (e) {
-            console.error("[NextAuth] Refresh fetch failed:", e);
+            console.error("[NextAuth] Background sync failed:", e);
           }
         }
 
