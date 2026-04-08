@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import AuthOverlay from "@/components/auth/AuthOverlay";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +22,7 @@ export default function SignupPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match. Please verify your deployment key.");
+      setError("VALIDATION_ERROR: Deployment keys do not match. Please verify your entry.");
       return;
     }
     
@@ -39,152 +40,153 @@ export default function SignupPage() {
         setIsSuccess(true);
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || "An error occurred during registration.");
+      setError(err.response?.data?.detail || "REGISTRY_ERROR: Identity link could not be established.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isSuccess) {
-    return (
-      <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute top-[-10%] right-[-15%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[140px] rounded-full pointer-events-none" />
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative z-10 text-center"
-        >
-          <div className="w-20 h-20 rounded-full bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center text-brand-teal mx-auto mb-6">
-            <Mail className="w-10 h-10" />
-          </div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-4">Transmission Sent</h1>
-          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            We have securely dispatched an initialization link to <span className="text-white font-bold">{email}</span>. 
-            <br/><br/>Please inspect your inbox (and spam array) to verify your clearance and activate your terminal.
-          </p>
-          <Link href="/auth/login" className="w-full inline-flex justify-center bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all font-mono">
-            RETURN TO LOGIN
-          </Link>
-        </motion.div>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
+      
+      <AuthOverlay 
+        isVisible={isLoading} 
+        message="Deploying Agent Node..." 
+        subMessage="Initializing neural security clearance and establishing encrypted link..." 
+      />
+
       <div className="absolute top-[-10%] right-[-15%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[140px] rounded-full pointer-events-none" />
       
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative z-10"
-      >
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-8 text-sm font-medium">
-          <ArrowLeft className="w-4 h-4" /> Back to Home
-        </Link>
-
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue">
-            <ShieldCheck className="w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Commission</h1>
-            <p className="text-slate-400 text-sm">Initialize 7-day Quant Trial.</p>
-          </div>
-        </div>
-
-        <div className="mb-8 p-4 rounded-xl bg-brand-teal/5 border border-brand-teal/20 text-[10px] uppercase font-bold tracking-widest text-brand-teal text-center">
-             ⚡ Full terminal features enabled for trial 
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold tracking-widest text-slate-500 ml-4">Registry Email</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
-              />
+      <AnimatePresence mode="wait">
+        {isSuccess ? (
+          <motion.div 
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative z-10 text-center"
+          >
+            <div className="w-20 h-20 rounded-full bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center text-brand-teal mx-auto mb-6">
+              <Mail className="w-10 h-10" />
             </div>
-          </div>
+            <h1 className="text-3xl font-black text-white tracking-tight mb-4">Transmission Sent</h1>
+            <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+              We have securely dispatched an initialization link to <span className="text-white font-bold">{email}</span>. 
+              <br/><br/>Please inspect your inbox (and spam array) to verify your clearance and activate your terminal.
+            </p>
+            <Link href="/auth/login" className="w-full inline-flex justify-center bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all font-mono text-sm uppercase tracking-widest">
+              RETURN TO LOGIN
+            </Link>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full max-w-md bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative z-10"
+          >
+            <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-8 text-[11px] font-black uppercase tracking-widest">
+              <ArrowLeft className="w-3.5 h-3.5" /> Core System
+            </Link>
 
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold tracking-widest text-slate-500 ml-4">Deployment Key</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="enter your password"
-                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
-              />
-            </div>
-            {/* Password Hint */}
-            <div className="mt-2 space-y-1.5 px-4 py-2 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Security Protocol</p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                <div className={`flex items-center gap-1.5 text-[9px] ${password.length >= 8 ? "text-brand-teal/80" : "text-slate-600"}`}>
-                  <div className={`w-1 h-1 rounded-full ${password.length >= 8 ? "bg-brand-teal" : "bg-slate-700"}`} />
-                  8+ characters
-                </div>
-                <div className={`flex items-center gap-1.5 text-[9px] ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
-                  <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
-                  Aa mix
-                </div>
-                <div className={`flex items-center gap-1.5 text-[9px] ${/\d/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
-                  <div className={`w-1 h-1 rounded-full ${/\d/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
-                  Numbers
-                </div>
-                <div className={`flex items-center gap-1.5 text-[9px] ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-brand-teal/80" : "text-slate-600"}`}>
-                  <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "bg-brand-teal" : "bg-slate-700"}`} />
-                  Symbols
-                </div>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue">
+                <ShieldCheck className="w-7 h-7" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black text-white tracking-tight">Commission</h1>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Initialize Quant Trial</p>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold tracking-widest text-slate-500 ml-4">Confirm Deployment Key</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="re-enter your password"
-                className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-[16px] md:text-sm text-white placeholder:text-slate-700 outline-none transition-all shadow-inner"
-              />
-            </div>
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 ml-4">Registry Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="agent@betassistant.io"
+                    className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-sm text-white placeholder:text-slate-800 outline-none transition-all shadow-inner"
+                  />
+                </div>
+              </div>
 
-          <div className="pt-2 flex justify-center scale-[0.85] md:scale-100 origin-center">
-          </div>
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 ml-4">Deployment Key</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-sm text-white placeholder:text-slate-800 outline-none transition-all shadow-inner"
+                  />
+                </div>
+                {/* Password Hint */}
+                <div className="mt-2 space-y-1.5 px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                  <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1 font-mono">Security Protocol</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    <div className={`flex items-center gap-1.5 text-[9px] font-bold ${password.length >= 8 ? "text-brand-teal/80" : "text-slate-700"}`}>
+                      <div className={`w-1 h-1 rounded-full ${password.length >= 8 ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      8+ CHARS
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
+                      <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      ALPHA MIX
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/\d/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
+                      <div className={`w-1 h-1 rounded-full ${/\d/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      NUMERIC
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
+                      <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      SYMBOL
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          {error && (
-            <p className="text-xs font-bold text-red-400 text-center bg-red-400/10 py-3 rounded-xl border border-red-400/20">{error}</p>
-          )}
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 ml-4">Re-confirm Key</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl pl-12 pr-6 py-4 text-sm text-white placeholder:text-slate-800 outline-none transition-all shadow-inner"
+                  />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center font-mono"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "DEPLOY AGENT"}
-          </button>
-        </form>
+              {error && (
+                <p className="text-[10px] font-bold text-red-400 text-center bg-red-500/10 py-3 rounded-xl border border-red-500/20 uppercase tracking-tight">{error}</p>
+              )}
 
-        <p className="mt-8 text-center text-slate-500 text-sm font-medium">
-          Already active? <Link href="/auth/login" className="text-brand-blue hover:underline font-bold">Login to Dashboard</Link>
-        </p>
-      </motion.div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center text-sm uppercase tracking-widest"
+              >
+                DEPLOY AGENT
+              </button>
+            </form>
+
+            <p className="mt-8 text-center text-[10px] font-black uppercase tracking-widest">
+              <span className="text-slate-600">Active link?</span> <Link href="/auth/login" className="ml-2 text-brand-blue hover:text-brand-blue/80 transition-colors">Login to Terminal</Link>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

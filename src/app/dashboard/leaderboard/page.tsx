@@ -73,11 +73,11 @@ export default function LeaderboardPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5 bg-white/2">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Rank</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Participant</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Efficiency Score</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Won Slips</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Status</th>
+                  <th className="px-4 md:px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Rank</th>
+                  <th className="px-4 md:px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Participant</th>
+                  <th className="px-4 md:px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Efficiency</th>
+                  <th className="hidden md:table-cell px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Won Slips</th>
+                  <th className="hidden sm:table-cell px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,14 +90,14 @@ export default function LeaderboardPage() {
                       transition={{ delay: idx * 0.05 }}
                       className={`group border-b border-white/5 hover:bg-white/[0.02] transition-colors ${idx < 3 ? "bg-white/[0.01]" : ""}`}
                     >
-                      <td className="px-8 py-6">
+                      <td className="px-4 md:px-8 py-6">
                         <div className="flex items-center gap-3">
                           {getRankBadge(idx + 1)}
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-4 md:px-8 py-6">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                             idx === 0 ? "bg-yellow-500/20 text-yellow-500" : 
                             idx === 1 ? "bg-slate-300/20 text-slate-300" :
                             idx === 2 ? "bg-amber-600/20 text-amber-600" :
@@ -105,29 +105,29 @@ export default function LeaderboardPage() {
                           }`}>
                             {user.username[0].toUpperCase()}
                           </div>
-                          <div>
-                            <div className="text-sm font-bold text-white group-hover:text-brand-teal transition-colors">{user.username}</div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-bold text-white group-hover:text-brand-teal transition-colors truncate max-w-[80px] md:max-w-none">{user.username}</div>
                             <div className="text-[10px] text-slate-500 font-mono">ID: {user.id.toString().padStart(4, '0')}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-4 md:px-8 py-6">
                         <div className="flex items-center gap-2">
                            <TrendingUp className="w-3.5 h-3.5 text-brand-teal" />
                            <span className="text-base font-black text-white">{user.score.toLocaleString()}</span>
                         </div>
                       </td>
-                      <td className="px-8 py-6 text-center">
+                      <td className="hidden md:table-cell px-8 py-6 text-center">
                         <span className="text-sm font-mono font-bold text-slate-300">{user.won_count}</span>
                       </td>
-                      <td className="px-8 py-6 text-right">
+                      <td className="hidden sm:table-cell px-8 py-6 text-right">
                         {user.is_premium ? (
                           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-teal/10 border border-brand-teal/20 text-[10px] font-black text-brand-teal uppercase">
-                            <Crown className="w-3 h-3" /> Institutional
+                            <Crown className="w-3 h-3" /> PRO
                           </div>
                         ) : (
                           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-500 uppercase">
-                            Commercial
+                            TRIAL
                           </div>
                         )}
                       </td>

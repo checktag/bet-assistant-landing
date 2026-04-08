@@ -6,6 +6,7 @@ import { Crown, Clock, LogOut, LayoutDashboard, Settings, BarChart3, Radar } fro
 import Link from "next/link";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import MobileNav from "@/components/dashboard/MobileNav";
+import DashboardOnboarding from "@/components/dashboard/DashboardOnboarding";
 import { signOut } from "@/auth";
 
 export default async function DashboardPage() {
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
       </header>
 
       <AssistantChat accessToken={(session as any).accessToken} />
+      <DashboardOnboarding user={user} accessToken={(session as any).accessToken} />
     </div>
   );
 }

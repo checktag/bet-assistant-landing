@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { LayoutDashboard, BarChart3, Settings, Radar, Crown, ChevronLeft, ChevronRight, LogOut, ArrowRightLeft, Calculator, Zap, Send, CheckCircle2, Loader2, Trophy } from "lucide-react";
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import AuthOverlay from "@/components/auth/AuthOverlay";
 
 interface DashboardSidebarProps {
   isPremium: boolean;
@@ -19,27 +19,16 @@ interface DashboardSidebarProps {
 
 export default function DashboardSidebar({ isPremium, userInitial = "U", userEmail = "User", username, credits = 0, telegramJoined = false }: DashboardSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const pathname = usePathname();
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const router = useRouter();
   const { data: session } = useSession();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
-  const handleVerifyJoin = async () => {
-    if (!(session as any)?.accessToken) return;
-    setIsVerifying(true);
-    try {
-      await axios.post(`${API_URL}/confirm-telegram-join`, {}, {
-        headers: { Authorization: `Bearer ${(session as any).accessToken}` }
-      });
-      setVerificationSuccess(true);
-      // Refresh page to update credits globally
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (err) {
-      alert("Verification failed. Please ensure you have joined the group and linked your Telegram account in Settings.");
-    } finally {
-      setIsVerifying(false);
-    }
+  const handleSignOut = async () => {
+    setIsDisconnecting(true);
+    setTimeout(() => {
+      signOut({ callbackUrl: "/auth/login" });
+    }, 1500);
   };
 
   const navItems = [
@@ -55,6 +44,12 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
   return (
     <aside className={`hidden md:flex border-r border-white/5 bg-[#060913] flex-col p-4 space-y-8 h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
       
+      <AuthOverlay 
+        isVisible={isDisconnecting} 
+        message="Disconnecting Node..." 
+        subMessage="Terminating secure quant link and purging local session data..." 
+      />
+
       {/* Header */}
       <div className={`flex items-center transition-all ${collapsed ? "justify-center" : "justify-between px-2"}`}>
         <div className={`flex items-center ${collapsed ? "" : "gap-3"} overflow-hidden transition-all text-ellipsis`}>
@@ -128,12 +123,10 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
                 <Send className="w-3.5 h-3.5" /> 1. Join Telegram
               </button>
               <button 
-                onClick={handleVerifyJoin}
-                disabled={isVerifying || verificationSuccess}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-[11px] uppercase tracking-wider hover:bg-brand-teal/20 transition-all disabled:opacity-50"
+                onClick={() => router.push("/dashboard?onboard=true")}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-[11px] uppercase tracking-wider hover:bg-brand-teal/20 transition-all"
               >
-                {isVerifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : verificationSuccess ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
-                {verificationSuccess ? "Credits Claimed!" : "2. Claim 1,000 Credits"}
+                <Zap className="w-3.5 h-3.5" /> Claim 1,000 Credits
               </button>
             </div>
           )}
@@ -156,10 +149,9 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
           )}
         </div>
         
-        {/* Sign Out Button */}
         <div className={`mt-4 border-t border-white/5 pt-3 flex justify-center ${collapsed ? "hidden" : "block"}`}>
           <button 
-            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" /> SIGN OUT

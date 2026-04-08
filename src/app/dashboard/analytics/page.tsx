@@ -86,24 +86,24 @@ export default function AnalyticsPage() {
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight mb-1">Analytics</h1>
-            <p className="text-sm text-slate-400">Your full quant edge report — last 30 days.</p>
+            <p className="text-xs md:text-sm text-slate-400">Your full quant edge report — last 30 days.</p>
           </motion.div>
-
+ 
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {statCards.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={loaded ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.06 }}
-                className="p-5 rounded-2xl bg-[#0A0F1C] border border-white/8 flex flex-col gap-3 hover:border-white/15 transition-all">
+                className="p-4 md:p-5 rounded-2xl bg-[#0A0F1C] border border-white/8 flex flex-col gap-3 hover:border-white/15 transition-all">
                 <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">{s.icon}</div>
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/5 flex items-center justify-center scale-90 md:scale-100">{s.icon}</div>
                   {s.trend === "up"
                     ? <ArrowUpRight className="w-4 h-4 text-green-400" />
                     : <ArrowDownRight className="w-4 h-4 text-red-400" />}
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-white">{s.value}</div>
-                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider mt-0.5">{s.label}</div>
-                  <div className="text-[10px] text-slate-600 mt-0.5 italic">{s.sub}</div>
+                  <div className="text-xl md:text-2xl font-black text-white">{s.value}</div>
+                  <div className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-wider mt-0.5">{s.label}</div>
+                  <div className="text-[9px] md:text-[10px] text-slate-600 mt-0.5 italic">{s.sub}</div>
                 </div>
               </motion.div>
             ))}

@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy, Send, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
+import AuthOverlay from "@/components/auth/AuthOverlay";
 
 interface MobileNavProps {
   isPremium: boolean;
@@ -18,26 +19,16 @@ interface MobileNavProps {
 
 export default function MobileNav({ isPremium, userInitial, userEmail, username, credits = 0, telegramJoined = false }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+  const router = useRouter();
 
-  const handleVerifyJoin = async () => {
-    if (!(session as any)?.accessToken) return;
-    setIsVerifying(true);
-    try {
-      await axios.post(`${API_URL}/confirm-telegram-join`, {}, {
-        headers: { Authorization: `Bearer ${(session as any).accessToken}` }
-      });
-      setVerificationSuccess(true);
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (err) {
-      alert("Verification failed. Please ensure you have joined the group and linked your Telegram account in Settings.");
-    } finally {
-      setIsVerifying(false);
-    }
+  const handleSignOut = async () => {
+    setIsDisconnecting(true);
+    setTimeout(() => {
+      signOut({ callbackUrl: "/auth/login" });
+    }, 1500);
   };
 
   const navItems = [
@@ -54,6 +45,11 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
 
   return (
     <div className="md:hidden">
+      <AuthOverlay 
+        isVisible={isDisconnecting} 
+        message="Disconnecting Node..." 
+        subMessage="Terminating mobile quant link and clearing terminal cache..." 
+      />
       {/* Top Bar */}
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#060913] backdrop-blur-xl sticky top-0 z-[100]">
         <div className="flex items-center gap-3">
@@ -120,12 +116,13 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
                   <Send className="w-4 h-4" /> 1. Join Telegram
                 </button>
                 <button 
-                  onClick={handleVerifyJoin}
-                  disabled={isVerifying || verificationSuccess}
-                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-xs uppercase tracking-wider disabled:opacity-50"
+                  onClick={() => {
+                    setIsOpen(false);
+                    router.push("/dashboard?onboard=true");
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-teal/10 border border-brand-teal/30 text-brand-teal font-black text-xs uppercase tracking-wider transition-all"
                 >
-                  {isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : verificationSuccess ? <CheckCircle2 className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
-                  {verificationSuccess ? "Claimed!" : "2. Claim 1,000 Credits"}
+                  <Zap className="w-4 h-4" /> Claim 1,000 Credits
                 </button>
               </div>
             )}
@@ -143,7 +140,7 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
             </div>
             
             <button 
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+              onClick={handleSignOut}
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               <LogOut className="w-4 h-4" /> SIGN OUT
