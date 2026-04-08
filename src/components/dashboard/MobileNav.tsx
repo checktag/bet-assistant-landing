@@ -69,34 +69,47 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
 
       {/* Overlay Menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-[90] bg-[#03060E] pt-20 px-6 flex flex-col animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex-1 space-y-2">
+        <div className="fixed inset-0 z-[90] bg-[#03060E] pt-20 px-6 flex flex-col overflow-y-auto pb-10 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="space-y-2">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-2">Navigation</p>
             {navItems.map((item) => {
-              const isActive = pathname === item.path || (item.path === "/dashboard/tracker" && pathname === "/dashboard" && typeof window !== "undefined" && window.location.search.includes("tab=tracker"));
+              const isActive = pathname === item.path;
               
               return (
                 <Link 
                   key={item.name} 
-                  href={item.path === "/dashboard/tracker" ? "/dashboard?tab=tracker" : item.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all border cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
-                    isActive 
+                  href={item.premiumLock ? "#" : item.path}
+                  onClick={(e) => {
+                    if (item.premiumLock) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setIsOpen(false);
+                  }}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all border ${
+                    item.premiumLock ? "cursor-not-allowed opacity-50 bg-white/[0.02] border-white/5" : "cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  } ${
+                    isActive && !item.premiumLock
                       ? "bg-brand-blue/10 border-brand-blue/30 text-brand-blue" 
-                      : "bg-white/5 border-white/5 text-slate-300"
+                      : !item.premiumLock ? "bg-white/5 border-white/5 text-slate-300" : "text-slate-600"
                   }`}
                 >
-                  <div className={`${isActive ? "text-brand-blue" : "text-slate-400"}`}>
+                  <div className={`${isActive && !item.premiumLock ? "text-brand-blue" : "text-slate-500"}`}>
                     {item.icon}
                   </div>
                   <span className="font-bold flex-1">{item.name}</span>
-                  {item.premiumLock && <Crown className="w-4 h-4 text-yellow-500 opacity-60" />}
+                  {item.premiumLock && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                      <Crown className="w-3 h-3 text-yellow-500" />
+                      <span className="text-[8px] font-black text-yellow-500 tracking-tighter">PRO</span>
+                    </div>
+                  )}
                 </Link>
               );
             })}
           </div>
 
-          <div className="pb-10 space-y-6">
+          <div className="mt-10 mb-8 space-y-6">
             {!telegramJoined && (
               <div className="space-y-3 px-2">
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-teal/20 to-brand-blue/10 border border-brand-teal/20">

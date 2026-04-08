@@ -79,22 +79,39 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
-          const baseClasses = `relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all group overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
-            isActive ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20" : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
+          const isLocked = item.premiumLock;
+          
+          const baseClasses = `relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all group overflow-hidden ${
+            isLocked ? "cursor-not-allowed opacity-30" : "cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+          } ${
+            isActive && !isLocked ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20" : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`;
 
           return (
-            <Link key={item.name} href={item.path} className={baseClasses} title={collapsed ? item.name : undefined}>
-              <div className="shrink-0">{item.icon}</div>
+            <Link 
+              key={item.name} 
+              href={isLocked ? "#" : item.path} 
+              className={baseClasses} 
+              title={collapsed ? (isLocked ? `${item.name} (PRO Required)` : item.name) : undefined}
+              onClick={(e) => {
+                if (isLocked) e.preventDefault();
+              }}
+            >
+              <div className={`shrink-0 ${isActive && !isLocked ? "text-brand-blue" : "text-slate-500"}`}>{item.icon}</div>
               {!collapsed && (
-                <span className={`font-medium tracking-tight whitespace-nowrap flex-1 ${isActive ? "text-brand-blue" : ""}`}>{item.name}</span>
+                <span className={`font-medium tracking-tight whitespace-nowrap flex-1 ${isActive && !isLocked ? "text-brand-blue" : ""}`}>{item.name}</span>
               )}
               
-              {!collapsed && item.premiumLock && (
-                 <Crown className="w-3.5 h-3.5 text-yellow-500 opacity-60 absolute right-4" />
+              {!collapsed && isLocked && (
+                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 absolute right-4">
+                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <span className="text-[8px] font-black text-yellow-500 tracking-tighter">PRO</span>
+                 </div>
               )}
-              {collapsed && item.premiumLock && (
-                 <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-500 rounded-full" />
+              {collapsed && isLocked && (
+                 <div className="absolute top-1 right-1">
+                    <Crown className="w-2.5 h-2.5 text-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]" />
+                 </div>
               )}
             </Link>
           );
