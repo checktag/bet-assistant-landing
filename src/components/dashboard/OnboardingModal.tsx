@@ -129,60 +129,69 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                       </a>
 
                       {/* Step 2: Sync */}
-                      <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
-                        <div className="flex items-center gap-4 mb-4">
+                      <div className="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
+                        <div className="flex items-center gap-4 mb-6">
                            <div className="w-10 h-10 rounded-xl bg-brand-blue/20 flex items-center justify-center text-brand-blue">
                              <ShieldCheck className="w-5 h-5" />
                            </div>
                            <div className="text-left">
                              <p className="text-[10px] font-black text-brand-blue uppercase tracking-widest">Step 02</p>
-                             <p className="text-sm font-bold text-white">Sync Identity (One-Click)</p>
+                             <p className="text-sm font-bold text-white">Identity Handshake</p>
                            </div>
                         </div>
 
-                        {/* Login Widget Container */}
-                        <div className="flex flex-col items-center gap-4 relative min-h-[40px]">
+                        <div className="space-y-4">
                            {syncMode === "widget" ? (
                              <>
-                               {isVerifying ? (
-                                  <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase animate-pulse">
-                                    <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
-                                  </div>
-                               ) : (
-                                  <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
-                               )}
-                               
-                               {!isVerifying && (
+                               {/* Standard Widget */}
+                               <div className="flex flex-col items-center gap-3">
+                                 {isVerifying ? (
+                                    <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase animate-pulse">
+                                      <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
+                                    </div>
+                                 ) : (
+                                    <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
+                                 )}
+                                 
+                                 <div className="flex items-center gap-3 w-full py-2">
+                                   <div className="h-px bg-white/5 flex-1" />
+                                   <span className="text-[8px] font-black text-slate-700 uppercase tracking-widest">OR</span>
+                                   <div className="h-px bg-white/5 flex-1" />
+                                 </div>
+
                                  <button 
                                    onClick={() => setSyncMode("manual")}
-                                   className="text-[9px] font-black text-slate-600 hover:text-brand-blue uppercase tracking-widest transition-colors mt-2"
+                                   className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white font-bold text-[10px] uppercase tracking-widest transition-all"
                                  >
-                                   Not receiving the message? Try Manual Sync
+                                    🚀 Sync via Bot (More Reliable)
                                  </button>
-                               )}
+                               </div>
                              </>
                            ) : (
                              <div className="w-full space-y-4">
+                               <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                                 If the widget shows a 'Server Error', click below to open the bot directly and type **START**.
+                               </p>
                                <a 
                                  href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
                                  target="_blank"
-                                 className="w-full flex items-center justify-center gap-2 py-3 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                 className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.3)]"
                                >
-                                 <Send className="w-4 h-4" /> OPEN TELEGRAM BOT
+                                 <Send className="w-4 h-4" /> START HANDSHAKE IN APP
                                </a>
                                
                                <button 
                                  onClick={() => window.location.reload()}
-                                 className="w-full py-3 bg-white/5 border border-white/10 text-slate-400 font-bold text-xs rounded-xl hover:bg-white/10 transition-all"
+                                 className="w-full py-3 bg-white/10 border border-white/20 text-white font-bold text-xs rounded-xl hover:bg-white/20 transition-all"
                                >
-                                 I'VE CLICKED START - CHECK STATUS
+                                 I'VE CLICKED START - REFRESH
                                </button>
 
                                <button 
                                  onClick={() => setSyncMode("widget")}
                                  className="w-full text-[9px] font-black text-slate-600 hover:text-white uppercase tracking-widest transition-colors"
                                 >
-                                 Back to One-Click Sync
+                                 Return to One-Click Dashboard
                                </button>
                              </div>
                            )}
