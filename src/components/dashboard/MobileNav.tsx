@@ -110,18 +110,21 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
           </div>
 
           <div className="mt-10 mb-8 space-y-6">
+            {/* Persistent Credits Display */}
+            <div className="px-2">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-teal/20 to-brand-blue/10 border border-brand-teal/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-black text-brand-teal uppercase tracking-widest">Available Credits</span>
+                  <Zap className="w-3 h-3 text-brand-teal animate-pulse" />
+                </div>
+                <div className="text-xl font-black text-white flex items-baseline gap-1">
+                  {credits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
+                </div>
+              </div>
+            </div>
+
             {!telegramJoined && (
               <div className="space-y-3 px-2">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-teal/20 to-brand-blue/10 border border-brand-teal/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black text-brand-teal uppercase tracking-widest">Available Credits</span>
-                    <Zap className="w-3 h-3 text-brand-teal animate-pulse" />
-                  </div>
-                  <div className="text-xl font-black text-white flex items-baseline gap-1">
-                    {credits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
-                  </div>
-                </div>
-                
                 <button 
                   onClick={() => window.open("https://t.me/+KKXegSaFc1Y3MTQ0", "_blank")}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-background font-black text-xs uppercase tracking-wider hover:scale-105 transition-all"

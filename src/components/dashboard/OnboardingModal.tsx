@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Send, CheckCircle2, Loader2, X, ShieldCheck, Trophy, Sparkles, AlertCircle } from "lucide-react";
-import TelegramLoginWidget from "./TelegramLoginWidget";
+import { Zap, Send, CheckCircle2, Loader2, X, Sparkles, AlertCircle } from "lucide-react";
 import axios from "axios";
 
 interface OnboardingModalProps {
@@ -15,8 +14,6 @@ interface OnboardingModalProps {
 }
 
 export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode, onSuccess }: OnboardingModalProps) {
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [syncMode, setSyncMode] = useState<"widget" | "manual">("widget");
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [pollingStatus, setPollingStatus] = useState<"idle" | "handshaking" | "verifying">("idle");
@@ -60,37 +57,6 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
     };
   }, [isOpen, isSuccess, accessToken, onSuccess, onClose]);
 
-  const handleAuth = async (user: any) => {
-    setIsVerifying(true);
-    setError(null);
-    
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
-    
-    try {
-      const res = await axios.post(`${API_URL}/confirm-telegram-join`, user, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      
-      if (res.data.status === "success" || res.data.status === "already_claimed") {
-        setIsSuccess(true);
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 2000);
-      }
-    } catch (err: any) {
-      console.error("Verification error:", err);
-      const detail = err.response?.data?.detail;
-      if (detail === "MUST_JOIN_TELEGRAM_FIRST") {
-        setError("CLEARANCE DENIED: You must join the Telegram channel first before syncing your identity.");
-      } else {
-        setError(detail || "An unexpected error occurred during terminal initialization.");
-      }
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -101,7 +67,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+          className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
         />
 
         {/* Modal */}
@@ -109,19 +75,19 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-lg bg-[#0A0F1C] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,1)]"
+          className="relative w-full max-w-lg bg-[#0A0F1C] border border-white/10 rounded-[3rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,1)]"
         >
           {/* Close Button */}
           {!isSuccess && (
             <button 
               onClick={onClose}
-              className="absolute top-6 right-6 p-2 rounded-full bg-white/5 border border-white/10 text-slate-500 hover:text-white transition-all z-20"
+              className="absolute top-8 right-8 p-2 rounded-full bg-white/5 border border-white/10 text-slate-500 hover:text-white transition-all z-20"
             >
               <X className="w-4 h-4" />
             </button>
           )}
 
-          <div className="p-6 md:p-12 relative z-10 flex flex-col items-center text-center">
+          <div className="p-8 md:p-14 relative z-10 flex flex-col items-center text-center">
             <AnimatePresence mode="wait">
               {isSuccess ? (
                 <motion.div 
@@ -130,125 +96,72 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-brand-teal/20 border border-brand-teal/30 flex items-center justify-center text-brand-teal mb-6">
-                    <CheckCircle2 className="w-10 h-10 md:w-12 md:h-12" />
+                  <div className="w-24 h-24 rounded-full bg-brand-teal/20 border border-brand-teal/30 flex items-center justify-center text-brand-teal mb-8">
+                    <CheckCircle2 className="w-12 h-12" />
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Clearance Granted</h2>
-                  <p className="text-brand-teal font-bold uppercase tracking-widest text-[10px] md:text-xs">1,000 Credits Injected</p>
+                  <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Clearance Granted</h2>
+                  <p className="text-brand-teal font-black uppercase tracking-widest text-xs">1,000 Credits Injected</p>
                 </motion.div>
               ) : (
                 <motion.div key="form" className="w-full flex flex-col items-center">
                    {/* Header Icon */}
-                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6 md:mb-8">
-                     <Zap className="w-8 h-8 md:w-10 md:h-10 animate-pulse" />
+                   <div className="w-20 h-20 rounded-[2rem] bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-10">
+                     <Zap className="w-10 h-10 animate-pulse text-brand-blue" />
                    </div>
 
-                   <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight mb-3 md:mb-4">
-                      Initialize <span className="text-gradient">Terminal</span>
+                   <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+                      Direct <span className="text-gradient">Handshake</span>
                    </h2>
                    
-                   <p className="text-slate-400 text-xs md:text-base leading-relaxed mb-8 md:mb-10 max-w-xs">
-                     Unlock your first **1,000 Credits** by joining our official community channel.
+                   <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-10 max-w-xs">
+                     Link your Telegram identity to initialize your terminal and claim **1,000 Credits**.
                    </p>
 
-                   {/* Onboarding Steps */}
-                   <div className="w-full space-y-4 mb-8">
-                      {/* Step 1: Join */}
-                      <a 
-                        href="https://t.me/+KKXegSaFc1Y3MTQ0" 
-                        target="_blank" 
-                        className="flex items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-brand-teal/40 transition-all text-left"
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-brand-teal/20 flex items-center justify-center text-brand-teal">
-                          <Send className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-brand-teal uppercase tracking-widest">Step 01</p>
-                          <p className="text-sm font-bold text-white">Join Official Channel</p>
-                        </div>
-                      </a>
-
-                      {/* Step 2: Sync */}
-                      <div className="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
-                        <div className="flex items-center gap-4 mb-6">
-                           <div className="w-10 h-10 rounded-xl bg-brand-blue/20 flex items-center justify-center text-brand-blue">
-                             <ShieldCheck className="w-5 h-5" />
-                           </div>
-                           <div className="text-left">
-                             <p className="text-[10px] font-black text-brand-blue uppercase tracking-widest">Step 02</p>
-                             <p className="text-sm font-bold text-white">Identity Handshake</p>
-                           </div>
+                   {/* Instruction Card */}
+                   <div className="w-full p-6 md:p-8 rounded-[2rem] bg-white/[0.03] border border-white/10 mb-10">
+                      <div className="space-y-6 text-left">
+                        <div className="flex items-start gap-4">
+                          <div className="w-8 h-8 rounded-lg bg-brand-teal/20 flex items-center justify-center text-brand-teal shrink-0 font-black text-xs">1</div>
+                          <div>
+                            <p className="text-sm font-bold text-white mb-1">Join Community</p>
+                            <p className="text-[11px] text-slate-500 leading-normal">Must be a member of the official channel to gain terminal clearance.</p>
+                            <a href="https://t.me/+KKXegSaFc1Y3MTQ0" target="_blank" className="inline-block mt-3 text-[10px] font-black text-brand-teal uppercase tracking-widest hover:underline transition-all">Join Channel →</a>
+                          </div>
                         </div>
 
-                        <div className="space-y-4">
-                           {syncMode === "widget" ? (
-                             <>
-                               {/* Standard Widget */}
-                               <div className="flex flex-col items-center gap-3">
-                                 {isVerifying ? (
-                                    <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase animate-pulse">
-                                      <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
-                                    </div>
-                                 ) : (
-                                    <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
-                                 )}
-                                 
-                                 <div className="flex items-center gap-3 w-full py-2">
-                                   <div className="h-px bg-white/5 flex-1" />
-                                   <span className="text-[8px] font-black text-slate-700 uppercase tracking-widest">OR</span>
-                                   <div className="h-px bg-white/5 flex-1" />
-                                 </div>
+                        <div className="flex items-start gap-4">
+                          <div className="w-8 h-8 rounded-lg bg-brand-blue/20 flex items-center justify-center text-brand-blue shrink-0 font-black text-xs">2</div>
+                          <div className="w-full">
+                            <p className="text-sm font-bold text-white mb-1">Activate Handshake</p>
+                            <p className="text-[11px] text-slate-500 leading-normal mb-4">Click below to open the bot and press **START** to link your node.</p>
+                            
+                            {pollingStatus !== "idle" && (
+                              <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex items-center gap-2 text-[10px] font-black text-brand-teal uppercase tracking-widest mb-3"
+                              >
+                                <Loader2 className="w-3 h-3 animate-spin" /> 
+                                {pollingStatus === "handshaking" ? "Detecting Handshake..." : "Verifying Membership..."}
+                              </motion.div>
+                            )}
 
-                                 <button 
-                                   onClick={() => setSyncMode("manual")}
-                                   className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white font-bold text-[10px] uppercase tracking-widest transition-all"
-                                 >
-                                    🚀 Sync via Bot (More Reliable)
-                                 </button>
-                               </div>
-                             </>
-                           ) : (
-                             <div className="w-full space-y-4">
-                               <div className="text-center space-y-1">
-                                 <p className="text-[10px] text-slate-400 leading-relaxed">
-                                   If the widget shows a 'Server Error', click below to open the bot directly and type **START**.
-                                 </p>
-                                 {pollingStatus !== "idle" && (
-                                   <motion.div 
-                                     initial={{ opacity: 0 }}
-                                     animate={{ opacity: 1 }}
-                                     className="flex items-center justify-center gap-2 text-[10px] font-black text-brand-teal uppercase tracking-widest mt-2"
-                                   >
-                                     <Loader2 className="w-3 h-3 animate-spin" /> 
-                                     {pollingStatus === "handshaking" ? "Detecting Handshake..." : "Verifying Membership..."}
-                                   </motion.div>
-                                 )}
-                               </div>
-
-                               <a 
-                                 href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
-                                 target="_blank"
-                                 onClick={() => setPollingStatus("handshaking")}
-                                 className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.3)]"
-                               >
-                                 <Send className="w-4 h-4" /> START HANDSHAKE IN APP
-                               </a>
-                               
-                               <button 
-                                 onClick={() => window.location.reload()}
-                                 className="w-full py-3 bg-white/10 border border-white/20 text-white font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-                               >
-                                 <Sparkles className="w-3.5 h-3.5" /> Force Handshaking Status
-                               </button>
-
-                               <button 
-                                 onClick={() => setSyncMode("widget")}
-                                 className="w-full text-[9px] font-black text-slate-600 hover:text-white uppercase tracking-widest transition-colors"
-                                >
-                                 Return to One-Click Dashboard
-                               </button>
-                             </div>
-                           )}
+                            <a 
+                              href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
+                              target="_blank"
+                              onClick={() => setPollingStatus("handshaking")}
+                              className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.3)]"
+                            >
+                              <Send className="w-4 h-4" /> START HANDSHAKE IN APP
+                            </a>
+                            
+                            <button 
+                              onClick={() => window.location.reload()}
+                              className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" /> RE-CALIBRATE STATUS
+                            </button>
+                          </div>
                         </div>
                       </div>
                    </div>
@@ -265,7 +178,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                      </motion.div>
                    )}
 
-                   <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em]">
+                   <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mt-auto">
                       * automated terminal initialization
                    </p>
                 </motion.div>
