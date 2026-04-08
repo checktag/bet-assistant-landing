@@ -19,6 +19,46 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
   const [syncMode, setSyncMode] = useState<"widget" | "manual">("widget");
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [pollingStatus, setPollingStatus] = useState<"idle" | "handshaking" | "verifying">("idle");
+
+  // Neural Polling Logic: Automatically detect handshake completion
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isOpen && !isSuccess) {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+      
+      interval = setInterval(async () => {
+        try {
+          const res = await axios.get(`${API_URL}/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          
+          const userData = res.data;
+          
+          if (userData.telegram_id && !userData.telegram_joined) {
+            setPollingStatus("verifying");
+          }
+
+          if (userData.telegram_joined) {
+            setIsSuccess(true);
+            setPollingStatus("idle");
+            clearInterval(interval);
+            setTimeout(() => {
+              onSuccess();
+              onClose();
+            }, 2500);
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 2500);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isOpen, isSuccess, accessToken, onSuccess, onClose]);
 
   const handleAuth = async (user: any) => {
     setIsVerifying(true);
@@ -169,12 +209,26 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                              </>
                            ) : (
                              <div className="w-full space-y-4">
-                               <p className="text-[10px] text-slate-400 text-center leading-relaxed">
-                                 If the widget shows a 'Server Error', click below to open the bot directly and type **START**.
-                               </p>
+                               <div className="text-center space-y-1">
+                                 <p className="text-[10px] text-slate-400 leading-relaxed">
+                                   If the widget shows a 'Server Error', click below to open the bot directly and type **START**.
+                                 </p>
+                                 {pollingStatus !== "idle" && (
+                                   <motion.div 
+                                     initial={{ opacity: 0 }}
+                                     animate={{ opacity: 1 }}
+                                     className="flex items-center justify-center gap-2 text-[10px] font-black text-brand-teal uppercase tracking-widest mt-2"
+                                   >
+                                     <Loader2 className="w-3 h-3 animate-spin" /> 
+                                     {pollingStatus === "handshaking" ? "Detecting Handshake..." : "Verifying Membership..."}
+                                   </motion.div>
+                                 )}
+                               </div>
+
                                <a 
                                  href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
                                  target="_blank"
+                                 onClick={() => setPollingStatus("handshaking")}
                                  className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.3)]"
                                >
                                  <Send className="w-4 h-4" /> START HANDSHAKE IN APP
@@ -182,9 +236,9 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                                
                                <button 
                                  onClick={() => window.location.reload()}
-                                 className="w-full py-3 bg-white/10 border border-white/20 text-white font-bold text-xs rounded-xl hover:bg-white/20 transition-all"
+                                 className="w-full py-3 bg-white/10 border border-white/20 text-white font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-2"
                                >
-                                 I'VE CLICKED START - REFRESH
+                                 <Sparkles className="w-3.5 h-3.5" /> Force Handshaking Status
                                </button>
 
                                <button 
