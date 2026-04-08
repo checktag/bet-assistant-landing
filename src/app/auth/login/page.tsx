@@ -39,7 +39,18 @@ function LoginForm() {
       });
 
       if (res?.error) {
-        setError(res.error === "Configuration" ? "AUTHENTICATION_UNAVAILABLE: Secure gateway is temporarily offline." : res.error);
+        // Map generic Auth.js errors to user-friendly terminal messages
+        let errorMessage = "CRITICAL_FAILURE: Unexpected identity sync terminal error.";
+        
+        if (res.error === "CredentialsSignin" || res.error === "Credentials") {
+          errorMessage = "Incorrect email or password. Please verify your registry clearance.";
+        } else if (res.error === "Configuration") {
+          errorMessage = "AUTHENTICATION_UNAVAILABLE: Secure gateway is temporarily offline.";
+        } else {
+          errorMessage = res.error;
+        }
+
+        setError(errorMessage);
         setIsLoading(false);
       } else {
         // Success: Let the overlay show for a moment longer for smoother transition
@@ -47,8 +58,8 @@ function LoginForm() {
           router.push("/dashboard");
         }, 1000);
       }
-    } catch (err) {
-      setError("CRITICAL_FAILURE: Unexpected identity sync terminal error.");
+    } catch (err: any) {
+      setError("Incorrect email or password. Please verify your registry clearance.");
       setIsLoading(false);
     }
   };

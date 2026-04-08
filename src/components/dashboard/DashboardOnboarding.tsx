@@ -9,6 +9,7 @@ interface DashboardOnboardingProps {
     credits: number;
     telegram_joined: boolean;
     is_premium: boolean;
+    link_code: string;
   };
   accessToken: string;
 }
@@ -40,6 +41,7 @@ export default function DashboardOnboarding({ user, accessToken }: DashboardOnbo
       isOpen={showModal} 
       onClose={() => setShowModal(false)}
       accessToken={accessToken}
+      linkCode={user.link_code}
       onSuccess={() => {
         // Refresh the page to show new credit balance
         router.refresh();

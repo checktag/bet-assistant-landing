@@ -10,11 +10,13 @@ interface OnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
   accessToken: string;
+  linkCode: string;
   onSuccess: () => void;
 }
 
-export default function OnboardingModal({ isOpen, onClose, accessToken, onSuccess }: OnboardingModalProps) {
+export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode, onSuccess }: OnboardingModalProps) {
   const [isVerifying, setIsVerifying] = useState(false);
+  const [syncMode, setSyncMode] = useState<"widget" | "manual">("widget");
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -139,13 +141,50 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, onSucces
                         </div>
 
                         {/* Login Widget Container */}
-                        <div className="flex justify-center relative min-h-[40px]">
-                           {isVerifying ? (
-                              <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase animate-pulse">
-                                <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
-                              </div>
+                        <div className="flex flex-col items-center gap-4 relative min-h-[40px]">
+                           {syncMode === "widget" ? (
+                             <>
+                               {isVerifying ? (
+                                  <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase animate-pulse">
+                                    <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
+                                  </div>
+                               ) : (
+                                  <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
+                               )}
+                               
+                               {!isVerifying && (
+                                 <button 
+                                   onClick={() => setSyncMode("manual")}
+                                   className="text-[9px] font-black text-slate-600 hover:text-brand-blue uppercase tracking-widest transition-colors mt-2"
+                                 >
+                                   Not receiving the message? Try Manual Sync
+                                 </button>
+                               )}
+                             </>
                            ) : (
-                              <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
+                             <div className="w-full space-y-4">
+                               <a 
+                                 href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
+                                 target="_blank"
+                                 className="w-full flex items-center justify-center gap-2 py-3 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                               >
+                                 <Send className="w-4 h-4" /> OPEN TELEGRAM BOT
+                               </a>
+                               
+                               <button 
+                                 onClick={() => window.location.reload()}
+                                 className="w-full py-3 bg-white/5 border border-white/10 text-slate-400 font-bold text-xs rounded-xl hover:bg-white/10 transition-all"
+                               >
+                                 I'VE CLICKED START - CHECK STATUS
+                               </button>
+
+                               <button 
+                                 onClick={() => setSyncMode("widget")}
+                                 className="w-full text-[9px] font-black text-slate-600 hover:text-white uppercase tracking-widest transition-colors"
+                                >
+                                 Back to One-Click Sync
+                               </button>
+                             </div>
                            )}
                         </div>
                       </div>
