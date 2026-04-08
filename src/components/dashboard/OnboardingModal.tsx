@@ -145,7 +145,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, onSucces
                                 <Loader2 className="w-4 h-4 animate-spin" /> VERIFYING CLEARANCE...
                               </div>
                            ) : (
-                              <TelegramLoginWidget botName="bet_assistant_engine_bot" onAuth={handleAuth} />
+                              <TelegramLoginWidget botName="BetAssistant_AI_bot" onAuth={handleAuth} />
                            )}
                         </div>
                       </div>
