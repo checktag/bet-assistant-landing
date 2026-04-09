@@ -6,7 +6,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import {
   Crown, BellRing, Send, CheckCircle2,
-  Loader2, LinkIcon, Unlink, Lock, AlertCircle
+  Loader2, LinkIcon, Unlink, Lock, AlertCircle, Zap, Sparkles
 } from "lucide-react";
 
 interface SettingsPageClientProps {
@@ -15,6 +15,7 @@ interface SettingsPageClientProps {
     is_premium: boolean;
     telegram_id?: number | null;
     telegram_linked?: boolean;
+    link_code?: string;
     created_at?: string;
   };
   accessToken: string;
@@ -190,90 +191,71 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
             </Section>
           </motion.div>
 
-          {/* Telegram Integration — the star feature */}
+          {/* Telegram Integration — Streamlined */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Section
               title="Telegram Integration"
-              desc="Link your Telegram to receive AI cashout alerts and slip tracker push notifications."
+              desc="Link your identity to authorize AI push notifications and claim trial credits."
             >
               {isLinked ? (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-brand-teal/5 border border-brand-teal/20">
-                    <div className="w-10 h-10 rounded-full bg-brand-teal/20 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-5 h-5 text-brand-teal" />
+                  <div className="relative overflow-hidden p-6 rounded-2xl bg-brand-teal/5 border border-brand-teal/20 group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <Send className="w-16 h-16 text-brand-teal -rotate-12" />
                     </div>
-                    <div>
-                      <div className="text-sm font-bold text-white">Telegram Linked ✅</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
-                        You&apos;ll receive real-time AI push notifications for tracked slips and cashout signals.
+                    
+                    <div className="relative flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-brand-teal/20 flex items-center justify-center text-brand-teal shrink-0 shadow-lg border border-brand-teal/30">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase font-black tracking-[0.2em] text-brand-teal mb-0.5">Integration: ACTIVE</div>
+                        <div className="text-sm font-black text-white">Neural Handshake Synchronized</div>
+                        <div className="text-[11px] text-slate-500 mt-1">ID Clearance: {user.telegram_id || "VERIFIED"}</div>
                       </div>
                     </div>
+
+                    <div className="mt-6 pt-5 border-t border-brand-teal/10 flex items-center justify-between">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Active: Push Notifications & Advisories</p>
+                      <button onClick={handleUnlinkTelegram} className="text-[10px] font-black text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                        <Unlink className="w-3 h-3" /> Disconnect Node
+                      </button>
+                    </div>
                   </div>
-                  <button onClick={handleUnlinkTelegram}
-                    className="flex items-center gap-2 text-xs text-slate-500 hover:text-red-400 transition-colors">
-                    <Unlink className="w-3.5 h-3.5" /> Unlink Telegram
-                  </button>
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {/* Step 1 */}
-                  <div className="p-4 rounded-xl bg-white/3 border border-white/8 space-y-2">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-6 h-6 rounded-full bg-brand-teal/20 border border-brand-teal/30 flex items-center justify-center text-[10px] font-black text-brand-teal">1</div>
-                      <span className="text-xs font-bold text-white">Open the Bet Assistant Telegram bot</span>
+                  <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/8 text-center flex flex-col items-center">
+                    <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6">
+                      <Zap className="w-8 h-8 animate-pulse" />
                     </div>
+                    
+                    <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Initialize Handshake</h4>
+                    <p className="text-[11px] text-slate-400 mb-8 max-w-xs leading-relaxed">
+                      Link your account once to synchronize your **Credits** and enable **AI Push Alerts** across the network.
+                    </p>
+
                     <a
-                      href="https://t.me/BetAssistant_AI_bot"
+                      href={`https://t.me/BetAssistant_AI_bot?start=verify_${user.link_code || ""}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#229ED9] hover:bg-[#1a8ab8] text-white rounded-xl text-xs font-bold transition-all w-fit"
+                      className="w-full flex items-center justify-center gap-3 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.2)]"
                     >
-                      <Send className="w-3.5 h-3.5" />
-                      Open @BetAssistantAI Bot
+                      <Send className="w-4 h-4" /> START HANDSHAKE IN APP
                     </a>
-                    <p className="text-[11px] text-slate-500">Send the bot the command: <code className="text-brand-teal font-mono bg-white/5 px-1.5 py-0.5 rounded">/link</code></p>
+
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" /> RE-CALIBRATE SYNC STATUS
+                    </button>
                   </div>
 
-                  {/* Step 2 */}
-                  <div className="p-4 rounded-xl bg-white/3 border border-white/8 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-brand-teal/20 border border-brand-teal/30 flex items-center justify-center text-[10px] font-black text-brand-teal">2</div>
-                      <span className="text-xs font-bold text-white">Enter your 6-digit link code below</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">The bot will send you a code — paste it here to link your accounts.</p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={telegramCode}
-                        onChange={e => setTelegramCode(e.target.value.toUpperCase())}
-                        placeholder="e.g. TG-4F9X2A"
-                        maxLength={10}
-                        className="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 tracking-widest uppercase"
-                      />
-                      <button
-                        onClick={handleLinkTelegram}
-                        disabled={linkStatus === "loading" || !telegramCode.trim()}
-                        className="px-5 py-3 bg-brand-teal text-background font-black text-xs rounded-xl hover:scale-105 disabled:opacity-50 transition-all flex items-center gap-2 whitespace-nowrap"
-                      >
-                        {linkStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
-                        Link
-                      </button>
-                    </div>
-
-                    {linkMessage && (
-                      <div className={`flex items-start gap-2 text-xs p-3 rounded-lg ${linkStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
-                        {linkStatus === "success"
-                          ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                          : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
-                        {linkMessage}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-3 bg-brand-teal/5 border border-brand-teal/15 rounded-xl flex items-start gap-2">
+                  <div className="p-4 bg-brand-teal/5 border border-brand-teal/15 rounded-xl flex items-start gap-3">
                     <BellRing className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-slate-400">
-                      Once linked, Premium users receive <strong className="text-brand-teal">real-time cashout alerts</strong> when the AI detects a momentum shift on their tracked slips — sent directly to Telegram.
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      One link covers all terminal features. If you already linked via the bot for credits, click <strong>RE-CALIBRATE</strong> to sync your status.
                     </p>
                   </div>
                 </div>
