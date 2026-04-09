@@ -103,12 +103,12 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
         <div className="w-20 h-20 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mb-6">
           <Crown className="w-10 h-10 text-yellow-400" />
         </div>
-        <h3 className="text-xl font-black text-white mb-3">Premium Feature</h3>
+        <h3 className="text-xl font-black text-white mb-3">PRO Feature</h3>
         <p className="text-slate-400 text-sm max-w-xs mb-8">
-          Slip Tracking with live AI advisories and Telegram push notifications is exclusively available to Premium members.
+          Slip Tracking with live AI advisories and Telegram push notifications is exclusively available to PRO operatives.
         </p>
         <a href="/billing" className="px-6 py-3 bg-yellow-400 text-black font-black rounded-xl hover:scale-105 transition-all text-sm uppercase tracking-wider">
-          Upgrade to Premium
+          Upgrade to PRO Clearance
         </a>
       </div>
     );

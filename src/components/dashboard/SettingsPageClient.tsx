@@ -169,7 +169,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
               <Row label="Subscription" desc="Your current plan">
                 {user.is_premium ? (
                   <span className="flex items-center gap-1.5 text-xs font-black text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-3 py-1.5 rounded-full">
-                    <Crown className="w-3 h-3" /> PREMIUM
+                    <Crown className="w-3 h-3" /> PRO CLEARANCE
                   </span>
                 ) : (
                   <div className="flex items-center gap-2">
