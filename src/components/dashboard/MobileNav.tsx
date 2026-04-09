@@ -49,7 +49,7 @@ export default function MobileNav({
         const fresh = res.data;
         setCurrentCredits(fresh.credits);
         setIsPremium(fresh.is_premium);
-        setTelegramJoined(!!(fresh.telegram_id || fresh.telegram_linked));
+        setTelegramJoined(fresh.telegram_linked);
         setUsername(fresh.username);
         
         await update();
@@ -160,7 +160,7 @@ export default function MobileNav({
               </div>
             </div>
 
-            {!telegramJoined && (
+            {(!telegramJoined && currentCredits === 0) && (
               <div className="space-y-3 px-2">
                 <button 
                   onClick={() => window.open("https://t.me/+KKXegSaFc1Y3MTQ0", "_blank")}

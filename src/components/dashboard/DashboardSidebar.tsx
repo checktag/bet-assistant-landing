@@ -50,7 +50,7 @@ export default function DashboardSidebar({
         const fresh = res.data;
         setCurrentCredits(fresh.credits);
         setIsPremium(fresh.is_premium);
-        setTelegramJoined(!!(fresh.telegram_id || fresh.telegram_linked));
+        setTelegramJoined(fresh.telegram_linked);
         setUsername(fresh.username);
         
         // Sync with next-auth session
@@ -170,7 +170,7 @@ export default function DashboardSidebar({
             </div>
           </div>
           
-          {!telegramJoined && (
+          {(!telegramJoined && currentCredits === 0) && (
             <div className="space-y-2">
               <button 
                 onClick={() => window.open("https://t.me/+KKXegSaFc1Y3MTQ0", "_blank")}

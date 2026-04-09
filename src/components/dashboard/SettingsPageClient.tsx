@@ -108,7 +108,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
             setIsLinked(true);
             setLinkStatus("success");
             setLinkMessage("Handshake synchronized automatically via cloud registry.");
-            await update();
+            await update({ user: res.data });
           }
         } catch (e) { /* silent polling */ }
       }, 3000); // 3s Pulse
@@ -129,7 +129,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
         setIsLinked(true);
         setLinkStatus("success");
         setLinkMessage("Identity fusion confirmed! Your terminal is now fully synchronized.");
-        await update();
+        await update({ user: freshUser });
       } else {
         setLinkStatus("error");
         setLinkMessage("Handshake not detected yet. Ensure you have clicked START in the bot.");
@@ -152,7 +152,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       setLinkStatus("success");
       setLinkMessage("Telegram linked successfully! You'll now receive push notifications.");
       setIsLinked(true);
-      await update();
+      await update({ user: { ...user, telegram_linked: true } });
     } catch (err: any) {
       setLinkStatus("error");
       setLinkMessage(err.response?.data?.detail || "Invalid code. Generate a fresh code from the Telegram bot and try again.");
@@ -168,7 +168,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       setLinkStatus("idle");
       setLinkMessage("");
       setTelegramCode("");
-      await update();
+      await update({ user: { ...user, telegram_linked: false, telegram_id: null } });
     } catch {
       // silent
     }

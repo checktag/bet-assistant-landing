@@ -41,8 +41,8 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
             setIsSuccess(true);
             setPollingStatus("idle");
             clearInterval(interval);
-            // Trigger session update to refresh credits in real-time
-            await update();
+            // Trigger session update to persist verified state instantly
+            await update({ user: userData });
             
             setTimeout(() => {
               onSuccess();
