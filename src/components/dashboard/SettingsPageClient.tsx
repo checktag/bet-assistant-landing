@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
@@ -72,13 +73,15 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 }
 
 export default function SettingsPageClient({ user, accessToken }: SettingsPageClientProps) {
+  const { update } = useSession();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   // Telegram linking state
   const [telegramCode, setTelegramCode] = useState("");
   const [linkStatus,   setLinkStatus]   = useState<"idle"|"loading"|"success"|"error">("idle");
   const [linkMessage,  setLinkMessage]  = useState("");
-  const [isLinked,     setIsLinked]     = useState(!!user.telegram_linked);
+  const [isLinked,     setIsLinked]     = useState(!!user.telegram_id);
+  const [isSyncing,    setIsSyncing]    = useState(false);
 
   // Notification prefs
   const [notifScan,   setNotifScan]   = useState(true);
@@ -92,6 +95,33 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
   const [pwStatus,  setPwStatus]    = useState<"idle"|"loading"|"success"|"error">("idle");
   const [pwMessage, setPwMessage]   = useState("");
 
+  const handleSyncStatus = async () => {
+    setIsSyncing(true);
+    setLinkMessage("");
+    try {
+      const res = await axios.get(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      
+      const freshUser = res.data;
+      if (freshUser.telegram_joined || freshUser.telegram_id) {
+        setIsLinked(true);
+        setLinkStatus("success");
+        setLinkMessage("Identity fusion confirmed! Your terminal is now fully synchronized.");
+        // Propagate to global session
+        await update();
+      } else {
+        setLinkStatus("error");
+        setLinkMessage("Handshake not detected yet. Ensure you have clicked START in the bot.");
+      }
+    } catch (err) {
+      setLinkStatus("error");
+      setLinkMessage("Failed to connect to the node. Please try again.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleLinkTelegram = async () => {
     if (!telegramCode.trim()) return;
     setLinkStatus("loading");
@@ -102,6 +132,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       setLinkStatus("success");
       setLinkMessage("Telegram linked successfully! You'll now receive push notifications.");
       setIsLinked(true);
+      await update();
     } catch (err: any) {
       setLinkStatus("error");
       setLinkMessage(err.response?.data?.detail || "Invalid code. Generate a fresh code from the Telegram bot and try again.");
@@ -117,6 +148,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       setLinkStatus("idle");
       setLinkMessage("");
       setTelegramCode("");
+      await update();
     } catch {
       // silent
     }
@@ -245,11 +277,22 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                     </a>
 
                     <button 
-                      onClick={() => window.location.reload()}
-                      className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2"
+                      onClick={handleSyncStatus}
+                      disabled={isSyncing}
+                      className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      <Sparkles className="w-3.5 h-3.5" /> RE-CALIBRATE SYNC STATUS
+                      {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      {isSyncing ? "SYNCING..." : "RE-CALIBRATE SYNC STATUS"}
                     </button>
+
+                    {linkMessage && (
+                      <div className={`mt-4 flex items-start gap-2 text-[10px] p-3 rounded-lg ${linkStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
+                        {linkStatus === "success" 
+                          ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" /> 
+                          : <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />}
+                        {linkMessage}
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-4 bg-brand-teal/5 border border-brand-teal/15 rounded-xl flex items-start gap-3">
