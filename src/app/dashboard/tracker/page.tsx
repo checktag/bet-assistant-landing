@@ -9,22 +9,30 @@ import SlipTracker from "@/components/dashboard/SlipTracker";
 import { Crown, Info, Loader2, Radar, Zap, ShieldCheck, ArrowRightLeft } from "lucide-react";
 
 export default function TrackerPage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   useEffect(() => {
-    if ((session as any)?.accessToken) {
-      axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${(session as any).accessToken}` }
-      })
-      .then(res => setUserData(res.data))
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
-    }
-  }, [session, API_URL]);
+    const initPage = async () => {
+      if ((session as any)?.accessToken) {
+        try {
+          // Force session update on mount to recalibrate PRO status
+          await update();
+          
+          const res = await axios.get(`${API_URL}/me`, {
+            headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+          });
+          setUserData(res.data);
+        } catch (e) {} finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    initPage();
+  }, [session, API_URL, update]);
 
   if (!session) return null;
 

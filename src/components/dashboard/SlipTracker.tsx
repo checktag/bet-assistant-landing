@@ -5,6 +5,8 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Trash2, RefreshCw, Loader2, Bot, Crown, Link as LinkIcon, CheckCircle2, XCircle, DollarSign, Clock } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface TrackedSlip {
   id: number;
@@ -48,6 +50,17 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
   const [newPlatform, setNewPlatform] = useState("sportybet");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const { data: session, update } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    const initPage = async () => {
+      // Force session update on mount to recalibrate PRO status
+      await update();
+      await fetchSlips();
+    };
+    initPage();
+  }, []);
 
   const fetchSlips = async () => {
     try {
@@ -61,8 +74,6 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
       setIsLoading(false);
     }
   };
-
-  useEffect(() => { fetchSlips(); }, []);
 
   const handleAddSlip = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,16 +138,16 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
             <LinkIcon className="w-5 h-5 text-brand-blue" />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-bold text-white">Link Telegram for Push Notifications</div>
+            <div className="text-sm font-bold text-white">PRO Identity: Neural Sync Required</div>
             <div className="text-xs text-slate-400 mt-0.5">
-              Get real-time cashout alerts sent directly to your Telegram when the AI detects a momentum shift.
+              Identity handshake detected as **INACTIVE**. Activate push notifications in settings to receive AI cashout alerts.
             </div>
           </div>
           <Link
             href="/dashboard/settings"
             className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
           >
-            Go to Settings
+            START HANDSHAKE
           </Link>
         </motion.div>
       )}

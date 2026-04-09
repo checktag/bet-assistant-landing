@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -17,12 +17,51 @@ interface DashboardSidebarProps {
   telegramJoined?: boolean;
 }
 
-export default function DashboardSidebar({ isPremium, userInitial = "U", userEmail = "User", username, credits = 0, telegramJoined = false }: DashboardSidebarProps) {
+export default function DashboardSidebar({ 
+  isPremium: initialIsPremium, 
+  userInitial = "U", 
+  userEmail = "User", 
+  username: initialUsername, 
+  credits: initialCredits = 0, 
+  telegramJoined: initialTelegramJoined = false 
+}: DashboardSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
+  
+  // Local reactive state for pulsing
+  const [currentCredits, setCurrentCredits] = useState(initialCredits);
+  const [isPremium, setIsPremium] = useState(initialIsPremium);
+  const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
+  const [username, setUsername] = useState(initialUsername);
+
+  // Global Pulse Check on Navigation
+  useEffect(() => {
+    const pulseCheck = async () => {
+      if (!(session as any)?.accessToken) return;
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+      try {
+        const res = await axios.get(`${API_URL}/me`, {
+          headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+        });
+        const fresh = res.data;
+        setCurrentCredits(fresh.credits);
+        setIsPremium(fresh.is_premium);
+        setTelegramJoined(!!(fresh.telegram_id || fresh.telegram_linked));
+        setUsername(fresh.username);
+        
+        // Sync with next-auth session
+        await update();
+      } catch (e) {
+        console.error("[Pulse] Sync failed", e);
+      }
+    };
+
+    pulseCheck();
+  }, [pathname, (session as any)?.accessToken, update]);
 
   const handleSignOut = async () => {
     setIsDisconnecting(true);
@@ -127,7 +166,7 @@ export default function DashboardSidebar({ isPremium, userInitial = "U", userEma
               <Zap className="w-3 h-3 text-brand-teal animate-pulse" />
             </div>
             <div className="text-2xl font-black text-white flex items-baseline gap-1">
-              {credits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
+              {currentCredits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
             </div>
           </div>
           

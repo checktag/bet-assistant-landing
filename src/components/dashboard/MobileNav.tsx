@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy, Send, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -17,12 +17,49 @@ interface MobileNavProps {
   telegramJoined?: boolean;
 }
 
-export default function MobileNav({ isPremium, userInitial, userEmail, username, credits = 0, telegramJoined = false }: MobileNavProps) {
+export default function MobileNav({ 
+  isPremium: initialIsPremium, 
+  userInitial, 
+  userEmail, 
+  username: initialUsername, 
+  credits: initialCredits = 0, 
+  telegramJoined: initialTelegramJoined = false 
+}: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+
+  // Local reactive state for pulsing
+  const [currentCredits, setCurrentCredits] = useState(initialCredits);
+  const [isPremium, setIsPremium] = useState(initialIsPremium);
+  const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
+  const [username, setUsername] = useState(initialUsername);
+
+  useEffect(() => {
+    const pulseCheck = async () => {
+      if (!(session as any)?.accessToken) return;
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+      try {
+        const res = await axios.get(`${API_URL}/me`, {
+          headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+        });
+        const fresh = res.data;
+        setCurrentCredits(fresh.credits);
+        setIsPremium(fresh.is_premium);
+        setTelegramJoined(!!(fresh.telegram_id || fresh.telegram_linked));
+        setUsername(fresh.username);
+        
+        await update();
+      } catch (e) {
+        console.error("[MobilePulse] Sync failed", e);
+      }
+    };
+
+    pulseCheck();
+  }, [pathname, (session as any)?.accessToken, update]);
 
   const handleSignOut = async () => {
     setIsDisconnecting(true);
@@ -118,7 +155,7 @@ export default function MobileNav({ isPremium, userInitial, userEmail, username,
                   <Zap className="w-3 h-3 text-brand-teal animate-pulse" />
                 </div>
                 <div className="text-xl font-black text-white flex items-baseline gap-1">
-                  {credits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
+                  {currentCredits.toLocaleString()} <span className="text-[10px] text-slate-500 font-bold">QTY</span>
                 </div>
               </div>
             </div>
