@@ -49,7 +49,7 @@ function VerifyEmailContent() {
             <div className="w-20 h-20 rounded-full bg-slate-800/50 border border-white/5 flex items-center justify-center mb-6">
               <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Authenticating Access</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Decrypting Clearance</h1>
             <p className="text-slate-400 text-sm">Please stand by while we verify your cryptographic signature...</p>
           </motion.div>
         )}
@@ -59,7 +59,7 @@ function VerifyEmailContent() {
             <div className="w-20 h-20 rounded-full bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center text-brand-teal mb-6">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Access Granted</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Clearance Granted</h1>
             <p className="text-slate-400 text-sm mb-8">Your terminal access has been securely verified and activated.</p>
             <button
               onClick={() => router.push("/auth/login")}
