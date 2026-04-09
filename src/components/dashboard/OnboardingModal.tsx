@@ -102,7 +102,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                   <div className="w-24 h-24 rounded-full bg-brand-teal/20 border border-brand-teal/30 flex items-center justify-center text-brand-teal mb-8">
                     <CheckCircle2 className="w-12 h-12" />
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Clearance Granted</h2>
+                  <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Access Granted</h2>
                   <p className="text-brand-teal font-black uppercase tracking-widest text-xs">100 Credits Injected</p>
                 </motion.div>
               ) : (
@@ -127,7 +127,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                           <div className="w-8 h-8 rounded-lg bg-brand-teal/20 flex items-center justify-center text-brand-teal shrink-0 font-black text-xs">1</div>
                           <div>
                             <p className="text-sm font-bold text-white mb-1">Join Community</p>
-                            <p className="text-[11px] text-slate-500 leading-normal">Must be a member of the official channel to gain terminal clearance.</p>
+                            <p className="text-[11px] text-slate-500 leading-normal">Must be a member of the official channel to gain terminal access.</p>
                             <a href="https://t.me/+KKXegSaFc1Y3MTQ0" target="_blank" className="inline-block mt-3 text-[10px] font-black text-brand-teal uppercase tracking-widest hover:underline transition-all">Join Channel →</a>
                           </div>
                         </div>
@@ -162,7 +162,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                               onClick={() => window.location.reload()}
                               className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2"
                             >
-                              <Sparkles className="w-3.5 h-3.5" /> RE-CALIBRATE STATUS
+                              <Sparkles className="w-3.5 h-3.5" /> MANUAL RE-SYNC
                             </button>
                           </div>
                         </div>

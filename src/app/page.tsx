@@ -517,7 +517,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-16">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-brand-teal mb-4">From The Community</p>
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">What Real Operators Are Saying</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">What Real Members Are Saying</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

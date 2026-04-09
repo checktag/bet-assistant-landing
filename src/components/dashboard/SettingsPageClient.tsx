@@ -7,8 +7,10 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import {
   Crown, BellRing, Send, CheckCircle2,
-  Loader2, LinkIcon, Unlink, Lock, AlertCircle, Zap, Sparkles
+  Loader2, LinkIcon, Unlink, Lock, AlertCircle, Zap, Sparkles,
+  Wifi, ShieldCheck, Activity
 } from "lucide-react";
+import { useEffect } from "react";
 
 interface SettingsPageClientProps {
   user: {
@@ -52,21 +54,19 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={onToggle}
       aria-checked={on}
       role="switch"
-      className={`relative flex items-center w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${
-        on
+      className={`relative flex items-center w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${on
           ? "bg-brand-teal shadow-[0_0_12px_rgba(0,198,186,0.45)]"
           : "bg-white/10"
-      }`}
+        }`}
     >
       {/* Track border */}
       <span className={`absolute inset-0 rounded-full border transition-all duration-300 ${on ? "border-brand-teal/60" : "border-white/15"}`} />
       {/* Knob */}
       <span
-        className={`absolute w-5 h-5 rounded-full shadow-md transition-all duration-300 ${
-          on
+        className={`absolute w-5 h-5 rounded-full shadow-md transition-all duration-300 ${on
             ? "translate-x-[26px] bg-white"
             : "translate-x-[2px] bg-white/70"
-        }`}
+          }`}
       />
     </button>
   );
@@ -78,22 +78,43 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
 
   // Telegram linking state
   const [telegramCode, setTelegramCode] = useState("");
-  const [linkStatus,   setLinkStatus]   = useState<"idle"|"loading"|"success"|"error">("idle");
-  const [linkMessage,  setLinkMessage]  = useState("");
-  const [isLinked,     setIsLinked]     = useState(!!user.telegram_id);
-  const [isSyncing,    setIsSyncing]    = useState(false);
+  const [linkStatus, setLinkStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [linkMessage, setLinkMessage] = useState("");
+  const [isLinked, setIsLinked] = useState(!!user.telegram_id);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Notification prefs
-  const [notifScan,   setNotifScan]   = useState(true);
-  const [notifSlip,   setNotifSlip]   = useState(true);
-  const [notifPromo,  setNotifPromo]  = useState(false);
+  const [notifScan, setNotifScan] = useState(true);
+  const [notifSlip, setNotifSlip] = useState(true);
+  const [notifPromo, setNotifPromo] = useState(false);
 
   // Change password
-  const [currentPw, setCurrentPw]   = useState("");
-  const [newPw,     setNewPw]       = useState("");
-  const [confirmPw, setConfirmPw]   = useState("");
-  const [pwStatus,  setPwStatus]    = useState<"idle"|"loading"|"success"|"error">("idle");
-  const [pwMessage, setPwMessage]   = useState("");
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [pwMessage, setPwMessage] = useState("");
+
+  // Background Polling for "Zero-Click" Linking
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (!isLinked) {
+      interval = setInterval(async () => {
+        try {
+          const res = await axios.get(`${API_URL}/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          if (res.data.telegram_id || res.data.telegram_linked) {
+            setIsLinked(true);
+            setLinkStatus("success");
+            setLinkMessage("Handshake synchronized automatically via cloud registry.");
+            await update();
+          }
+        } catch (e) { /* silent polling */ }
+      }, 3000); // 3s Pulse
+    }
+    return () => clearInterval(interval);
+  }, [isLinked, API_URL, accessToken, update]);
 
   const handleSyncStatus = async () => {
     setIsSyncing(true);
@@ -102,13 +123,12 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
       const res = await axios.get(`${API_URL}/me`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
-      
+
       const freshUser = res.data;
       if (freshUser.telegram_joined || freshUser.telegram_id) {
         setIsLinked(true);
         setLinkStatus("success");
         setLinkMessage("Identity fusion confirmed! Your terminal is now fully synchronized.");
-        // Propagate to global session
         await update();
       } else {
         setLinkStatus("error");
@@ -183,203 +203,215 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
   return (
     <div className="max-w-2xl mx-auto py-8 md:py-12 px-4 md:px-0 space-y-6 relative z-10">
 
-          {/* Header */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight mb-1">Settings</h1>
-            <p className="text-sm text-slate-400">Manage your account, notifications, and integrations.</p>
-          </motion.div>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight mb-1">Settings</h1>
+        <p className="text-sm text-slate-400">Manage your account, notifications, and integrations.</p>
+      </motion.div>
 
-          {/* Account Info */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <Section title="Account" desc="Your plan and account details">
-              <Row label="Email" desc="Your registered email address">
-                <span className="text-xs font-mono text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
-                  {user.email}
+      {/* Account Info */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <Section title="Account" desc="Your plan and account details">
+          <Row label="Email" desc="Your registered email address">
+            <span className="text-xs font-mono text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+              {user.email}
+            </span>
+          </Row>
+          <div className="h-px bg-white/5" />
+          <Row label="Subscription" desc="Your current plan">
+            {user.is_premium ? (
+              <span className="flex items-center gap-1.5 text-xs font-black text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-3 py-1.5 rounded-full">
+                <Crown className="w-3 h-3" /> PRO
+              </span>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-3 py-1.5 rounded-full">
+                  TRIAL
                 </span>
-              </Row>
-              <div className="h-px bg-white/5" />
-              <Row label="Subscription" desc="Your current plan">
-                {user.is_premium ? (
-                  <span className="flex items-center gap-1.5 text-xs font-black text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-3 py-1.5 rounded-full">
-                    <Crown className="w-3 h-3" /> PRO CLEARANCE
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-xs font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-3 py-1.5 rounded-full">
-                      TRIAL
-                    </span>
-                    <Link href="/billing" className="text-[11px] font-bold text-brand-teal hover:underline">Upgrade →</Link>
-                  </div>
-                )}
-              </Row>
-              {user.created_at && (
-                <>
-                  <div className="h-px bg-white/5" />
-                  <Row label="Member Since" desc="">
-                    <span className="text-xs text-slate-400">{new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
-                  </Row>
-                </>
-              )}
-            </Section>
-          </motion.div>
-
-          {/* Telegram Integration — Streamlined */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Section
-              title="Telegram Integration"
-              desc="Link your identity to authorize AI push notifications and claim trial credits."
-            >
-              {isLinked ? (
-                <div className="space-y-4">
-                  <div className="relative overflow-hidden p-6 rounded-2xl bg-brand-teal/5 border border-brand-teal/20 group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                      <Send className="w-16 h-16 text-brand-teal -rotate-12" />
-                    </div>
-                    
-                    <div className="relative flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-brand-teal/20 flex items-center justify-center text-brand-teal shrink-0 shadow-lg border border-brand-teal/30">
-                        <CheckCircle2 className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase font-black tracking-[0.2em] text-brand-teal mb-0.5">Integration: ACTIVE</div>
-                        <div className="text-sm font-black text-white">Neural Handshake Synchronized</div>
-                        <div className="text-[11px] text-slate-500 mt-1">ID Clearance: {user.telegram_id || "VERIFIED"}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 pt-5 border-t border-brand-teal/10 flex items-center justify-between">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Active: Push Notifications & Advisories</p>
-                      <button onClick={handleUnlinkTelegram} className="text-[10px] font-black text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                        <Unlink className="w-3 h-3" /> Disconnect Node
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-5">
-                  <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/8 text-center flex flex-col items-center">
-                    <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6">
-                      <Zap className="w-8 h-8 animate-pulse" />
-                    </div>
-                    
-                    <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Initialize Handshake</h4>
-                    <p className="text-[11px] text-slate-400 mb-8 max-w-xs leading-relaxed">
-                      Link your account once to synchronize your **Credits** and enable **AI Push Alerts** across the network.
-                    </p>
-
-                    <a
-                      href={`https://t.me/BetAssistant_AI_bot?start=verify_${user.link_code || ""}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-3 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.2)]"
-                    >
-                      <Send className="w-4 h-4" /> START HANDSHAKE IN APP
-                    </a>
-
-                    <button 
-                      onClick={handleSyncStatus}
-                      disabled={isSyncing}
-                      className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      {isSyncing ? "SYNCING..." : "RE-CALIBRATE SYNC STATUS"}
-                    </button>
-
-                    {linkMessage && (
-                      <div className={`mt-4 flex items-start gap-2 text-[10px] p-3 rounded-lg ${linkStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
-                        {linkStatus === "success" 
-                          ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" /> 
-                          : <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />}
-                        {linkMessage}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 bg-brand-teal/5 border border-brand-teal/15 rounded-xl flex items-start gap-3">
-                    <BellRing className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
-                    <p className="text-[10px] text-slate-400 leading-normal">
-                      One link covers all terminal features. If you already linked via the bot for credits, click <strong>RE-CALIBRATE</strong> to sync your status.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </Section>
-          </motion.div>
-
-          {/* Notification Preferences */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
-              <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">
-                <Toggle on={notifScan} onToggle={() => setNotifScan(v => !v)} />
-              </Row>
-              <div className="h-px bg-white/5" />
-              <Row label="Slip Advisory Updates" desc="AI cashout and hold recommendations">
-                <Toggle on={notifSlip} onToggle={() => setNotifSlip(v => !v)} />
-              </Row>
-              <div className="h-px bg-white/5" />
-              <Row label="Promotions & Tips" desc="Weekly edge reports and platform updates">
-                <Toggle on={notifPromo} onToggle={() => setNotifPromo(v => !v)} />
-              </Row>
-
-              {!user.is_premium && (
-                <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/15 flex items-start gap-2 mt-2">
-                  <Crown className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-slate-400">Telegram notifications require a linked account and <strong className="text-yellow-400">Premium</strong> for cashout alerts.</p>
-                </div>
-              )}
-            </Section>
-          </motion.div>
-
-          {/* Change Password */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Section title="Security" desc="Update your password">
-              <form onSubmit={handleChangePassword} className="space-y-3">
-                {[
-                  { label: "Current Password",  value: currentPw, set: setCurrentPw },
-                  { label: "New Password",       value: newPw,     set: setNewPw },
-                  { label: "Confirm Password",   value: confirmPw, set: setConfirmPw },
-                ].map((f, i) => (
-                  <div key={i}>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">{f.label}</label>
-                    <input
-                      type="password"
-                      value={f.value}
-                      onChange={e => f.set(e.target.value)}
-                      className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-brand-teal/50 placeholder:text-slate-600"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                ))}
-
-                {pwMessage && (
-                  <div className={`flex items-start gap-2 text-xs p-3 rounded-lg ${pwStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
-                    {pwStatus === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
-                    {pwMessage}
-                  </div>
-                )}
-
-                <button type="submit" disabled={pwStatus === "loading"}
-                  className="px-5 py-2.5 bg-white/8 hover:bg-white/12 border border-white/10 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 disabled:opacity-50">
-                  {pwStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                  Update Password
-                </button>
-              </form>
-            </Section>
-          </motion.div>
-
-          {/* Danger Zone */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="p-6 rounded-2xl bg-red-500/3 border border-red-500/15 space-y-4">
-              <div>
-                <h3 className="text-sm font-black text-white">Danger Zone</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">These actions cannot be undone.</p>
+                <Link href="/billing" className="text-[11px] font-bold text-brand-teal hover:underline">Upgrade →</Link>
               </div>
-              <button className="text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" /> Delete Account
-              </button>
-            </div>
-          </motion.div>
+            )}
+          </Row>
+          {user.created_at && (
+            <>
+              <div className="h-px bg-white/5" />
+              <Row label="Member Since" desc="">
+                <span className="text-xs text-slate-400">{new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+              </Row>
+            </>
+          )}
+        </Section>
+      </motion.div>
 
+      {/* Neural Telegram Integration */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Section
+          title="Neural Integration"
+          desc="Synchronize your identity to authorize AI push notifications and automated credit refills."
+        >
+          {isLinked ? (
+            <div className="space-y-4">
+              <div className="relative overflow-hidden p-6 rounded-2xl bg-brand-teal/5 border border-brand-teal/20 group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Send className="w-16 h-16 text-brand-teal -rotate-12" />
+                </div>
+
+                <div className="relative flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-teal/20 flex items-center justify-center text-brand-teal shrink-0 shadow-lg border border-brand-teal/30">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase font-black tracking-[0.2em] text-brand-teal mb-0.5 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+                       Integration: ACTIVE
+                    </div>
+                    <div className="text-sm font-black text-white">Neural Handshake Synchronized</div>
+                    <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-wider font-mono">Identity Status: {user.telegram_id || "VERIFIED"}</div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-5 border-t border-brand-teal/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-brand-teal/60" />
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Push Alerts & AI Advisories Active</p>
+                  </div>
+                  <button onClick={handleUnlinkTelegram} className="text-[10px] font-black text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5 self-start">
+                    <Unlink className="w-3 h-3" /> Disconnect Node
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/8 text-center flex flex-col items-center relative overflow-hidden">
+                {/* Polling Indicator */}
+                <div className="absolute top-4 right-4 flex items-center gap-2 px-2 py-1 rounded-full bg-white/5 border border-white/5">
+                  <Activity className="w-3 h-3 text-brand-blue animate-pulse" />
+                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Searching Registry...</span>
+                </div>
+
+                <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6 shadow-[0_0_30px_rgba(0,113,206,0.1)]">
+                  <Zap className="w-8 h-8 animate-pulse" />
+                </div>
+                
+                <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Initialize Handshake</h4>
+                <p className="text-[11px] text-slate-400 mb-8 max-w-xs leading-relaxed">
+                  Press **START** on the bot to link your account. Your **Credits** and **AI Push Alerts** will synchronize automatically once detected.
+                </p>
+
+                <a
+                  href={`https://t.me/BetAssistant_AI_bot?start=verify_${user.link_code || ""}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.2)]"
+                >
+                  <Send className="w-4 h-4" /> START HANDSHAKE IN BOT
+                </a>
+
+                <button
+                  onClick={handleSyncStatus}
+                  disabled={isSyncing}
+                  className="w-full mt-3 py-3 bg-white/5 border border-white/10 text-slate-500 hover:text-white font-black text-[9px] uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5" />}
+                  {isSyncing ? "SYNCING..." : "FORCED RE-SYNC"}
+                </button>
+
+                {linkMessage && (
+                  <div className={`mt-4 flex items-start gap-2 text-[10px] p-3 rounded-lg w-full text-left ${linkStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
+                    {linkStatus === "success"
+                      ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      : <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />}
+                    {linkMessage}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 bg-brand-teal/5 border border-brand-teal/15 rounded-2xl flex items-start gap-3">
+                <ShieldCheck className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Our cloud registry polls your status every 3 seconds. Once you interact with the bot, this terminal will synchronize **automatically**.
+                </p>
+              </div>
+            </div>
+          )}
+        </Section>
+      </motion.div>
+
+      {/* Notification Preferences */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
+          <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">
+            <Toggle on={notifScan} onToggle={() => setNotifScan(v => !v)} />
+          </Row>
+          <div className="h-px bg-white/5" />
+          <Row label="Slip Advisory Updates" desc="AI cashout and hold recommendations">
+            <Toggle on={notifSlip} onToggle={() => setNotifSlip(v => !v)} />
+          </Row>
+          <div className="h-px bg-white/5" />
+          <Row label="Promotions & Tips" desc="Weekly edge reports and platform updates">
+            <Toggle on={notifPromo} onToggle={() => setNotifPromo(v => !v)} />
+          </Row>
+
+          {!user.is_premium && (
+            <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/15 flex items-start gap-2 mt-2">
+              <Crown className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] text-slate-400">Telegram notifications require a linked account and <strong className="text-yellow-400">Premium</strong> for cashout alerts.</p>
+            </div>
+          )}
+        </Section>
+      </motion.div>
+
+      {/* Change Password */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <Section title="Security" desc="Update your password">
+          <form onSubmit={handleChangePassword} className="space-y-3">
+            {[
+              { label: "Current Password", value: currentPw, set: setCurrentPw },
+              { label: "New Password", value: newPw, set: setNewPw },
+              { label: "Confirm Password", value: confirmPw, set: setConfirmPw },
+            ].map((f, i) => (
+              <div key={i}>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">{f.label}</label>
+                <input
+                  type="password"
+                  value={f.value}
+                  onChange={e => f.set(e.target.value)}
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-brand-teal/50 placeholder:text-slate-600"
+                  placeholder="••••••••"
+                />
+              </div>
+            ))}
+
+            {pwMessage && (
+              <div className={`flex items-start gap-2 text-xs p-3 rounded-lg ${pwStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
+                {pwStatus === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+                {pwMessage}
+              </div>
+            )}
+
+            <button type="submit" disabled={pwStatus === "loading"}
+              className="px-5 py-2.5 bg-white/8 hover:bg-white/12 border border-white/10 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 disabled:opacity-50">
+              {pwStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+              Update Password
+            </button>
+          </form>
+        </Section>
+      </motion.div>
+
+      {/* Danger Zone */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <div className="p-6 rounded-2xl bg-red-500/3 border border-red-500/15 space-y-4">
+          <div>
+            <h3 className="text-sm font-black text-white">Danger Zone</h3>
+            <p className="text-[11px] text-slate-500 mt-0.5">These actions cannot be undone.</p>
+          </div>
+          <button className="text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" /> Delete Account
+          </button>
         </div>
+      </motion.div>
+
+    </div>
   );
 }

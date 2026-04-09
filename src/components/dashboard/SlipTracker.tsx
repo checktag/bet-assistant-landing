@@ -25,10 +25,10 @@ interface SlipTrackerProps {
 }
 
 const statusConfig = {
-  active:    { label: "Active",      color: "text-brand-teal",  bg: "bg-brand-teal/10",  border: "border-brand-teal/20" },
-  won:       { label: "Won ✅",      color: "text-green-400",   bg: "bg-green-400/10",   border: "border-green-400/20" },
-  lost:      { label: "Lost ❌",     color: "text-red-400",     bg: "bg-red-400/10",     border: "border-red-400/20" },
-  cashedout: { label: "Cashed Out 💰",color: "text-yellow-400", bg: "bg-yellow-400/10",  border: "border-yellow-400/20" },
+  active: { label: "Active", color: "text-brand-teal", bg: "bg-brand-teal/10", border: "border-brand-teal/20" },
+  won: { label: "Won ✅", color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" },
+  lost: { label: "Lost ❌", color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20" },
+  cashedout: { label: "Cashed Out 💰", color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
 };
 
 const platformEmoji: Record<string, string> = {
@@ -114,12 +114,12 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
         <div className="w-20 h-20 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mb-6">
           <Crown className="w-10 h-10 text-yellow-400" />
         </div>
-        <h3 className="text-xl font-black text-white mb-3">PRO Feature</h3>
+        <h3 className="text-xl font-black text-white mb-3">Premium Feature</h3>
         <p className="text-slate-400 text-sm max-w-xs mb-8">
-          Slip Tracking with live AI advisories and Telegram push notifications is exclusively available to PRO operatives.
+          Slip Tracking with live AI advisories and Telegram push notifications is exclusively available to Premium members.
         </p>
         <a href="/billing" className="px-6 py-3 bg-yellow-400 text-black font-black rounded-xl hover:scale-105 transition-all text-sm uppercase tracking-wider">
-          Upgrade to PRO Clearance
+          Upgrade to Premium
         </a>
       </div>
     );

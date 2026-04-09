@@ -157,7 +157,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "👋 **Welcome back, Operative.**\nYour Quant Terminal is active. Type a command or click **QUICK ACTIONS** to begin scanning.",
+      content: "👋 **Welcome back, Pro member.**\nYour Quant Terminal is active. Type a command or click **QUICK ACTIONS** to begin scanning.",
     }
   ]);
   const [input, setInput] = useState("");
