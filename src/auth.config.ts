@@ -6,7 +6,9 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-      if (isOnDashboard) {
+      const isOnPremiumPro = nextUrl.pathname.startsWith("/premiumpro");
+      
+      if (isOnDashboard || isOnPremiumPro) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
       }
