@@ -243,6 +243,33 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
         </Section>
       </motion.div>
 
+      {/* Ref & Earn */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+        <Section title="Ref & Earn" desc="Share your referral link. You earn +50 credits for every friend who signs up — they get +100.">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-3 font-mono text-xs text-brand-teal truncate">
+                {typeof window !== "undefined"
+                  ? `${window.location.origin}/auth/signup?ref=${user.link_code ?? "..."}`
+                  : `https://betassistant.io/auth/signup?ref=${user.link_code ?? "..."}`}
+              </div>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/auth/signup?ref=${user.link_code}`;
+                  navigator.clipboard.writeText(url);
+                }}
+                className="shrink-0 px-4 py-3 bg-brand-teal/10 border border-brand-teal/20 text-brand-teal text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-brand-teal/20 transition-all"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Credits are added automatically once your referred friend verifies their email. Track your credits balance above.
+            </p>
+          </div>
+        </Section>
+      </motion.div>
+
       {/* Neural Telegram Integration */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Section

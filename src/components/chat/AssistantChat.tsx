@@ -34,6 +34,7 @@ interface Message {
 
 interface AssistantChatProps {
   accessToken: string;
+  modelVersion?: string;
 }
 
 // Plain-English Glossary Card shown on scan/slip results
@@ -151,7 +152,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
   );
 };
 
-export default function AssistantChat({ accessToken }: AssistantChatProps) {
+export default function AssistantChat({ accessToken, modelVersion }: AssistantChatProps) {
   const { update } = useSession();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
   const [messages, setMessages] = useState<Message[]>([
@@ -242,7 +243,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
         const parts = userMsg.split(" ");
         const platform = parts[1] || "sportybet";
         const code = parts[2] || "";
-        const res = await axios.post(`${API_URL}/check-slip`, { platform, code, history: chatHistory }, {
+        const res = await axios.post(`${API_URL}/check-slip`, { platform, code, history: chatHistory, model_version: modelVersion }, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         setMessages(prev => [...prev, {
@@ -255,7 +256,7 @@ export default function AssistantChat({ accessToken }: AssistantChatProps) {
         // Sync Credits Pulse
         await update();
       } else {
-        const res = await axios.post(`${API_URL}/chat`, { message: userMsg, history: chatHistory }, {
+        const res = await axios.post(`${API_URL}/chat`, { message: userMsg, history: chatHistory, model_version: modelVersion }, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         setMessages(prev => [...prev, { role: "assistant", content: res.data.response }]);

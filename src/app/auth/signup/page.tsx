@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck, Gift } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -15,7 +15,14 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [refCode, setRefCode] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setRefCode(ref);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +40,8 @@ export default function SignupPage() {
     try {
       const res = await axios.post(`${API_URL}/signup`, {
         email,
-        password
+        password,
+        ...(refCode ? { ref: refCode } : {})
       });
 
       if (res.status === 200) {
@@ -101,6 +109,15 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Referral bonus banner */}
+              {refCode && (
+                <div className="p-3 rounded-xl bg-brand-teal/10 border border-brand-teal/20 flex items-center gap-3">
+                  <Gift className="w-4 h-4 text-brand-teal shrink-0" />
+                  <p className="text-[10px] text-brand-teal font-bold leading-snug">
+                    You were referred! Sign up to receive <span className="text-white">+100 free credits</span> — and your referrer gets bonus credits too.
+                  </p>
+                </div>
+              )}
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 ml-4">Registry Email</label>
                 <div className="relative">
