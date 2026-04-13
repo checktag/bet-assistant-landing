@@ -16,6 +16,7 @@ export default async function SettingsPage() {
         telegram_linked: !!user.telegram_linked,
         telegram_id:     user.telegram_id ?? null,
         link_code:       user.link_code ?? null,
+        total_referrals: user.total_referrals ?? 0,
         created_at:      user.created_at ?? null,
       }}
       accessToken={(session as any).accessToken ?? ""}

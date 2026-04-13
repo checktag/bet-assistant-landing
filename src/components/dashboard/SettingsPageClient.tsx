@@ -56,8 +56,8 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       aria-checked={on}
       role="switch"
       className={`relative flex items-center w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${on
-          ? "bg-brand-teal shadow-[0_0_12px_rgba(0,198,186,0.45)]"
-          : "bg-white/10"
+        ? "bg-brand-teal shadow-[0_0_12px_rgba(0,198,186,0.45)]"
+        : "bg-white/10"
         }`}
     >
       {/* Track border */}
@@ -65,8 +65,8 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       {/* Knob */}
       <span
         className={`absolute w-5 h-5 rounded-full shadow-md transition-all duration-300 ${on
-            ? "translate-x-[26px] bg-white"
-            : "translate-x-[2px] bg-white/70"
+          ? "translate-x-[26px] bg-white"
+          : "translate-x-[2px] bg-white/70"
           }`}
       />
     </button>
@@ -290,8 +290,8 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                   </div>
                   <div>
                     <div className="text-[10px] uppercase font-black tracking-[0.2em] text-brand-teal mb-0.5 flex items-center gap-2">
-                       <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
-                       Integration: ACTIVE
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+                      Integration: ACTIVE
                     </div>
                     <div className="text-sm font-black text-white">Neural Handshake Synchronized</div>
                     <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-wider font-mono">Identity Status: {user.telegram_id || "VERIFIED"}</div>
@@ -321,7 +321,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                 <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6 shadow-[0_0_30px_rgba(0,113,206,0.1)]">
                   <Zap className="w-8 h-8 animate-pulse" />
                 </div>
-                
+
                 <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2">Initialize Handshake</h4>
                 <p className="text-[11px] text-slate-400 mb-8 max-w-xs leading-relaxed">
                   Press **START** on the bot to link your account. Your **Credits** and **AI Push Alerts** will synchronize automatically once detected.
@@ -364,11 +364,12 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
             </div>
           )}
         </Section>
-        </Section>
+      </motion.div>
 
-        {/* --- Referral Program --- */}
-        <Section 
-          title="Referral Program" 
+      {/* --- Referral Program --- */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+        <Section
+          title="Referral Program"
           desc="Recruit new operatives and earn terminal credits. Bonuses are issued after your referrals verify their identity."
         >
           <div className="p-4 rounded-xl bg-brand-blue/5 border border-brand-blue/10 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -381,14 +382,14 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                 <div className="text-2xl font-black text-white">{user.total_referrals || 0}</div>
               </div>
             </div>
-            
+
             <div className="w-full md:w-auto flex flex-col gap-2">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Your Registry Code</span>
               <div className="flex items-center gap-2">
                 <code className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-brand-teal font-mono font-bold text-sm select-all">
                   {user.link_code || "REGEN_REQUIRED"}
                 </code>
-                <button 
+                <button
                   onClick={() => {
                     navigator.clipboard.writeText(user.link_code || "");
                     // Simple alert for feedback
@@ -402,7 +403,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
             <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
               <div className="text-[10px] font-black text-brand-teal uppercase tracking-tighter mb-1">Operative Bonus</div>
@@ -414,80 +415,81 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
             </div>
           </div>
         </Section>
+      </motion.div>
 
         {/* --- Platform Performance --- */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
-          <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">
-            <Toggle on={notifScan} onToggle={() => setNotifScan(v => !v)} />
-          </Row>
-          <div className="h-px bg-white/5" />
-          <Row label="Slip Advisory Updates" desc="AI cashout and hold recommendations">
-            <Toggle on={notifSlip} onToggle={() => setNotifSlip(v => !v)} />
-          </Row>
-          <div className="h-px bg-white/5" />
-          <Row label="Promotions & Tips" desc="Weekly edge reports and platform updates">
-            <Toggle on={notifPromo} onToggle={() => setNotifPromo(v => !v)} />
-          </Row>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
+            <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">
+              <Toggle on={notifScan} onToggle={() => setNotifScan(v => !v)} />
+            </Row>
+            <div className="h-px bg-white/5" />
+            <Row label="Slip Advisory Updates" desc="AI cashout and hold recommendations">
+              <Toggle on={notifSlip} onToggle={() => setNotifSlip(v => !v)} />
+            </Row>
+            <div className="h-px bg-white/5" />
+            <Row label="Promotions & Tips" desc="Weekly edge reports and platform updates">
+              <Toggle on={notifPromo} onToggle={() => setNotifPromo(v => !v)} />
+            </Row>
 
-          {!user.is_premium && (
-            <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/15 flex items-start gap-2 mt-2">
-              <Crown className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-slate-400">Telegram notifications require a linked account and <strong className="text-yellow-400">Premium</strong> for cashout alerts.</p>
-            </div>
-          )}
-        </Section>
-      </motion.div>
-
-      {/* Change Password */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <Section title="Security" desc="Update your password">
-          <form onSubmit={handleChangePassword} className="space-y-3">
-            {[
-              { label: "Current Password", value: currentPw, set: setCurrentPw },
-              { label: "New Password", value: newPw, set: setNewPw },
-              { label: "Confirm Password", value: confirmPw, set: setConfirmPw },
-            ].map((f, i) => (
-              <div key={i}>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">{f.label}</label>
-                <input
-                  type="password"
-                  value={f.value}
-                  onChange={e => f.set(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-brand-teal/50 placeholder:text-slate-600"
-                  placeholder="••••••••"
-                />
-              </div>
-            ))}
-
-            {pwMessage && (
-              <div className={`flex items-start gap-2 text-xs p-3 rounded-lg ${pwStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
-                {pwStatus === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
-                {pwMessage}
+            {!user.is_premium && (
+              <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/15 flex items-start gap-2 mt-2">
+                <Crown className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-400">Telegram notifications require a linked account and <strong className="text-yellow-400">Premium</strong> for cashout alerts.</p>
               </div>
             )}
+          </Section>
+        </motion.div>
 
-            <button type="submit" disabled={pwStatus === "loading"}
-              className="px-5 py-2.5 bg-white/8 hover:bg-white/12 border border-white/10 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 disabled:opacity-50">
-              {pwStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-              Update Password
+        {/* Change Password */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Section title="Security" desc="Update your password">
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              {[
+                { label: "Current Password", value: currentPw, set: setCurrentPw },
+                { label: "New Password", value: newPw, set: setNewPw },
+                { label: "Confirm Password", value: confirmPw, set: setConfirmPw },
+              ].map((f, i) => (
+                <div key={i}>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1.5">{f.label}</label>
+                  <input
+                    type="password"
+                    value={f.value}
+                    onChange={e => f.set(e.target.value)}
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-brand-teal/50 placeholder:text-slate-600"
+                    placeholder="••••••••"
+                  />
+                </div>
+              ))}
+
+              {pwMessage && (
+                <div className={`flex items-start gap-2 text-xs p-3 rounded-lg ${pwStatus === "success" ? "bg-green-400/10 text-green-400 border border-green-400/20" : "bg-red-400/10 text-red-400 border border-red-400/20"}`}>
+                  {pwStatus === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+                  {pwMessage}
+                </div>
+              )}
+
+              <button type="submit" disabled={pwStatus === "loading"}
+                className="px-5 py-2.5 bg-white/8 hover:bg-white/12 border border-white/10 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 disabled:opacity-50">
+                {pwStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                Update Password
+              </button>
+            </form>
+          </Section>
+        </motion.div>
+
+        {/* Danger Zone */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <div className="p-6 rounded-2xl bg-red-500/3 border border-red-500/15 space-y-4">
+            <div>
+              <h3 className="text-sm font-black text-white">Danger Zone</h3>
+              <p className="text-[11px] text-slate-500 mt-0.5">These actions cannot be undone.</p>
+            </div>
+            <button className="text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" /> Delete Account
             </button>
-          </form>
-        </Section>
-      </motion.div>
-
-      {/* Danger Zone */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <div className="p-6 rounded-2xl bg-red-500/3 border border-red-500/15 space-y-4">
-          <div>
-            <h3 className="text-sm font-black text-white">Danger Zone</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">These actions cannot be undone.</p>
           </div>
-          <button className="text-xs font-bold text-red-400/70 hover:text-red-400 transition-colors flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" /> Delete Account
-          </button>
-        </div>
-      </motion.div>
+        </motion.div>
 
     </div>
   );
