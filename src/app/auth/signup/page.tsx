@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Loader2, Mail, Lock, Bot, ShieldCheck, Gift } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Lock, ShieldCheck, Gift } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import AuthOverlay from "@/components/auth/AuthOverlay";
 
-export default function SignupPage() {
+// Inner component that uses useSearchParams — must be wrapped in Suspense
+function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -55,16 +56,13 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
-      
+    <>
       <AuthOverlay 
         isVisible={isLoading} 
         message="Deploying Agent Node..." 
         subMessage="Initializing neural security clearance and establishing encrypted link..." 
       />
 
-      <div className="absolute top-[-10%] right-[-15%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[140px] rounded-full pointer-events-none" />
-      
       <AnimatePresence mode="wait">
         {isSuccess ? (
           <motion.div 
@@ -204,6 +202,23 @@ export default function SignupPage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  );
+}
+
+// Default export wraps the form in Suspense to satisfy Next.js prerender requirements
+export default function SignupPage() {
+  return (
+    <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-[-10%] right-[-15%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[140px] rounded-full pointer-events-none" />
+      <Suspense fallback={
+        <div className="flex items-center justify-center gap-3 text-slate-500">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm font-mono uppercase tracking-widest">Initializing...</span>
+        </div>
+      }>
+        <SignupForm />
+      </Suspense>
     </main>
   );
 }
