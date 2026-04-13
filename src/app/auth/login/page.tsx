@@ -39,10 +39,14 @@ function LoginForm() {
       });
 
       if (res?.error) {
-        // Map generic Auth.js errors to user-friendly terminal messages
+        // Map backend detail error to user-friendly terminal messages
         let errorMessage = "CRITICAL_FAILURE: Unexpected identity sync terminal error.";
         
-        if (res.error === "CredentialsSignin" || res.error === "Credentials") {
+        if (res.error.includes("AUTH_ERROR")) {
+          errorMessage = res.error.replace("AUTH_ERROR: ", "");
+        } else if (res.error.includes("VERIFICATION_REQUIRED")) {
+          errorMessage = res.error.replace("VERIFICATION_REQUIRED: ", "");
+        } else if (res.error === "CredentialsSignin" || res.error === "Credentials") {
           errorMessage = "Incorrect email or password. Please verify your registry clearance.";
         } else if (res.error === "Configuration") {
           errorMessage = "AUTHENTICATION_UNAVAILABLE: Secure gateway is temporarily offline.";

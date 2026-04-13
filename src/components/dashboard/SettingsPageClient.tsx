@@ -19,6 +19,7 @@ interface SettingsPageClientProps {
     telegram_id?: number | null;
     telegram_linked?: boolean;
     link_code?: string;
+    total_referrals?: number;
     created_at?: string;
   };
   accessToken: string;
@@ -363,9 +364,58 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
             </div>
           )}
         </Section>
-      </motion.div>
+        </Section>
 
-      {/* Notification Preferences */}
+        {/* --- Referral Program --- */}
+        <Section 
+          title="Referral Program" 
+          desc="Recruit new operatives and earn terminal credits. Bonuses are issued after your referrals verify their identity."
+        >
+          <div className="p-4 rounded-xl bg-brand-blue/5 border border-brand-blue/10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue border border-brand-blue/20">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-xs font-black text-slate-500 uppercase tracking-widest">Active Operatives</div>
+                <div className="text-2xl font-black text-white">{user.total_referrals || 0}</div>
+              </div>
+            </div>
+            
+            <div className="w-full md:w-auto flex flex-col gap-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Your Registry Code</span>
+              <div className="flex items-center gap-2">
+                <code className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-brand-teal font-mono font-bold text-sm select-all">
+                  {user.link_code || "REGEN_REQUIRED"}
+                </code>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(user.link_code || "");
+                    // Simple alert for feedback
+                    alert("Registry code copied to clipboard.");
+                  }}
+                  className="p-2 rounded-lg bg-brand-teal text-background hover:scale-110 active:scale-95 transition-all"
+                  title="Copy Code"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
+              <div className="text-[10px] font-black text-brand-teal uppercase tracking-tighter mb-1">Operative Bonus</div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">Referrals receive <span className="text-white font-bold">100 Credits</span> once they sync with Telegram.</p>
+            </div>
+            <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
+              <div className="text-[10px] font-black text-brand-blue uppercase tracking-tighter mb-1">Recruitment Bounty</div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">You receive <span className="text-white font-bold">1 Credit</span> for every operative that verifies their email.</p>
+            </div>
+          </div>
+        </Section>
+
+        {/* --- Platform Performance --- */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
           <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">

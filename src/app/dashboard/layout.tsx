@@ -26,6 +26,7 @@ export default async function DashboardLayout({
         userEmail={user.email} 
         username={user.username}
         credits={user.credits}
+        totalReferrals={user.total_referrals}
         telegramJoined={user.telegram_joined}
       />
 
@@ -35,6 +36,7 @@ export default async function DashboardLayout({
         username={user.username}
         userInitial={userInitial} 
         credits={user.credits}
+        totalReferrals={user.total_referrals}
         telegramJoined={user.telegram_joined}
       />
 

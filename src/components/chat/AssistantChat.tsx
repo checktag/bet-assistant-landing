@@ -37,6 +37,28 @@ interface AssistantChatProps {
   modelVersion?: string;
 }
 
+const LinkingRequiredOverlay = ({ onAction }: { onAction: () => void }) => (
+  <motion.div 
+    initial={{ opacity: 0 }} 
+    animate={{ opacity: 1 }} 
+    className="absolute inset-0 z-50 bg-[#03060E]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
+  >
+    <div className="w-20 h-20 rounded-3xl bg-brand-blue/10 flex items-center justify-center text-brand-blue border border-brand-blue/20 mb-6 shadow-[0_0_40px_rgba(45,108,223,0.15)]">
+      <Send className="w-10 h-10" />
+    </div>
+    <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Identity Sync Required</h3>
+    <p className="text-sm text-slate-400 mb-8 max-w-xs leading-relaxed">
+      Institutional clearance requires a synced Telegram identity. Link your account to unlock terminal analysis.
+    </p>
+    <button 
+      onClick={onAction}
+      className="px-8 py-4 rounded-xl bg-brand-teal text-background font-black text-xs uppercase tracking-widest hover:scale-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(0,198,186,0.3)]"
+    >
+      Link Telegram Now
+    </button>
+  </motion.div>
+);
+
 // Plain-English Glossary Card shown on scan/slip results
 const MetricGlossary = () => (
   <div className="flex flex-wrap gap-3 mb-3 p-3 rounded-xl border border-white/5 bg-black/20">
@@ -152,9 +174,9 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
   );
 };
 
-export default function AssistantChat({ accessToken, modelVersion }: AssistantChatProps) {
+export default function AssistantChat({ accessToken, modelVersion = "v2" }: AssistantChatProps) {
   const { update } = useSession();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+  const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -164,6 +186,7 @@ export default function AssistantChat({ accessToken, modelVersion }: AssistantCh
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLinkRequired, setShowLinkRequired] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -272,10 +295,15 @@ export default function AssistantChat({ accessToken, modelVersion }: AssistantCh
           type: "onboarding" //Reuse onboarding style for prominent display
         }]);
       } else {
-        const errorMsg = error.response?.data?.detail === "TRIAL_EXPIRED"
-          ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
-          : "⚠️ Sorry, I encountered an error processing that request.";
-        setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+        const detail = error.response?.data?.detail;
+        if (detail === "TELEGRAM_LINK_REQUIRED") {
+          setShowLinkRequired(true);
+        } else {
+          const errorMsg = detail === "TRIAL_EXPIRED"
+            ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
+            : "⚠️ Sorry, I encountered an error processing that request.";
+          setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -337,7 +365,16 @@ export default function AssistantChat({ accessToken, modelVersion }: AssistantCh
   };
 
   return (
-    <div className="flex flex-col h-[75vh] md:h-[600px] w-full max-w-4xl mx-auto bg-[#0A0F1C]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl">
+    <div className="relative flex flex-col h-[600px] md:h-[650px] bg-[#0A0F1C] rounded-3xl border border-white/8 shadow-2xl overflow-hidden group">
+      <AnimatePresence>
+        {showLinkRequired && (
+          <LinkingRequiredOverlay onAction={() => {
+            // Redirect to settings or show onboarding
+            window.location.href = "/dashboard/settings";
+          }} />
+        )}
+      </AnimatePresence>
+      
       {/* Header */}
       <div className="px-4 md:px-8 py-3 md:py-4 border-b border-white/5 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-2 md:gap-3">
