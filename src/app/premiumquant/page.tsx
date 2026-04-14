@@ -32,7 +32,7 @@ export default async function DashboardPage() {
         )}
       </header>
 
-      <AssistantChat accessToken={(session as any).accessToken} modelVersion="grok-4.2-reasoning" />
+      <AssistantChat accessToken={(session as any).accessToken} modelVersion="grok-4.20-0309-reasoning" />
       
       <Suspense fallback={null}>
         <DashboardOnboarding user={user} accessToken={(session as any).accessToken} />
