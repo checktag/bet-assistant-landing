@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { 
   Users, Crown, Zap, Shield, Search, Filter, 
@@ -32,15 +32,17 @@ export default function AdminPortal() {
   const [search, setSearch] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [me, setMe] = useState<any>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   useEffect(() => {
-    if (status === "unauthenticated") redirect("/auth/login");
-    if (status === "authenticated" && (session as any)?.accessToken) {
+    if (status === "unauthenticated") router.push("/auth/login");
+    if (status === "authenticated" && (session as any)?.accessToken && !me) {
       fetchData();
     }
-  }, [status, session]);
+  }, [status, session, me]);
 
   const fetchData = async () => {
     try {
@@ -52,7 +54,8 @@ export default function AdminPortal() {
       setMe(meRes.data);
       
       if (!meRes.data.is_admin) {
-        redirect("/dashboard");
+        console.warn("Unauthorized access attempt. Redirecting to dashboard.");
+        router.push("/dashboard");
         return;
       }
 
@@ -60,8 +63,10 @@ export default function AdminPortal() {
         headers: { Authorization: `Bearer ${(session as any).accessToken}` }
       });
       setUsers(res.data);
-    } catch (err) {
+      setFetchError(null);
+    } catch (err: any) {
       console.error("Failed to fetch admin data", err);
+      setFetchError(err.response?.data?.detail || "Connection to secure registry failed.");
     } finally {
       setLoading(false);
     }
@@ -109,12 +114,34 @@ export default function AdminPortal() {
     quant: users.filter(u => u.is_quant).length,
   };
 
-  if (status === "loading" || loading) {
+  if (status === "loading" || (loading && !fetchError)) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#03060E]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-brand-teal animate-spin" />
           <p className="text-brand-teal font-black text-xs uppercase tracking-widest animate-pulse">Syncing Admin Node...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#03060E] p-6 text-center">
+        <div className="max-w-md space-y-6">
+          <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto text-red-500">
+            <AlertCircle className="w-10 h-10" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white mb-2 tracking-tight">Access Denied</h1>
+            <p className="text-slate-400 text-sm">{fetchError}</p>
+          </div>
+          <button 
+            onClick={() => router.push("/dashboard")}
+            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-black hover:bg-white/10 transition-all uppercase tracking-widest text-xs"
+          >
+            Return to Terminal
+          </button>
         </div>
       </div>
     );
