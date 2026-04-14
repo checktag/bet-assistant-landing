@@ -13,6 +13,7 @@ export default async function SettingsPage() {
       user={{
         email:           user.email,
         is_premium:      !!user.is_premium,
+        is_quant:        !!user.is_quant,
         telegram_linked: !!user.telegram_linked,
         telegram_id:     user.telegram_id ?? null,
         link_code:       user.link_code ?? null,

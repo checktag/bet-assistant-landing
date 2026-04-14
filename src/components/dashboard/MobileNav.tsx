@@ -72,15 +72,22 @@ export default function MobileNav({
     }, 1500);
   };
 
-  const navItems = [
-    { name: "Quant Terminal", path: "/dashboard",          icon: <LayoutDashboard className="w-5 h-5" /> },
+  const isQuantRoute = pathname.startsWith("/premiumquant");
+
+  const allNavItems = [
+    { name: "Quant Terminal", path: isQuantRoute ? "/premiumquant" : "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-5 h-5" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-5 h-5" /> },
     { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-5 h-5" /> },
     { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-5 h-5" /> },
     { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-5 h-5" /> },
-    { name: "Settings",       path: "/dashboard/settings",    icon: <Settings className="w-5 h-5" /> },
+    { name: "Settings",       path: isQuantRoute ? "/premiumquant/settings" : "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
   ];
+
+  // Filter items for specialized PremiumQuant view
+  const navItems = isQuantRoute 
+    ? allNavItems.filter(item => ["Quant Terminal", "Settings"].includes(item.name))
+    : allNavItems;
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -191,7 +198,13 @@ export default function MobileNav({
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-white truncate">{username || userEmail}</div>
                 <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest mt-0.5">
-                  {isPremium ? <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span> : <span className="text-slate-500">TRIAL</span>}
+                  {isQuantRoute ? (
+                    <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> QUANT</span>
+                  ) : isPremium ? (
+                    <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span>
+                  ) : (
+                    <span className="text-slate-500">TRIAL</span>
+                  )}
                   <span className="text-brand-blue flex items-center gap-1"><Zap className="w-2.5 h-2.5" /> REFS: {currentReferrals}</span>
                 </div>
               </div>

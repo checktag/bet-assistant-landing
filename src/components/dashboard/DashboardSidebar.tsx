@@ -36,9 +36,9 @@ export default function DashboardSidebar({
   // Local reactive state for pulsing
   const [currentCredits, setCurrentCredits] = useState(initialCredits);
   const [currentReferrals, setCurrentReferrals] = useState(initialReferrals);
-  const [isPremium, setIsPremium] = useState(initialIsPremium);
   const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
   const [username, setUsername] = useState(initialUsername);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
 
   // Global Pulse Check on Navigation
   useEffect(() => {
@@ -57,6 +57,13 @@ export default function DashboardSidebar({
         setTelegramJoined(fresh.telegram_linked);
         setUsername(fresh.username);
         
+        // Fetch Notifications unread count
+        const notifRes = await axios.get(`${API_URL}/notifications`, {
+          headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+        });
+        const unread = notifRes.data.filter((n: any) => !n.is_read).length;
+        setUnreadNotifs(unread);
+
         // Sync with next-auth session
         await update();
       } catch (e) {
@@ -74,15 +81,34 @@ export default function DashboardSidebar({
     }, 1500);
   };
 
-  const navItems = [
-    { name: "Quant Terminal", path: "/dashboard",          icon: <LayoutDashboard className="w-4 h-4" /> },
+  const isQuantRoute = pathname.startsWith("/premiumquant");
+
+  const allNavItems = [
+    { name: "Quant Terminal", path: isQuantRoute ? "/premiumquant" : "/dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-4 h-4" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-4 h-4" /> },
     { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-4 h-4" /> },
     { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-4 h-4" /> },
     { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-4 h-4" /> },
-    { name: "Settings",       path: "/dashboard/settings",    icon: <Settings className="w-4 h-4" /> },
+    { 
+      name: "Notifications",   
+      path: isQuantRoute ? "/premiumquant/settings#notifications" : "/dashboard/settings#notifications",    
+      icon: (
+        <div className="relative">
+          <Send className="w-4 h-4 rotate-90" />
+          {unreadNotifs > 0 && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[#060913] animate-pulse" />
+          )}
+        </div>
+      ) 
+    },
+    { name: "Settings",       path: isQuantRoute ? "/premiumquant/settings" : "/dashboard/settings", icon: <Settings className="w-4 h-4" /> },
   ];
+
+  // Filter items for specialized PremiumQuant view
+  const navItems = isQuantRoute 
+    ? allNavItems.filter(item => ["Quant Terminal", "Notifications", "Settings"].includes(item.name))
+    : allNavItems;
 
   return (
     <aside className={`hidden md:flex border-r border-white/5 bg-[#060913] flex-col p-4 space-y-8 h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
@@ -203,7 +229,13 @@ export default function DashboardSidebar({
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-white truncate">{username || userEmail}</div>
               <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest mt-0.5">
-                {isPremium ? <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span> : <span className="text-slate-500">TRIAL</span>}
+                {isQuantRoute ? (
+                  <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> QUANT</span>
+                ) : isPremium ? (
+                  <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span>
+                ) : (
+                  <span className="text-slate-500">TRIAL</span>
+                )}
                 <span className="text-brand-blue flex items-center gap-1"><Zap className="w-2.5 h-2.5" /> REFS: {currentReferrals}</span>
               </div>
             </div>

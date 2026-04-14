@@ -16,6 +16,7 @@ interface SettingsPageClientProps {
   user: {
     email: string;
     is_premium: boolean;
+    is_quant?: boolean;
     telegram_id?: number | null;
     telegram_linked?: boolean;
     link_code?: string;
@@ -96,6 +97,23 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwMessage, setPwMessage] = useState("");
 
+  // Notifications
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isLoadingNotifs, setIsLoadingNotifs] = useState(true);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setNotifications(res.data);
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+    } finally {
+      setIsLoadingNotifs(false);
+    }
+  };
+
   // Background Polling for "Zero-Click" Linking
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -116,6 +134,36 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
     }
     return () => clearInterval(interval);
   }, [isLinked, API_URL, accessToken, update]);
+
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Auto-scroll to notifications if hash present
+    if (window.location.hash === "#notifications") {
+      setTimeout(() => {
+        const el = document.getElementById("notifications-section");
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
+    }
+  }, []);
+
+  const markRead = async (id: number) => {
+    try {
+      await axios.post(`${API_URL}/notifications/${id}/read`, {}, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    } catch (err) { /* silent */ }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await axios.post(`${API_URL}/notifications/read-all`, {}, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (err) { /* silent */ }
+  };
 
   const handleSyncStatus = async () => {
     setIsSyncing(true);
@@ -220,7 +268,11 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
           </Row>
           <div className="h-px bg-white/5" />
           <Row label="Subscription" desc="Your current plan">
-            {user.is_premium ? (
+            {user.is_quant ? (
+              <span className="flex items-center gap-1.5 text-xs font-black text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-3 py-1.5 rounded-full">
+                <Crown className="w-3 h-3" /> QUANT
+              </span>
+            ) : user.is_premium ? (
               <span className="flex items-center gap-1.5 text-xs font-black text-brand-teal bg-brand-teal/10 border border-brand-teal/20 px-3 py-1.5 rounded-full">
                 <Crown className="w-3 h-3" /> PRO
               </span>
@@ -240,6 +292,65 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                 <span className="text-xs text-slate-400">{new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
               </Row>
             </>
+          )}
+        </Section>
+      </motion.div>
+      
+      {/* Notifications Feed */}
+      <motion.div id="notifications-section" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
+        <Section 
+          title="Terminal Alerts" 
+          desc="Operational logs and intelligence notifications for your node."
+        >
+          {notifications.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                 <button onClick={markAllRead} className="text-[10px] font-black text-brand-teal uppercase tracking-widest hover:opacity-70 transition-opacity">
+                    Clear All Alerts
+                 </button>
+              </div>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {notifications.map((n) => (
+                  <div 
+                    key={n.id} 
+                    onClick={() => !n.is_read && markRead(n.id)}
+                    className={`p-4 rounded-xl border transition-all relative cursor-pointer ${
+                      n.is_read 
+                        ? "bg-white/[0.02] border-white/5 opacity-60" 
+                        : "bg-white/[0.05] border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    {!n.is_read && (
+                      <span className="absolute top-4 right-4 w-2 h-2 bg-brand-teal rounded-full animate-pulse" />
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1 w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                        n.type === "success" ? "bg-green-500/20 text-green-400" :
+                        n.type === "warning" ? "bg-red-500/20 text-red-400" :
+                        "bg-brand-blue/20 text-brand-blue"
+                      }`}>
+                        {n.type === "success" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
+                         n.type === "warning" ? <AlertCircle className="w-3.5 h-3.5" /> :
+                         <BellRing className="w-3.5 h-3.5" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-white mb-0.5">{n.title}</div>
+                        <div className="text-[11px] text-slate-500 leading-relaxed mb-2">{n.content}</div>
+                        <div className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">
+                          {new Date(n.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="p-8 rounded-xl bg-white/[0.02] border border-dashed border-white/10 flex flex-col items-center text-center">
+              <BellRing className="w-8 h-8 text-slate-700 mb-3" />
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Primary Inbox Empty</div>
+              <p className="text-[10px] text-slate-600 mt-1">No operational alerts detected in your local datastream.</p>
+            </div>
           )}
         </Section>
       </motion.div>

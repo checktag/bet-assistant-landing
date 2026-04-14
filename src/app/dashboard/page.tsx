@@ -27,7 +27,7 @@ export default async function DashboardPage() {
         </div>
         {!user.is_premium && (
            <Link href="/billing" className="px-5 py-2.5 bg-brand-teal text-background font-black text-xs rounded-lg hover:scale-[1.05] transition-all shadow-[0_0_20px_rgba(0,198,186,0.2)] flex items-center gap-2">
-             <Crown className="w-3 h-3" /> UPGRADE TO PREMIUM
+             <Crown className="w-3 h-3" /> UPGRADE TO PREMIUM PRO
            </Link>
         )}
       </header>
