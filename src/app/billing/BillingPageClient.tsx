@@ -17,20 +17,20 @@ interface BillingPageClientProps {
 const WALLETS = [
   {
     id: "trc20",
-    label: "USDT / TRC-20 (Fastest)",
+    label: "USDT / TRC-20 (Tron)",
     coin: "USDT",
     network: "TRC-20 (Tron)",
-    address: "TYourTronWalletAddressHere", // <-- Replace with your wallet
+    address: "TKHJp9tK3koiBZQwerqnVxxahBigbznyR9",
     color: "text-green-400",
     bg: "bg-green-400/10",
     border: "border-green-400/20",
   },
   {
     id: "erc20",
-    label: "USDC / ERC-20 (Ethereum)",
+    label: "USDC / EVM Multi-Chain",
     coin: "USDC",
-    network: "ERC-20 (Ethereum)",
-    address: "0xYourEthereumWalletAddressHere", // <-- Replace with your wallet
+    network: "EVM (Ethereum, Base, Avalanche, etc.)",
+    address: "0x05bD1b80AEE60EEAe0e293845192A3B05307E323",
     color: "text-blue-400",
     bg: "bg-blue-400/10",
     border: "border-blue-400/20",

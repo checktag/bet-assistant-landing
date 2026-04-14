@@ -39,6 +39,7 @@ export default function DashboardSidebar({
   const [isPremium, setIsPremium] = useState(initialIsPremium);
   const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
   const [username, setUsername] = useState(initialUsername);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
 
   // Global Pulse Check on Navigation
@@ -57,6 +58,7 @@ export default function DashboardSidebar({
         setIsPremium(fresh.is_premium);
         setTelegramJoined(fresh.telegram_linked);
         setUsername(fresh.username);
+        setIsAdmin(fresh.is_admin);
         
         // Fetch Notifications unread count
         const notifRes = await axios.get(`${API_URL}/notifications`, {
@@ -104,12 +106,16 @@ export default function DashboardSidebar({
       ) 
     },
     { name: "Settings",       path: isQuantRoute ? "/premiumquant/settings" : "/dashboard/settings", icon: <Settings className="w-4 h-4" /> },
+    { name: "Admin Panel",    path: "/admin",                 icon: <Zap className="w-4 h-4 text-brand-teal" />, adminOnly: true },
   ];
 
   // Filter items for specialized PremiumQuant view
-  const navItems = isQuantRoute 
-    ? allNavItems.filter(item => ["Quant Terminal", "Notifications", "Settings"].includes(item.name))
+  let navItems = isQuantRoute 
+    ? allNavItems.filter(item => ["Quant Terminal", "Notifications", "Settings", "Admin Panel"].includes(item.name))
     : allNavItems;
+
+  // Filter out admin items for non-admins
+  navItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className={`hidden md:flex border-r border-white/5 bg-[#060913] flex-col p-4 space-y-8 h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
