@@ -36,6 +36,7 @@ export default function DashboardSidebar({
   // Local reactive state for pulsing
   const [currentCredits, setCurrentCredits] = useState(initialCredits);
   const [currentReferrals, setCurrentReferrals] = useState(initialReferrals);
+  const [isPremium, setIsPremium] = useState(initialIsPremium);
   const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
   const [username, setUsername] = useState(initialUsername);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
