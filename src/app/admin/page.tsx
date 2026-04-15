@@ -10,7 +10,6 @@ import {
   TrendingUp, Activity, BadgeCheck, AlertCircle,
   Loader2, ChevronRight, LayoutDashboard
 } from "lucide-react";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 interface AdminUser {
   id: number;
@@ -52,10 +51,8 @@ export default function AdminPortal() {
       const meRes = await axios.get(`${API_URL}/me`, {
         headers: { Authorization: `Bearer ${(session as any).accessToken}` }
       });
-      setMe(meRes.data);
-      
       if (!meRes.data.is_admin) {
-        console.warn("Unauthorized access attempt. Redirecting to dashboard.");
+        // Fallback for safety, though layout handle this
         router.push("/dashboard");
         return;
       }
@@ -117,7 +114,7 @@ export default function AdminPortal() {
 
   if (status === "loading" || (loading && !fetchError)) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#03060E]">
+      <div className="flex flex-1 items-center justify-center p-20">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-brand-teal animate-spin" />
           <p className="text-brand-teal font-black text-xs uppercase tracking-widest animate-pulse">Syncing Admin Node...</p>
@@ -128,7 +125,7 @@ export default function AdminPortal() {
 
   if (fetchError) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#03060E] p-6 text-center">
+      <div className="flex flex-1 items-center justify-center p-20 text-center">
         <div className="max-w-md space-y-6">
           <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto text-red-500">
             <AlertCircle className="w-10 h-10" />
@@ -149,15 +146,7 @@ export default function AdminPortal() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#03060E]">
-      <DashboardSidebar 
-        isPremium={me?.is_premium || false} 
-        username={me?.username}
-        credits={me?.credits}
-        userEmail={me?.email}
-      />
-      
-      <main className="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto">
+    <div className="p-6 md:p-10 space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -322,14 +311,14 @@ export default function AdminPortal() {
               </tbody>
             </table>
           </div>
-          {filteredUsers.length === 0 && (
+        </div>
+        
+        {filteredUsers.length === 0 && (
             <div className="py-20 flex flex-col items-center justify-center text-slate-500">
               <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
               <p className="font-bold text-xs uppercase tracking-widest">No Identities Match Search Parameters</p>
             </div>
           )}
         </div>
-      </main>
-    </div>
-  );
+    );
 }

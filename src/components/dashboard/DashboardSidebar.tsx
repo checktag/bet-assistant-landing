@@ -39,7 +39,6 @@ export default function DashboardSidebar({
   const [isPremium, setIsPremium] = useState(initialIsPremium);
   const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
   const [username, setUsername] = useState(initialUsername);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const lastPulseToken = useRef<string | null>(null);
 
@@ -62,7 +61,6 @@ export default function DashboardSidebar({
         setIsPremium(fresh.is_premium);
         setTelegramJoined(fresh.telegram_linked);
         setUsername(fresh.username);
-        setIsAdmin(fresh.is_admin);
         
         // Fetch Notifications unread count
         const notifRes = await axios.get(`${API_URL}/notifications`, {
@@ -70,16 +68,13 @@ export default function DashboardSidebar({
         });
         const unread = notifRes.data.filter((n: any) => !n.is_read).length;
         setUnreadNotifs(unread);
-
-        // Sync with next-auth session
-        await update();
       } catch (e) {
         console.error("[Pulse] Sync failed", e);
       }
     };
 
     pulseCheck();
-  }, [pathname, (session as any)?.accessToken, update]);
+  }, [pathname, (session as any)?.accessToken]);
 
   const handleSignOut = async () => {
     setIsDisconnecting(true);
@@ -119,7 +114,11 @@ export default function DashboardSidebar({
     : allNavItems;
 
   // Filter out admin items for non-admins
-  navItems = navItems.filter(item => !item.adminOnly || isAdmin);
+  const sessionUser = session?.user as any;
+  const SUPER_ADMINS = ["official@ctts.io", "chinazhirno@gmail.com"];
+  const isUserAdmin = sessionUser?.is_admin || SUPER_ADMINS.includes(sessionUser?.email);
+  
+  navItems = navItems.filter(item => !item.adminOnly || isUserAdmin);
 
   return (
     <aside className={`hidden md:flex border-r border-white/5 bg-[#060913] flex-col p-4 space-y-8 h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-20" : "w-64"}`}>
