@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -34,15 +34,17 @@ export default function AdminPortal() {
   const [me, setMe] = useState<any>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const router = useRouter();
+  const hasFetched = useRef(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/login");
-    if (status === "authenticated" && (session as any)?.accessToken && !me) {
+    if (status === "authenticated" && (session as any)?.accessToken && !hasFetched.current) {
+      hasFetched.current = true;
       fetchData();
     }
-  }, [status, session, me]);
+  }, [status, session]);
 
   const fetchData = async () => {
     try {

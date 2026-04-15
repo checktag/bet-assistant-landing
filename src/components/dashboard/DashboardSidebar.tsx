@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -41,11 +41,15 @@ export default function DashboardSidebar({
   const [username, setUsername] = useState(initialUsername);
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const lastPulseToken = useRef<string | null>(null);
 
   // Global Pulse Check on Navigation
   useEffect(() => {
     const pulseCheck = async () => {
-      if (!(session as any)?.accessToken) return;
+      const token = (session as any)?.accessToken;
+      if (!token || lastPulseToken.current === token + pathname) return;
+      
+      lastPulseToken.current = token + pathname;
       
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
       try {
