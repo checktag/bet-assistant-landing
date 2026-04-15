@@ -39,7 +39,6 @@ export default function AdminPortal() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
 
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/auth/login");
     if (status === "authenticated" && (session as any)?.accessToken && !hasFetched.current) {
       hasFetched.current = true;
       fetchData();
