@@ -174,7 +174,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
   );
 };
 
-export default function AssistantChat({ accessToken, modelVersion = "v2" }: AssistantChatProps) {
+export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fast-reasoning" }: AssistantChatProps) {
   const { update } = useSession();
   const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
   const [messages, setMessages] = useState<Message[]>([
