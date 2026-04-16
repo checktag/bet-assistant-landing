@@ -291,7 +291,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
       if (error.response?.status === 402) {
         setMessages(prev => [...prev, { 
           role: "assistant", 
-          content: "🚫 **Insufficient Credits!**\nYou've exhausted your available scan credits. Join our Telegram community to get **1,000 FREE credits** instantly, or upgrade to Premium for a one-time boost and unlimited Tracking features.",
+          content: "🚫 **Insufficient Credits!**\nYou've exhausted your available scan credits. Join our Telegram community to get **100 FREE credits** instantly, or upgrade to Premium for a one-time boost and unlimited Tracking features.",
           type: "onboarding" //Reuse onboarding style for prominent display
         }]);
       } else {
@@ -299,8 +299,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         if (detail === "TELEGRAM_LINK_REQUIRED") {
           setShowLinkRequired(true);
         } else {
-          const errorMsg = detail === "TRIAL_EXPIRED"
-            ? "🚨 Your 7-day trial has expired. Upgrade to Premium to continue scanning!"
+          const errorMsg = detail === "TRIAL_EXPIRED" || detail === "INSUFFICIENT_CREDITS"
+            ? "🚨 Your terminal access is currently restricted. Link Telegram to claim your free credits or upgrade to Pro!"
             : "⚠️ Sorry, I encountered an error processing that request.";
           setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
         }
@@ -508,9 +508,9 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                         </div>
                         <div className="space-y-2">
                           {[
-                            { cmd: "/scan",                 desc: "Global +EV edges — next 24 hours" },
+                            { cmd: "/scan",                 desc: "Global +EV edges — top market signals" },
                             { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
-                            { cmd: "/scan upcoming",        desc: "All fixtures in the next 72 hours" },
+                            { cmd: "/scan upcoming",        desc: "All fixtures in the upcoming window" },
                             { cmd: "/scan 2026-04-06",      desc: "Scan specific date (YYYY-MM-DD)" },
                             { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
                             { cmd: "/scan champions league",desc: "Champions League edges" },

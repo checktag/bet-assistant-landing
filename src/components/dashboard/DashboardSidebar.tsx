@@ -244,7 +244,7 @@ export default function DashboardSidebar({
                 ) : isPremium ? (
                   <span className="text-brand-teal flex items-center gap-1"><Crown className="w-2.5 h-2.5"/> PRO</span>
                 ) : (
-                  <span className="text-slate-500">TRIAL</span>
+                  <span className="text-slate-500">STANDARD</span>
                 )}
                 <span className="text-brand-blue flex items-center gap-1"><Zap className="w-2.5 h-2.5" /> REFS: {currentReferrals}</span>
               </div>

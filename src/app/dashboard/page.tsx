@@ -14,10 +14,7 @@ export default async function DashboardPage() {
   }
 
   const user = session.user as any;
-  const now = new Date();
   
-  const trialEnds = new Date(user.trial_ends_at || (new Date(user.created_at || now).getTime() + 7 * 86400000));
-
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 flex flex-col justify-center min-h-full py-8 md:py-12 px-4 md:px-0">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
