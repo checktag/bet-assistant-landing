@@ -11,6 +11,7 @@ const fadeUp: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
 };
 import { CalcWrapper } from "@/components/calculator/CalculatorComponents";
+import LiveSlipFeed from "@/components/landing/LiveSlipFeed";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -165,8 +166,30 @@ export default function Home() {
               How To Use
             </Link>
           </motion.div>
+
+          {/* Trustpilot Placeholder */}
+          <motion.div variants={fadeUp} className="mt-12 flex flex-col items-center">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-white font-bold text-lg">Excellent</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div key={star} className="w-6 h-6 bg-[#00b67a] flex items-center justify-center rounded-sm">
+                    <Star className="w-4 h-4 text-white fill-white" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="text-slate-400 text-sm flex items-center gap-2">
+              <span>Based on 1,200+ reviews on</span>
+              <div className="flex items-center gap-1 text-white font-bold">
+                 <Star className="w-4 h-4 text-[#00b67a] fill-[#00b67a]" /> Trustpilot
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </motion.section>
+
+      <LiveSlipFeed />
 
       {/* Infinite Marquee Section */}
       <section className="relative z-20 py-10 border-y border-white/5 bg-[#03060E]/80 backdrop-blur-xl">
