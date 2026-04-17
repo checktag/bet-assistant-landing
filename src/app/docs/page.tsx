@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, FileText, CheckCircle, BellRing } from "lucide-react";
+import { ArrowLeft, Zap, TerminalSquare, ShieldCheck, BellRing } from "lucide-react";
 
 export default function Documentation() {
   return (
@@ -25,8 +25,7 @@ export default function Documentation() {
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">How to Use <span className="text-gradient">Bet Assistant</span></h1>
           <p className="text-xl text-slate-400 leading-relaxed font-light">
-            We built Bet Assistant to make smart betting as easy as texting a friend. 
-            No confusing math or complex settings—just send a message, get expert advice, and start winning.
+            We built Bet Assistant to provide institutional-grade mathematical edges directly to your dashboard and Telegram. Follow this workflow to start executing profitable trades immediately.
           </p>
         </div>
       </section>
@@ -35,36 +34,33 @@ export default function Documentation() {
       <section className="relative z-10 py-24 px-6">
         <div className="max-w-3xl mx-auto space-y-16">
           
-          <div className="pl-8 border-l-2 border-brand-blue/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-blue/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,113,206,0.3)]">
-              <MessageCircle className="w-5 h-5 text-brand-blue" />
+          <div className="pl-8 border-l-2 border-brand-teal/30 relative">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-teal/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,198,186,0.3)]">
+              <Zap className="w-5 h-5 text-brand-teal" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">1. Start the Chat</h3>
+            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">1. Initialize Terminal & Claim Credits</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-4">
-              Open Telegram and search for <strong>@BetAssistant_AI_bot</strong> (or just click any of the Launch buttons on our site). Press <strong>Start</strong> to wake up the assistant. It's fully ready 24/7.
+              Bet Assistant operates on a strictly credit-based mathematical execution model. To unlock your Quant Terminal, simply sign up and link your dedicated Telegram account. <strong>Linking your Telegram instantly injects 100 free computational credits</strong> into your balance, allowing you to begin scanning the markets immediately with Standard access.
             </p>
           </div>
 
-          <div className="pl-8 border-l-2 border-brand-teal/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-teal/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,198,186,0.3)]">
-              <FileText className="w-5 h-5 text-brand-teal" />
+          <div className="pl-8 border-l-2 border-brand-blue/30 relative">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-blue/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,113,206,0.3)]">
+              <TerminalSquare className="w-5 h-5 text-brand-blue" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">2. Send Your Betslip</h3>
+            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">2. Scan for Mathematical Edges</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-4">
-              Got a booking code or an idea for a game? Just send it to the bot like you're texting a friend. For example: <br/><br/>
-              <span className="italic text-slate-300">"Hey, what do you think about Arsenal winning today?"</span> <br/>
-              or <br/>
-              <span className="italic text-slate-300">"Here is my booking code: BC-9XY-ZZ. Is this safe?"</span>
+              Forget manual research. Use our built-in terminal commands like <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan</code> or <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan weekend</code>. The AI fetches live odds from 55+ global leagues, runs deep Poisson distributions, and filters out everything except <strong>Strict Positive Expected Value (+EV)</strong> fixtures. If an edge exists, the system flags it.
             </p>
           </div>
 
           <div className="pl-8 border-l-2 border-purple-500/30 relative">
             <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-purple-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-              <CheckCircle className="w-5 h-5 text-purple-400" />
+              <ShieldCheck className="w-5 h-5 text-purple-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">3. Get Simple Advice</h3>
+            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">3. Auto-Generate & Analyze Slips</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-4">
-              The AI does all the heavy math behind the scenes. It checks the live odds, team momentum, and statistics, then replies to you in plain English. It will clearly tell you if your bet is genuinely a highly profitable idea, or if you're walking into a trap set by the bookies. 
+              Found your edges? One click translates the AI's curated picks into a universal <strong>Booking Code</strong> compatible with 7+ platforms (SportyBet, 1xBet, Bet9ja). <br/><br/>If you already have a slip from external sources, run <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/checkslip sportybet [CODE]</code>. The AI will tear the slip down game-by-game to expose any negative-value traps set by bookmakers or calculate the true win probability. You can even use <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/convert</code> to move a code between platforms instantly.
             </p>
           </div>
 
@@ -72,13 +68,13 @@ export default function Documentation() {
             <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-green-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]">
               <BellRing className="w-5 h-5 text-green-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">4. Live Cashout Alerts</h3>
+            <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">4. Live Tracker & Cashout Alerts (PRO)</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-8">
-              Once your games kick off, the assistant stays awake for you. If a team suddenly loses momentum or a surprise injury happens, the bot will instantly send you an alert advising you to Cashout and take your money safely to the bank.
+              Execution isn't the end of the lifecycle. Add your active booking code to the Premium Slip Tracker. The AI watchdog continuously monitors live scoreboards, evaluating momentum shifts. If a sudden risk spike threatens your position, it pushes an instantaneous <strong>Cashout Alert</strong> directly to your linked Telegram account to secure your profits.
             </p>
-            <a href="https://t.me/BetAssistant_AI_bot" target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-4 bg-gradient-to-r from-brand-blue to-brand-teal text-background font-bold text-lg rounded-full shadow-[0_0_30px_rgba(0,198,186,0.2)] hover:scale-105 transition-transform">
-              Try the Assistant Now
-            </a>
+            <Link href="/dashboard" className="inline-block px-8 py-4 bg-gradient-to-r from-brand-teal to-brand-blue text-background font-bold text-lg rounded-full shadow-[0_0_30px_rgba(0,198,186,0.2)] hover:scale-105 transition-transform uppercase tracking-wider">
+              Open Your Terminal
+            </Link>
           </div>
 
         </div>
@@ -92,7 +88,7 @@ export default function Documentation() {
              <Link href="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
              <Link href="/status" className="hover:text-brand-teal transition-colors">Bot Status</Link>
           </div>
-          <p className="text-slate-600 text-sm">© 2026 Checktag Platform. All rights reserved.</p>
+          <p className="text-slate-600 text-sm">© 2026 CTTS. All rights reserved.</p>
         </div>
       </footer>
 
