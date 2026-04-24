@@ -59,6 +59,66 @@ const LinkingRequiredOverlay = ({ onAction }: { onAction: () => void }) => (
   </motion.div>
 );
 
+const EngagingLoader = () => {
+  const [progress, setProgress] = useState(0);
+  const [messageIdx, setMessageIdx] = useState(0);
+  const messages = [
+    "Establishing secure connection...",
+    "Extracting real-time market odds...",
+    "Running Poisson probability grids...",
+    "Calculating Expected Value (EV)...",
+    "Filtering for institutional edges...",
+    "Finalizing mathematical tickets..."
+  ];
+
+  useEffect(() => {
+    const duration = 12000;
+    const interval = 100;
+    const step = 100 / (duration / interval);
+    
+    const progTimer = setInterval(() => {
+      setProgress(p => Math.min(p + step, 98));
+    }, interval);
+    
+    const msgTimer = setInterval(() => {
+      setMessageIdx(i => Math.min(i + 1, messages.length - 1));
+    }, 2000);
+
+    return () => {
+      clearInterval(progTimer);
+      clearInterval(msgTimer);
+    };
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5 w-full max-w-[280px]">
+      <div className="flex items-center gap-3">
+        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-brand-teal/10 shrink-0">
+          <Loader2 className="w-4 h-4 text-brand-teal animate-spin" />
+          <div className="absolute inset-0 rounded-full border border-brand-teal/30 animate-ping opacity-20"></div>
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-[11px] font-bold text-white tracking-wide uppercase truncate">Assistant Computing</span>
+          <motion.span 
+            key={messageIdx}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[9px] text-brand-teal italic truncate"
+          >
+            {messages[messageIdx]}
+          </motion.span>
+        </div>
+      </div>
+      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-brand-blue to-brand-teal rounded-full transition-all duration-100 ease-linear"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
 // Plain-English Glossary Card shown on scan/slip results
 const MetricGlossary = () => (
   <div className="flex flex-wrap gap-3 mb-3 p-3 rounded-xl border border-white/5 bg-black/20">
@@ -693,8 +753,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
           })}
         </AnimatePresence>
         {isLoading && (
-          <div className="flex items-center gap-2 text-slate-500 italic text-xs animate-pulse">
-            <Loader2 className="w-3 h-3 animate-spin" /> Assistant is computing...
+          <div className="flex justify-start my-4">
+            <EngagingLoader />
           </div>
         )}
       </div>
