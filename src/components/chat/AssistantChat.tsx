@@ -96,9 +96,8 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
     .filter(b => b.profiles?.includes(activeTab))
     .sort((a, b) => activeTab === "high" ? (b.model_prob - a.model_prob) : (b.ev_edge - a.ev_edge));
 
-  // Cap picks correctly client-side
-  const maxPicks = activeTab === "high" ? 7 : activeTab === "moderate" ? 20 : 40;
-  const slicedBets = filteredBets.slice(0, maxPicks);
+  // Removing artificial limits so all mathematically sound picks are displayed
+  const slicedBets = filteredBets;
 
   return (
     <div className="mt-4 flex flex-col gap-3">
