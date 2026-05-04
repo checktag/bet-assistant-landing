@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   Crown, BellRing, Send, CheckCircle2,
   Loader2, LinkIcon, Unlink, Lock, AlertCircle, Zap, Sparkles,
-  Wifi, ShieldCheck, Activity
+  Wifi, ShieldCheck, Activity, Gift, XCircle, ChevronRight,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -71,6 +71,162 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
           }`}
       />
     </button>
+  );
+}
+
+// ─── Cash Rewards Panel ───────────────────────────────────────────────────────
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+
+interface Reward {
+  id: number;
+  amount_ngn: number;
+  milestone: number;
+  status: "pending" | "approved" | "paid";
+  bank_name: string | null;
+  account_name: string | null;
+  account_number: string | null;
+  created_at: string;
+  paid_at: string | null;
+}
+
+function CashRewardsPanel({ accessToken, totalReferrals }: { accessToken: string; totalReferrals: number }) {
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [claiming, setClaiming] = useState<number | null>(null);
+  const [form, setForm] = useState({ bank_name: "", account_name: "", account_number: "" });
+  const [msg, setMsg] = useState("");
+  const [loadingRewards, setLoadingRewards] = useState(true);
+
+  const headers = { Authorization: `Bearer ${accessToken}` };
+
+  useEffect(() => {
+    axios.get(`${API_URL}/my-rewards`, { headers })
+      .then(r => setRewards(r.data))
+      .catch(() => {})
+      .finally(() => setLoadingRewards(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
+
+  const nextMilestone = Math.ceil((totalReferrals + 1) / 5) * 5;
+  const progressPct = Math.min(((totalReferrals % 5) / 5) * 100, 100);
+  const remaining = nextMilestone - totalReferrals;
+
+  const handleClaim = async (rewardId: number) => {
+    if (!form.bank_name || !form.account_name || !form.account_number) {
+      setMsg("❌ Please fill all bank details before claiming."); return;
+    }
+    setClaiming(rewardId); setMsg("");
+    try {
+      await axios.post(`${API_URL}/claim-reward`, { reward_id: rewardId, ...form }, { headers });
+      setMsg("✅ Bank details submitted! Your ₦500 will arrive within 2–3 business days.");
+      setRewards(prev => prev.map(r => r.id === rewardId ? { ...r, status: "approved" as const } : r));
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.detail || "Submission failed."}`);
+    } finally { setClaiming(null); }
+  };
+
+  const statusChip = (status: string) => {
+    const s: Record<string, string> = {
+      pending:  "bg-yellow-400/10 border-yellow-400/20 text-yellow-400",
+      approved: "bg-brand-teal/10 border-brand-teal/20 text-brand-teal",
+      paid:     "bg-emerald-400/10 border-emerald-400/20 text-emerald-400",
+    };
+    return s[status] || "bg-white/5 border-white/10 text-slate-400";
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Progress toward next ₦500 */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-yellow-500/5 to-amber-500/5 border border-yellow-400/10">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Gift className="w-4 h-4 text-yellow-400" />
+            <span className="text-xs font-black text-yellow-400 uppercase tracking-widest">₦500 Milestone</span>
+          </div>
+          <span className="text-[11px] text-slate-400 font-mono">{totalReferrals % 5} / 5 referrals</span>
+        </div>
+        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-2">
+          <div
+            className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full transition-all duration-500"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <p className="text-[11px] text-slate-500">
+          {remaining === 0 ? "🎉 Milestone reached! Claim your ₦500 below." : `Refer ${remaining} more user${remaining !== 1 ? "s" : ""} to unlock your next ₦500 cash reward.`}
+        </p>
+      </div>
+
+      {/* Reward list */}
+      {loadingRewards ? (
+        <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-brand-teal" /></div>
+      ) : rewards.length === 0 ? (
+        <p className="text-[11px] text-slate-500 text-center py-4">No rewards yet. Keep referring friends!</p>
+      ) : (
+        <div className="space-y-3">
+          {rewards.map(r => (
+            <div key={r.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/8 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">₦{r.amount_ngn} Cash Reward</p>
+                  <p className="text-[10px] text-slate-500">Milestone: {r.milestone} referrals · {new Date(r.created_at).toLocaleDateString()}</p>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full border text-[10px] font-black uppercase ${statusChip(r.status)}`}>
+                  {r.status}
+                </span>
+              </div>
+
+              {r.status === "pending" && (
+                <div className="space-y-2 pt-1 border-t border-white/5">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enter Bank Details to Claim</p>
+                  <input
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
+                    placeholder="Bank Name (e.g. GTBank)"
+                    value={form.bank_name}
+                    onChange={e => setForm(f => ({ ...f, bank_name: e.target.value }))}
+                  />
+                  <input
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
+                    placeholder="Account Name"
+                    value={form.account_name}
+                    onChange={e => setForm(f => ({ ...f, account_name: e.target.value }))}
+                  />
+                  <input
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
+                    placeholder="Account Number"
+                    value={form.account_number}
+                    onChange={e => setForm(f => ({ ...f, account_number: e.target.value }))}
+                  />
+                  <button
+                    onClick={() => handleClaim(r.id)}
+                    disabled={claiming === r.id}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-yellow-400 text-black font-black text-xs uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 transition-all"
+                  >
+                    {claiming === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
+                    {claiming === r.id ? "Submitting…" : "Claim ₦500"}
+                  </button>
+                </div>
+              )}
+
+              {r.status === "approved" && (
+                <p className="text-[11px] text-brand-teal flex items-center gap-1.5 pt-1 border-t border-white/5">
+                  <ChevronRight className="w-3 h-3" />
+                  Bank details received. Transfer processing in 2–3 business days.
+                </p>
+              )}
+
+              {r.status === "paid" && (
+                <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 pt-1 border-t border-white/5">
+                  ✅ Paid on {r.paid_at ? new Date(r.paid_at).toLocaleDateString() : "—"}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {msg && (
+        <p className={`text-xs text-center ${msg.startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>{msg}</p>
+      )}
+    </div>
   );
 }
 
@@ -525,6 +681,16 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
               <p className="text-[11px] text-slate-500 leading-relaxed">You receive <span className="text-white font-bold">1 Credit</span> for every operative that verifies their email.</p>
             </div>
           </div>
+        </Section>
+      </motion.div>
+
+      {/* --- Cash Rewards --- */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
+        <Section
+          title="💰 Cash Rewards"
+          desc="Earn ₦500 for every 5 verified users you refer. Claim it straight to your bank account."
+        >
+          <CashRewardsPanel accessToken={accessToken} totalReferrals={user.total_referrals || 0} />
         </Section>
       </motion.div>
 
