@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import MobileNav from "@/components/dashboard/MobileNav";
+import PageTransitionWrapper from "@/components/PageTransitionWrapper";
 
 export default async function DashboardLayout({
   children,
@@ -47,7 +48,7 @@ export default async function DashboardLayout({
         <div className="fixed bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none z-0" />
         
         <div className="relative z-10 w-full">
-          {children}
+          <PageTransitionWrapper>{children}</PageTransitionWrapper>
         </div>
       </main>
     </div>

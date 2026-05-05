@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import AuthProvider from "@/components/providers/AuthProvider";
+import NavigationProgressWrapper from "@/components/NavigationProgressWrapper";
 
 export default function RootLayout({
   children,
@@ -26,6 +27,7 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} h-full antialiased bg-[#03060E] text-slate-200`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        <NavigationProgressWrapper />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

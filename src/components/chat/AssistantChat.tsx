@@ -59,65 +59,182 @@ const LinkingRequiredOverlay = ({ onAction }: { onAction: () => void }) => (
   </motion.div>
 );
 
-const EngagingLoader = () => {
+// ─── Action-Specific Loaders ─────────────────────────────────────────────────
+
+type LoaderType = "scan" | "checkslip" | "ai" | "codegen" | null;
+
+/** Shared animated progress bar used across loaders */
+const ProgressBar = ({ color, duration = 14000 }: { color: string; duration?: number }) => {
   const [progress, setProgress] = useState(0);
-  const [messageIdx, setMessageIdx] = useState(0);
-  const messages = [
-    "Establishing secure connection...",
-    "Extracting real-time market odds...",
-    "Running Poisson probability grids...",
-    "Calculating Expected Value (EV)...",
-    "Filtering for institutional edges...",
-    "Finalizing mathematical tickets..."
-  ];
-
   useEffect(() => {
-    const duration = 12000;
-    const interval = 100;
-    const step = 100 / (duration / interval);
-    
-    const progTimer = setInterval(() => {
-      setProgress(p => Math.min(p + step, 98));
-    }, interval);
-    
-    const msgTimer = setInterval(() => {
-      setMessageIdx(i => Math.min(i + 1, messages.length - 1));
-    }, 2000);
-
-    return () => {
-      clearInterval(progTimer);
-      clearInterval(msgTimer);
-    };
-  }, []);
-
+    let cur = 0;
+    const t = setInterval(() => {
+      const step = cur < 30 ? 2.5 : cur < 65 ? 1.2 : cur < 85 ? 0.4 : 0.1;
+      cur = Math.min(cur + step, 95);
+      setProgress(cur);
+      if (cur >= 95) clearInterval(t);
+    }, duration / 950);
+    return () => clearInterval(t);
+  }, [duration]);
   return (
-    <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5 w-full max-w-[280px]">
-      <div className="flex items-center gap-3">
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-brand-teal/10 shrink-0">
-          <Loader2 className="w-4 h-4 text-brand-teal animate-spin" />
-          <div className="absolute inset-0 rounded-full border border-brand-teal/30 animate-ping opacity-20"></div>
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-[11px] font-bold text-white tracking-wide uppercase truncate">Assistant Computing</span>
-          <motion.span 
-            key={messageIdx}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-[9px] text-brand-teal italic truncate"
-          >
-            {messages[messageIdx]}
-          </motion.span>
-        </div>
+    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+      <div className={`h-full rounded-full transition-all ease-linear ${color}`} style={{ width: `${progress}%`, transitionDuration: "150ms" }} />
+    </div>
+  );
+};
+
+/** Rotating message ticker */
+const MessageTicker = ({ messages, interval = 2200, color }: { messages: string[]; interval?: number; color: string }) => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => Math.min(i + 1, messages.length - 1)), interval);
+    return () => clearInterval(t);
+  }, [messages.length, interval]);
+  return (
+    <motion.span key={idx} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+      className={`text-[9px] italic truncate ${color}`}>
+      {messages[idx]}
+    </motion.span>
+  );
+};
+
+// ── 1. Market Scan Loader ─────────────────────────────────────────────────────
+const ScanLoader = () => (
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-teal/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(0,198,186,0.05)]">
+    <div className="flex items-center gap-3">
+      {/* Radar pulse icon */}
+      <div className="relative w-9 h-9 shrink-0 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full border border-brand-teal/40 animate-ping" />
+        <div className="absolute inset-1 rounded-full border border-brand-teal/20 animate-ping" style={{ animationDelay: "0.3s" }} />
+        <Globe className="w-4 h-4 text-brand-teal relative z-10" />
       </div>
-      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-brand-blue to-brand-teal rounded-full transition-all duration-100 ease-linear"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-[11px] font-black text-white tracking-widest uppercase">Market Scan</span>
+        <MessageTicker color="text-brand-teal" messages={[
+          "Connecting to 55+ leagues...",
+          "Fetching live bookmaker odds...",
+          "Running Poisson probability model...",
+          "Calculating EV edges...",
+          "Applying Dixon-Coles correction...",
+          "Filtering high-confidence picks...",
+          "Building your risk-tiered output...",
+        ]} />
+      </div>
+      <div className="flex gap-[3px] shrink-0">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="w-[3px] bg-brand-teal rounded-full animate-bounce"
+            style={{ height: `${8 + i * 4}px`, animationDelay: `${i * 0.15}s` }} />
+        ))}
+      </div>
+    </div>
+    <ProgressBar color="bg-gradient-to-r from-brand-teal to-brand-blue" duration={16000} />
+    <div className="flex justify-between text-[9px] text-slate-600">
+      <span>55 leagues</span><span>Poisson + EV model</span><span>Live odds</span>
+    </div>
+  </div>
+);
+
+// ── 2. Check Slip Loader ──────────────────────────────────────────────────────
+const CheckSlipLoader = () => (
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-blue/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(45,108,223,0.05)]">
+    <div className="flex items-center gap-3">
+      {/* Magnifier scan icon */}
+      <div className="relative w-9 h-9 shrink-0 flex items-center justify-center bg-brand-blue/10 rounded-xl border border-brand-blue/20">
+        <Calculator className="w-4 h-4 text-brand-blue" />
+      </div>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-[11px] font-black text-white tracking-widest uppercase">Slip Analysis</span>
+        <MessageTicker color="text-brand-blue" messages={[
+          "Decoding booking code...",
+          "Fetching fixture data...",
+          "Scoring each selection...",
+          "Running cashout valuation...",
+          "Checking live match status...",
+          "Generating AI recommendation...",
+        ]} />
+      </div>
+      {/* Pulsing dots */}
+      <div className="flex gap-1 shrink-0">
+        {[0, 1, 2].map(i => (
+          <div key={i} className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-bounce"
+            style={{ animationDelay: `${i * 0.2}s` }} />
+        ))}
+      </div>
+    </div>
+    <ProgressBar color="bg-gradient-to-r from-brand-blue to-purple-500" duration={10000} />
+    <div className="flex justify-between text-[9px] text-slate-600">
+      <span>Multi-bookie decode</span><span>AI scoring</span><span>Live status</span>
+    </div>
+  </div>
+);
+
+// ── 3. AI Chat Loader ─────────────────────────────────────────────────────────
+const AILoader = () => {
+  const [dots, setDots] = useState(1);
+  useEffect(() => {
+    const t = setInterval(() => setDots(d => d < 3 ? d + 1 : 1), 500);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-black/20 rounded-2xl border border-white/5 w-fit">
+      <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+        <Zap className="w-3.5 h-3.5 text-purple-400" />
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[10px] font-black text-white uppercase tracking-widest">AI Thinking</span>
+        <span className="text-[9px] text-purple-400 font-mono">{"•".repeat(dots)}{"·".repeat(3 - dots)}</span>
+      </div>
+      {/* Animated waveform */}
+      <div className="flex gap-[2px] items-end h-5 shrink-0">
+        {[3, 5, 8, 5, 3, 6, 9, 6, 4].map((h, i) => (
+          <div key={i} className="w-[2px] bg-purple-400/60 rounded-full animate-pulse"
+            style={{ height: `${h}px`, animationDelay: `${i * 0.1}s`, animationDuration: "0.8s" }} />
+        ))}
       </div>
     </div>
   );
 };
+
+// ── 4. Code Generation Loader ─────────────────────────────────────────────────
+const CodeGenLoader = () => (
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-yellow-500/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(234,179,8,0.05)]">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+        <Clock className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: "3s" }} />
+      </div>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-[11px] font-black text-white tracking-widest uppercase">Generating Codes</span>
+        <MessageTicker color="text-yellow-400" messages={[
+          "Matching fixtures in bookie DB...",
+          "Mapping market IDs...",
+          "Building multi-platform slip...",
+          "Encoding SportyBet code...",
+          "Encoding Bet9ja code...",
+          "Encoding 1xBet code...",
+          "Finalizing booking codes...",
+        ]} />
+      </div>
+    </div>
+    <ProgressBar color="bg-gradient-to-r from-yellow-400 to-amber-500" duration={12000} />
+    <div className="flex justify-between text-[9px] text-slate-600">
+      <span>SportyBet</span><span>Bet9ja</span><span>1xBet</span>
+    </div>
+  </div>
+);
+
+/** Route to the correct loader based on current action */
+const ActionLoader = ({ type }: { type: LoaderType }) => {
+  if (!type) return null;
+  return (
+    <div className="flex justify-start my-4">
+      {type === "scan"      && <ScanLoader />}
+      {type === "checkslip" && <CheckSlipLoader />}
+      {type === "ai"        && <AILoader />}
+      {type === "codegen"   && <CodeGenLoader />}
+    </div>
+  );
+};
+
 
 // Plain-English Glossary Card shown on scan/slip results
 const MetricGlossary = () => (
@@ -244,6 +361,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeLoader, setActiveLoader] = useState<LoaderType>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLinkRequired, setShowLinkRequired] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -279,6 +397,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
       // ── /scan ─────────────────────────────────────────────────────────────
       if (userMsg.toLowerCase().startsWith("/scan")) {
+        setActiveLoader("scan");
         const parts = userMsg.split(" ");
         let dateArg = null;
         let leagueArg = null;
@@ -322,6 +441,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         // Sync Credits Pulse
         await update();
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
+        setActiveLoader("checkslip");
         const parts = userMsg.split(" ");
         const platform = parts[1] || "sportybet";
         const code = parts[2] || "";
@@ -338,6 +458,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         // Sync Credits Pulse
         await update();
       } else {
+        setActiveLoader("ai");
         const res = await axios.post(`${API_URL}/chat`, { message: userMsg, history: chatHistory, model_version: modelVersion }, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
@@ -366,11 +487,13 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
       }
     } finally {
       setIsLoading(false);
+      setActiveLoader(null);
     }
   };
 
   const handleBuildSlip = async (selections: Selection[], singlePlatform?: string) => {
     setIsLoading(true);
+    setActiveLoader("codegen");
     const platforms = singlePlatform
       ? [singlePlatform]
       : ["sportybet", "bet9ja", "1xbet"];
@@ -396,6 +519,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
       setMessages(prev => [...prev, { role: "assistant", content: "⚠️ Failed to generate booking code. Please try again." }]);
     } finally {
       setIsLoading(false);
+      setActiveLoader(null);
     }
   };
 
@@ -752,11 +876,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
             );
           })}
         </AnimatePresence>
-        {isLoading && (
-          <div className="flex justify-start my-4">
-            <EngagingLoader />
-          </div>
-        )}
+        {isLoading && <ActionLoader type={activeLoader} />}
       </div>
 
       {/* Input */}
