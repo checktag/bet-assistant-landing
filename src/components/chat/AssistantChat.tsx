@@ -411,8 +411,13 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         const riskArg = parts.slice(1).find(p => RISK_KEYWORDS[p.toLowerCase()]) || null;
         const riskProfile = riskArg ? RISK_KEYWORDS[riskArg.toLowerCase()] : "moderate";
 
-        // Remove the risk keyword, then parse remaining args
-        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()]);
+        // Extract sport keyword from anywhere in the command
+        const SPORT_KEYWORDS = ["basketball", "bball", "nba", "wnba"];
+        const hasBasketball = parts.slice(1).some(p => SPORT_KEYWORDS.includes(p.toLowerCase()));
+        const sportArg = hasBasketball ? "basketball" : "soccer";
+
+        // Remove the risk and sport keywords, then parse remaining args
+        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()] && !SPORT_KEYWORDS.includes(p.toLowerCase()));
 
         if (remaining[0] === "upcoming" || remaining[0] === "weekend") {
           dateArg = remaining[0];
@@ -423,7 +428,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         }
 
         const res = await axios.get(`${API_URL}/scan`, {
-          params: { date: dateArg, league: leagueArg, risk: riskProfile },
+          params: { date: dateArg, league: leagueArg, risk: riskProfile, sport: sportArg },
           headers: { Authorization: `Bearer ${accessToken}` }
         });
 
@@ -433,7 +438,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
         setMessages(prev => [...prev, {
           role: "assistant",
-          content: `🔍 **Market Scan Complete!** Found **${totalBets} +EV picks** from ${scope} (${window}). Select a risk profile below to filter and build your slip.`,
+          content: `🔍 **${sportArg === 'basketball' ? '🏀 Basketball' : '⚽ Soccer'} Market Scan Complete!** Found **${totalBets} +EV picks** from ${scope} (${window}). Select a risk profile below to filter and build your slip.`,
           type: "scan",
           data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches }
         }]);
