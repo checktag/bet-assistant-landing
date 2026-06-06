@@ -111,11 +111,11 @@ const ScanLoader = () => (
       <div className="flex flex-col min-w-0 flex-1">
         <span className="text-[11px] font-black text-white tracking-widest uppercase">Market Scan</span>
         <MessageTicker color="text-brand-teal" messages={[
-          "Connecting to 55+ leagues...",
+          "Connecting to global league markets...",
           "Fetching live bookmaker odds...",
-          "Running Poisson probability model...",
+          "Running Poisson & Gaussian models...",
           "Calculating EV edges...",
-          "Applying Dixon-Coles correction...",
+          "Applying Dixon-Coles & spread math...",
           "Filtering high-confidence picks...",
           "Building your risk-tiered output...",
         ]} />
@@ -129,7 +129,7 @@ const ScanLoader = () => (
     </div>
     <ProgressBar color="bg-gradient-to-r from-brand-teal to-brand-blue" duration={16000} />
     <div className="flex justify-between text-[9px] text-slate-600">
-      <span>55 leagues</span><span>Poisson + EV model</span><span>Live odds</span>
+      <span>Global leagues</span><span>Quant + EV model</span><span>Live odds</span>
     </div>
   </div>
 );
@@ -602,11 +602,11 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                     </div>
                     <div className="grid gap-1">
                       {[
-                        { cmd: "/scan",          label: "Today's Scan",      desc: "Top edges for next 24h" },
-                        { cmd: "/scan upcoming", label: "Upcoming 72h",      desc: "Value picks for next 3 days" },
-                        { cmd: "/scan weekend",  label: "Weekend fixtures",  desc: "Saturday & Sunday value" },
-                        { cmd: "/scan 2026-04-06 ", label: "Scan by Date",      desc: "e.g. /scan 2026-04-06" },
-                        { cmd: "/scan premier league ", label: "Scan League",  desc: "e.g. /scan premier league" },
+                        { cmd: "/scan",          label: "Today's Scan (Soccer)", desc: "Top edges for next 24h" },
+                        { cmd: "/scan basketball", label: "Basketball Scan",    desc: "Top basketball edges" },
+                        { cmd: "/scan nba",      label: "NBA Scan",              desc: "NBA value picks" },
+                        { cmd: "/scan upcoming", label: "Upcoming 72h",         desc: "Value picks for next 3 days" },
+                        { cmd: "/scan weekend",  label: "Weekend fixtures",     desc: "Saturday & Sunday value" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
                           className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
@@ -697,11 +697,11 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                         <div className="space-y-2">
                           {[
                             { cmd: "/scan",                 desc: "Global +EV edges — top market signals" },
+                            { cmd: "/scan basketball",      desc: "Scan today's basketball / NBA markets" },
                             { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
+                            { cmd: "/scan nba weekend",     desc: "Weekend NBA value fixtures" },
                             { cmd: "/scan upcoming",        desc: "All fixtures in the upcoming window" },
-                            { cmd: "/scan 2026-04-06",      desc: "Scan specific date (YYYY-MM-DD)" },
                             { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
-                            { cmd: "/scan champions league",desc: "Champions League edges" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
@@ -891,7 +891,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me to /scan markets, or type /checkslip sportybet CODE..."
+            placeholder="Ask me to /scan markets, /scan basketball, or type /checkslip sportybet CODE..."
             className="flex-1 min-w-0 bg-[#03060E] border border-white/10 focus:border-brand-teal/50 rounded-2xl px-4 md:px-6 py-3 md:py-4 text-[16px] md:text-sm text-white placeholder:text-slate-600 outline-none transition-all shadow-inner"
           />
           <button
