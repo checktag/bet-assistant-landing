@@ -364,6 +364,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
   const [activeLoader, setActiveLoader] = useState<LoaderType>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLinkRequired, setShowLinkRequired] = useState(false);
+  const [activeScanSport, setActiveScanSport] = useState<"soccer" | "basketball">("soccer");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -596,27 +597,75 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
                   {/* SCAN GROUP */}
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Globe className="w-3 h-3 text-brand-teal" />
-                      <span className="text-[9px] font-black text-brand-teal uppercase tracking-[0.2em]">Market Scan</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-3.5 h-3.5 text-brand-teal" />
+                        <span className="text-[9px] font-black text-brand-teal uppercase tracking-[0.2em]">Market Scan</span>
+                      </div>
                     </div>
+
+                    {/* Sport Tabs inside Dropdown */}
+                    <div className="grid grid-cols-2 p-0.5 bg-black/40 rounded-xl border border-white/5 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setActiveScanSport("soccer")}
+                        className={`py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
+                          activeScanSport === "soccer"
+                            ? "bg-brand-teal text-background shadow-[0_0_10px_rgba(0,198,186,0.3)]"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        ⚽ Soccer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveScanSport("basketball")}
+                        className={`py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
+                          activeScanSport === "basketball"
+                            ? "bg-brand-teal text-background shadow-[0_0_10px_rgba(0,198,186,0.3)]"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        🏀 Basketball
+                      </button>
+                    </div>
+
                     <div className="grid gap-1">
-                      {[
-                        { cmd: "/scan",          label: "Today's Scan (Soccer)", desc: "Top edges for next 24h" },
-                        { cmd: "/scan basketball", label: "Basketball Scan",    desc: "Top basketball edges" },
-                        { cmd: "/scan nba",      label: "NBA Scan",              desc: "NBA value picks" },
-                        { cmd: "/scan upcoming", label: "Upcoming 72h",         desc: "Value picks for next 3 days" },
-                        { cmd: "/scan weekend",  label: "Weekend fixtures",     desc: "Saturday & Sunday value" },
-                      ].map((a, i) => (
-                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
-                          className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
-                          <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd}</code>
-                          <div className="min-w-0">
-                            <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
-                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
-                          </div>
-                        </button>
-                      ))}
+                      {activeScanSport === "soccer" ? (
+                        [
+                          { cmd: "/scan",                 label: "Today's Soccer",    desc: "Top soccer edges (24h)" },
+                          { cmd: "/scan upcoming",        label: "Upcoming 72h",      desc: "All upcoming soccer picks" },
+                          { cmd: "/scan weekend",         label: "Weekend Fixtures",  desc: "Saturday & Sunday value" },
+                          { cmd: "/scan premier league ", label: "Premier League",    desc: "Scan EPL matches" },
+                          { cmd: "/scan champions league ",label: "Champions League",  desc: "Scan UEFA CL matches" },
+                        ].map((a, i) => (
+                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
+                            <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
+                              <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        [
+                          { cmd: "/scan basketball",          label: "Today's Basketball", desc: "Top basketball edges (24h)" },
+                          { cmd: "/scan nba",                 label: "NBA Scan",           desc: "NBA value picks" },
+                          { cmd: "/scan basketball upcoming", label: "Upcoming 72h",       desc: "Next 3 days basketball" },
+                          { cmd: "/scan basketball weekend",  label: "Weekend Basketball", desc: "Weekend basketball value" },
+                          { cmd: "/scan euroleague ",         label: "Euroleague Scan",    desc: "Scan Euroleague matches" },
+                        ].map((a, i) => (
+                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
+                            <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-bold text-white group-hover:text-brand-teal transition-colors truncate">{a.label}</div>
+                              <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
+                            </div>
+                          </button>
+                        ))
+                      )}
                     </div>
                   </div>
 
@@ -692,16 +741,32 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                       <div className="p-4 rounded-2xl bg-brand-teal/5 border border-brand-teal/15 space-y-3">
                         <div className="flex items-center gap-2">
                           <Globe className="w-3.5 h-3.5 text-brand-teal" />
-                          <span className="text-[10px] font-black text-brand-teal uppercase tracking-wider">Market Scan</span>
+                          <span className="text-[10px] font-black text-brand-teal uppercase tracking-wider">Market Scan Commands</span>
                         </div>
+                        
+                        <div className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-wide">⚽ Soccer Scans</div>
                         <div className="space-y-2">
                           {[
                             { cmd: "/scan",                 desc: "Global +EV edges — top market signals" },
-                            { cmd: "/scan basketball",      desc: "Scan today's basketball / NBA markets" },
                             { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
-                            { cmd: "/scan nba weekend",     desc: "Weekend NBA value fixtures" },
                             { cmd: "/scan upcoming",        desc: "All fixtures in the upcoming window" },
                             { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
+                          ].map((c, ci) => (
+                            <button key={ci} onClick={() => setInput(c.cmd)}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
+                              <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
+                              <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="text-[10px] font-bold text-slate-400 mt-3 uppercase tracking-wide">🏀 Basketball Scans</div>
+                        <div className="space-y-2">
+                          {[
+                            { cmd: "/scan basketball",      desc: "Scan today's basketball / NBA markets" },
+                            { cmd: "/scan nba",             desc: "Scan active NBA matches" },
+                            { cmd: "/scan nba weekend",     desc: "Weekend NBA value fixtures" },
+                            { cmd: "/scan basketball upcoming", desc: "All upcoming basketball games" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
