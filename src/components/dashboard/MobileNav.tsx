@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { LayoutDashboard, BarChart3, Settings, Radar, Menu, X, Crown, LogOut, ArrowRightLeft, Calculator, Trophy, Send, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -40,14 +40,19 @@ export default function MobileNav({
   const [telegramJoined, setTelegramJoined] = useState(initialTelegramJoined);
   const [username, setUsername] = useState(initialUsername);
 
+  const lastPulseToken = useRef<string | null>(null);
+
   useEffect(() => {
     const pulseCheck = async () => {
-      if (!(session as any)?.accessToken) return;
+      const token = (session as any)?.accessToken;
+      if (!token || lastPulseToken.current === token + pathname) return;
+      
+      lastPulseToken.current = token + pathname;
       
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
       try {
         const res = await axios.get(`${API_URL}/me`, {
-          headers: { Authorization: `Bearer ${(session as any).accessToken}` }
+          headers: { Authorization: `Bearer ${token}` }
         });
         const fresh = res.data;
         setCurrentCredits(fresh.credits);
@@ -63,7 +68,7 @@ export default function MobileNav({
     };
 
     pulseCheck();
-  }, [pathname, (session as any)?.accessToken, update]);
+  }, [pathname, (session as any)?.accessToken]);
 
   const handleSignOut = async () => {
     setIsDisconnecting(true);
