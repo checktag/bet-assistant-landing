@@ -82,12 +82,20 @@ export default function MobileNav({
     { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-5 h-5" /> },
     { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-5 h-5" /> },
     { name: "Settings",       path: isQuantRoute ? "/premiumquant/settings" : "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
+    { name: "Admin Panel",    path: "/admin",                 icon: <Zap className="w-5 h-5 text-brand-teal" />, adminOnly: true },
   ];
 
   // Filter items for specialized PremiumQuant view
-  const navItems = isQuantRoute 
-    ? allNavItems.filter(item => ["Quant Terminal", "Settings"].includes(item.name))
+  let navItems = isQuantRoute 
+    ? allNavItems.filter(item => ["Quant Terminal", "Settings", "Admin Panel"].includes(item.name))
     : allNavItems;
+
+  // Filter out admin items for non-admins
+  const sessionUser = session?.user as any;
+  const SUPER_ADMINS = ["official@ctts.io", "chinazhirno@gmail.com"];
+  const isUserAdmin = sessionUser?.is_admin || SUPER_ADMINS.includes(sessionUser?.email);
+  
+  navItems = navItems.filter(item => !item.adminOnly || isUserAdmin);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
