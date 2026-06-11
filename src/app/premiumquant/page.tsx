@@ -5,6 +5,7 @@ import AssistantChat from "@/components/chat/AssistantChat";
 import { Crown } from "lucide-react";
 import Link from "next/link";
 import DashboardOnboarding from "@/components/dashboard/DashboardOnboarding";
+import WorldCupBanner from "@/components/landing/WorldCupBanner";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -32,6 +33,9 @@ export default async function DashboardPage() {
         )}
       </header>
 
+      {/* World Cup 2026 Promotional Banner */}
+      <WorldCupBanner />
+
       <AssistantChat accessToken={(session as any).accessToken} modelVersion="grok-4.20-0309-reasoning" />
       
       <Suspense fallback={null}>
@@ -40,3 +44,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

@@ -446,6 +446,46 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
         // Sync Credits Pulse
         await update();
+      } else if (userMsg.toLowerCase().startsWith("/worldcup")) {
+        setActiveLoader("scan");
+        const parts = userMsg.split(" ");
+
+        // Extract risk keyword
+        const RISK_KEYWORDS: Record<string, string> = {
+          high: "high", "high-stake": "high", stake: "high",
+          moderate: "moderate", balanced: "moderate", mid: "moderate",
+          low: "low", spread: "low",
+        };
+        const riskArg = parts.slice(1).find(p => RISK_KEYWORDS[p.toLowerCase()]) || null;
+        const riskProfile = riskArg ? RISK_KEYWORDS[riskArg.toLowerCase()] : "moderate";
+
+        // Parse remaining arg as date
+        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()]);
+        let dateArg: string | null = null;
+        if (remaining[0] === "upcoming" || remaining[0] === "weekend") {
+          dateArg = remaining[0];
+        } else if (remaining[0]?.match(/\d{4}-\d{2}-\d{2}/)) {
+          dateArg = remaining[0];
+        }
+
+        const res = await axios.get(`${API_URL}/scan/worldcup`, {
+          params: { date: dateArg, risk: riskProfile },
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        const totalBets = res.data.bets?.length ?? 0;
+        const window = dateArg || "Today's Matches";
+
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: totalBets > 0
+            ? `🏆 **World Cup 2026 Scan Complete!** Found **${totalBets} +EV picks** for ${window}. Select a risk profile to filter and build your slip.`
+            : `🏆 **World Cup Mode Active** — No World Cup fixtures found for "${window}". The tournament may not have started yet, or no matches are scheduled in this window. Try \`/worldcup upcoming\` to look ahead.`,
+          type: "scan",
+          data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches, worldcup: true }
+        }]);
+
+        await update();
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
         setActiveLoader("checkslip");
         const parts = userMsg.split(" ");
@@ -671,7 +711,40 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
                   <div className="h-px bg-white/5" />
 
-                  {/* SLIP TOOLS GROUP */}
+                  {/* 🏆 WORLD CUP MODE GROUP */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">🏆</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ background: "linear-gradient(90deg, #f59e0b, #22c55e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>World Cup Mode</span>
+                      </div>
+                      <span className="text-[8px] font-black text-green-400 bg-green-400/10 border border-green-400/20 px-1.5 py-0.5 rounded-full animate-pulse">2026</span>
+                    </div>
+                    <div className="grid gap-1">
+                      {[
+                        { cmd: "/worldcup",          label: "Today's WC Games",   desc: "WC fixtures in the next 24h" },
+                        { cmd: "/worldcup upcoming", label: "Upcoming WC 72h",    desc: "Next 3 days of World Cup" },
+                        { cmd: "/worldcup weekend",  label: "Weekend WC Games",  desc: "Sat & Sun WC fixtures" },
+                        { cmd: "/worldcup high",     label: "High-Stake WC",     desc: "Filter to top WC edges" },
+                        { cmd: "/worldcup low",      label: "WC Spread Mode",    desc: "Max volume, more WC picks" },
+                      ].map((a, i) => (
+                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer group border border-transparent hover:border-yellow-500/25 hover:scale-[1.02] active:scale-[0.98]"
+                          style={{ background: 'transparent' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.04)')}
+                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          <code className="text-[10px] font-black px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>{a.cmd.trim()}</code>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-white truncate">{a.label}</div>
+                            <div className="text-[9px] text-slate-600 truncate">{a.desc}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/5" />
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-3 h-3 text-brand-blue" />
@@ -755,6 +828,25 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
+                              <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="text-[10px] font-bold text-slate-400 mt-3 uppercase tracking-wide">🏆 World Cup Mode</div>
+                        <div className="space-y-2">
+                          {[
+                            { cmd: "/worldcup",          desc: "Today's World Cup fixtures & value picks" },
+                            { cmd: "/worldcup upcoming", desc: "Next 72h of World Cup matches" },
+                            { cmd: "/worldcup weekend",  desc: "Weekend World Cup fixtures" },
+                            { cmd: "/worldcup 2026-07-06", desc: "WC games on a specific date (YYYY-MM-DD)" },
+                          ].map((c, ci) => (
+                            <button key={ci} onClick={() => setInput(c.cmd)}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group border border-transparent hover:border-yellow-500/25"
+                              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.06)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = '')}
+                            >
+                              <code className="text-[10px] font-black font-mono shrink-0" style={{ color: '#f59e0b' }}>{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
                             </button>
                           ))}
