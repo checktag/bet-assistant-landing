@@ -474,13 +474,25 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         });
 
         const totalBets = res.data.bets?.length ?? 0;
-        const window = dateArg || "Today's Matches";
+
+        // Build context-aware empty-state hint
+        const windowLabel = dateArg === "upcoming"
+          ? "the next 72 hours"
+          : dateArg === "weekend"
+          ? "the coming weekend"
+          : dateArg?.match(/\d{4}-\d{2}-\d{2}/)
+          ? dateArg
+          : "today";
+
+        const nextHint = dateArg === "upcoming" || dateArg?.match(/\d{4}-\d{2}-\d{2}/)
+          ? "Try `/worldcup weekend` or a different date."
+          : "Try `/worldcup upcoming` to see the next 72h of fixtures.";
 
         setMessages(prev => [...prev, {
           role: "assistant",
           content: totalBets > 0
-            ? `🏆 **World Cup 2026 Scan Complete!** Found **${totalBets} +EV picks** for ${window}. Select a risk profile to filter and build your slip.`
-            : `🏆 **World Cup Mode Active** — No World Cup fixtures found for "${window}". The tournament may not have started yet, or no matches are scheduled in this window. Try \`/worldcup upcoming\` to look ahead.`,
+            ? `🏆 **World Cup 2026 Scan Complete!** Found **${totalBets} +EV picks** for ${windowLabel}. Select a risk profile to filter and build your slip.`
+            : `🏆 **World Cup Mode** — No fixtures scheduled for **${windowLabel}**. ${nextHint}`,
           type: "scan",
           data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches, worldcup: true }
         }]);
