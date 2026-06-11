@@ -64,16 +64,11 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* World Cup 2026 Sticky Announcement Banner */}
-      <div className="fixed top-[65px] left-0 right-0 z-40 px-4 md:px-6 pt-2">
-        <WorldCupBanner />
-      </div>
-
       {/* Hero Section with Parallax */}
       <motion.section
         ref={ref}
         style={{ y: yHero, opacity: opacityHero }}
-        className="relative flex flex-col items-center justify-center min-h-screen px-4 pt-44 pb-20 z-10"
+        className="relative flex flex-col items-center justify-center min-h-screen px-4 pt-32 pb-20 z-10"
       >
         {/* Floating Narrative Objects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -194,6 +189,11 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </motion.section>
+
+      {/* World Cup 2026 Promotional Banner — between hero and LiveSlipFeed */}
+      <div className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto -mt-4 mb-4">
+        <WorldCupBanner />
+      </div>
 
       <LiveSlipFeed />
 
