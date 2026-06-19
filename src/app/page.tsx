@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, Variants, AnimatePresence } from "framer-motion";
 import { ArrowRight, Bot, Zap, Calculator, TerminalSquare, Activity, Globe, Lock, CheckCircle2, ShieldCheck, Banknote, CircleDollarSign, Coins, TrendingDown, AlertOctagon, TrendingUp, Shield, Cpu, Network, ChevronDown, Star, MessageSquare, PlusCircle, Trash2, BarChart2, DollarSign } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 // Smooth Animation Variants that satisfy strict TypeScript typing
@@ -13,6 +14,7 @@ const fadeUp: Variants = {
 import { CalcWrapper } from "@/components/calculator/CalculatorComponents";
 import LiveSlipFeed from "@/components/landing/LiveSlipFeed";
 import WorldCupBanner from "@/components/landing/WorldCupBanner";
+import PWAInstallOverlay from "@/components/landing/PWAInstallOverlay";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -28,11 +30,27 @@ const scaleIn: Variants = {
 };
 
 export default function Home() {
+  const router = useRouter();
+  const [showInstallOverlay, setShowInstallOverlay] = useState(false);
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const yHero = useTransform(scrollYProgress, [0, 1], ["0%", "-20%"]);
   const opacityHero = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const handleLaunchTerminal = (e: React.MouseEvent) => {
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 768 || /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+      const isStandalone = 
+        window.matchMedia("(display-mode: standalone)").matches || 
+        (window.navigator as any).standalone;
+      
+      if (isMobile && !isStandalone) {
+        e.preventDefault();
+        setShowInstallOverlay(true);
+      }
+    }
+  };
 
   return (
     <main className="relative min-h-screen bg-[#03060E] text-slate-200 overflow-hidden selection:bg-brand-teal selection:text-background">
