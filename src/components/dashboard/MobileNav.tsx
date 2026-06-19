@@ -102,7 +102,18 @@ export default function MobileNav({
   
   navItems = navItems.filter(item => !item.adminOnly || isUserAdmin);
 
+  const isQuantActive = pathname === "/premiumquant" || pathname === "/dashboard";
+  const isConvertActive = pathname === "/dashboard/convert";
+  const isTrackerActive = pathname === "/dashboard/tracker";
+
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const tabItemClass = (isActive: boolean) =>
+    `flex flex-col items-center justify-center gap-1 flex-1 h-full py-1 text-[9px] font-black uppercase tracking-widest transition-all duration-200 cursor-pointer ${
+      isActive
+        ? "text-brand-blue scale-105"
+        : "text-slate-400 active:text-white"
+    }`;
 
   return (
     <div className="md:hidden">
@@ -112,7 +123,7 @@ export default function MobileNav({
         subMessage="Terminating mobile quant link and clearing terminal cache..." 
       />
       {/* Top Bar */}
-      <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#060913] backdrop-blur-xl sticky top-0 z-[100]">
+      <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]/90 backdrop-blur-xl sticky top-0 z-[100]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-white/10">
             <img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" />
@@ -120,17 +131,21 @@ export default function MobileNav({
           <span className="font-bold tracking-tight text-white text-sm">Bet Assistant</span>
         </div>
         
-        <button 
-          onClick={toggleMenu}
-          className="p-2 rounded-xl bg-white/5 border border-white/10 text-white transition-all active:scale-95"
-        >
-          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Credits & Profile info in top bar */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-teal/10 border border-brand-teal/20">
+            <Zap className="w-3.5 h-3.5 text-brand-teal animate-pulse" />
+            <span className="text-[11px] font-black text-white">{currentCredits.toLocaleString()}</span>
+          </div>
+          <div className="w-7 h-7 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold text-xs">
+            {userInitial}
+          </div>
+        </div>
       </div>
 
       {/* Overlay Menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-[90] bg-[#03060E] pt-20 px-6 flex flex-col overflow-y-auto pb-10 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="fixed inset-0 z-[90] bg-[#03060E] pt-20 px-6 flex flex-col overflow-y-auto pb-[calc(72px+env(safe-area-inset-bottom)+20px)] animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="space-y-2">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-2">Navigation</p>
             {navItems.map((item) => {
@@ -232,6 +247,62 @@ export default function MobileNav({
           </div>
         </div>
       )}
+
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-[100] h-[72px] pb-[env(safe-area-inset-bottom)] border-t border-white/5 bg-[#060913]/90 backdrop-blur-md flex items-center justify-around px-2">
+        {/* Terminal / Dashboard Tab */}
+        <Link
+          href={isQuantRoute ? "/premiumquant" : "/dashboard"}
+          onClick={() => setIsOpen(false)}
+          className={tabItemClass(isQuantActive)}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span>Terminal</span>
+        </Link>
+
+        {/* Convert Tab */}
+        <Link
+          href="/dashboard/convert"
+          onClick={() => setIsOpen(false)}
+          className={tabItemClass(isConvertActive)}
+        >
+          <ArrowRightLeft className="w-5 h-5" />
+          <span>Convert</span>
+        </Link>
+
+        {/* Tracker Tab */}
+        <Link
+          href={isPremium ? "/dashboard/tracker" : "#"}
+          onClick={(e) => {
+            if (!isPremium) {
+              e.preventDefault();
+              alert("PRO membership required for Slip Tracker.");
+            } else {
+              setIsOpen(false);
+            }
+          }}
+          className={tabItemClass(isTrackerActive)}
+        >
+          <div className="relative">
+            <Radar className="w-5 h-5" />
+            {!isPremium && (
+              <span className="absolute -top-1 -right-2 bg-yellow-500 rounded-full p-0.5 border border-[#060913]">
+                <Crown className="w-1.5 h-1.5 text-[#060913]" />
+              </span>
+            )}
+          </div>
+          <span>Tracker</span>
+        </Link>
+
+        {/* Menu Tab */}
+        <button
+          onClick={toggleMenu}
+          className={tabItemClass(isOpen)}
+        >
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          <span>Menu</span>
+        </button>
+      </div>
     </div>
   );
 }

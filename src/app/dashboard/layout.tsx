@@ -47,7 +47,7 @@ export default async function DashboardLayout({
         <div className="fixed top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-brand-teal/5 blur-[120px] rounded-full pointer-events-none z-0" />
         <div className="fixed bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none z-0" />
         
-        <div className="relative z-10 w-full">
+        <div className="relative z-10 w-full pb-[calc(72px+env(safe-area-inset-bottom)+20px)] md:pb-0">
           <PageTransitionWrapper>{children}</PageTransitionWrapper>
         </div>
       </main>
