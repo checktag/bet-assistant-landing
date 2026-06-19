@@ -1,12 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-});
 
 export const viewport: Viewport = {
   themeColor: "#03060E",
@@ -38,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} h-full antialiased bg-[#03060E] text-slate-200`}
+      className="h-full antialiased bg-[#03060E] text-slate-200"
     >
       <body className="min-h-full flex flex-col font-sans">
         <RegisterServiceWorker />
