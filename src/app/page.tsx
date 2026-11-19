@@ -530,10 +530,10 @@ export default function Home() {
                 )
               },
               {
-                name: "1xBet", logo: (
+                name: "MSport", logo: (
                   <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
                     <rect width="40" height="40" rx="8" fill="#1b3566" />
-                    <text x="20" y="27" textAnchor="middle" fontSize="12" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">1xBet</text>
+                    <text x="20" y="27" textAnchor="middle" fontSize="11" fontWeight="900" fill="#f5c518" fontFamily="Arial, sans-serif">MSport</text>
                   </svg>
                 )
               },
@@ -695,7 +695,7 @@ export default function Home() {
               { q: "How does the market scanner work?", a: "Type /scan in the chat (or click Quick Actions). The engine fetches live odds from global leagues, runs each bet through our Poisson and Gaussian probability models to estimate a 'true' probability, and compares it to the bookmaker's implied probability. Only fixtures with a positive EV above our minimum threshold AND above our confidence floor are shown. We also refine results with real historical team form data." },
               { q: "Is this a Telegram bot or a website?", a: "Both. The core AI engine runs on Telegram for instant mobile notifications and quick commands on the go. The web dashboard gives you a richer interface with market scan results, slip analysis, the bet calculator, and the premium slip tracker. You can link your Telegram account to your web dashboard for seamless push notifications." },
               { q: "How do I link my Telegram account?", a: "Start a conversation with our Telegram bot and it will generate a secure link code for you. Then, on your dashboard, go to Settings and enter the code. Your accounts are merged instantly. Premium subscribers can then receive AI push notifications directly on Telegram whenever an opportunity or cashout signal is detected on their tracked slips." },
-              { q: "What platforms are supported for booking codes?", a: "We currently support SportyBet, Bet9ja, 1xBet, Betway, BetWinner, MSport, and 22Bet. You can generate booking codes for all platforms simultaneously with the 'Generate All Booking Codes' button after a scan, or convert a code from one platform to another with the /convert command." },
+              { q: "What platforms are supported for booking codes?", a: "We currently support SportyBet, Bet9ja, MSport and Betika. After a scan you get codes for SportyBet, Bet9ja and MSport in one tap, and you can convert a code between any of the four with the /convert command." },
               { q: "What is the Slip Tracker and who can use it?", a: "The Slip Tracker is a Premium-exclusive feature where you submit your active booking code and the AI continuously monitors your games. When it detects a momentum shift, adverse variance, or a cashout opportunity, it sends you a push notification via Telegram with specific reasons. You can also manually mark slips as Won, Lost, or Cashed Out to keep your records." },
               { q: "What is the difference between Standard and Premium?", a: "Standard access gives you full access to market scanning, slip analysis, booking code generation, and AI chat, powered by your credit balance. Joining Telegram injections 100 free credits immediately. Premium adds: Slip Tracking with Telegram push notifications, re-analysis of active slips, priority scan access during high-traffic periods, and early access to new features like advanced league filters and sharps tracking." },
               { q: "Does the AI guarantee profits?", a: "No. No betting tool can guarantee profits, and anyone who says otherwise is lying to you. What we do is provide a statistically sound mathematical edge on each bet we recommend. EV betting is a long-run strategy — over hundreds of bets, the mathematics will work in your favour. A single session can still result in a loss. Use proper bankroll management (check our Kelly Criterion Calculator!) and never stake money you can't afford to lose." },

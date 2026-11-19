@@ -14,10 +14,6 @@ const platforms = [
   { id: "bet9ja",    name: "Bet9ja",    emoji: "🇳🇬" },
   { id: "msport",    name: "MSport",    emoji: "⚽" },
   { id: "betika",    name: "Betika",    emoji: "🇰🇪" },
-  { id: "1xbet",     name: "1xBet",     emoji: "🌍" },
-  { id: "betway",    name: "Betway",    emoji: "⚡" },
-  { id: "betwinner", name: "BetWinner", emoji: "🎯" },
-  { id: "22bet",     name: "22Bet",     emoji: "🎰" },
 ];
 
 export default function CodeConverter({ accessToken }: CodeConverterProps) {

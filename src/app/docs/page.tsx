@@ -60,7 +60,7 @@ export default function Documentation() {
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">3. Auto-Generate & Analyze Slips</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-4">
-              Found your edges? One click translates the AI's curated picks into a universal <strong>Booking Code</strong> compatible with 7+ platforms (SportyBet, 1xBet, Bet9ja). <br/><br/>If you already have a slip from external sources, run <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/checkslip sportybet [CODE]</code>. The AI will tear the slip down game-by-game to expose any negative-value traps set by bookmakers or calculate the true win probability. You can even use <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/convert</code> to move a code between platforms instantly.
+              Found your edges? One click translates the AI's curated picks into a universal <strong>Booking Code</strong> for SportyBet, Bet9ja, MSport and Betika. <br/><br/>If you already have a slip from external sources, run <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/checkslip sportybet [CODE]</code>. The AI will tear the slip down game-by-game to expose any negative-value traps set by bookmakers or calculate the true win probability. You can even use <code className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">/convert</code> to move a code between platforms instantly.
             </p>
           </div>
 

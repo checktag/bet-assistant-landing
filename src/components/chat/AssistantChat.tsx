@@ -210,14 +210,14 @@ const CodeGenLoader = () => (
           "Building multi-platform slip...",
           "Encoding SportyBet code...",
           "Encoding Bet9ja code...",
-          "Encoding 1xBet code...",
+          "Encoding MSport code...",
           "Finalizing booking codes...",
         ]} />
       </div>
     </div>
     <ProgressBar color="bg-gradient-to-r from-yellow-400 to-amber-500" duration={12000} />
     <div className="flex justify-between text-[9px] text-slate-600">
-      <span>SportyBet</span><span>Bet9ja</span><span>1xBet</span>
+      <span>SportyBet</span><span>Bet9ja</span><span>MSport</span>
     </div>
   </div>
 );
@@ -730,7 +730,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                       {[
                         { cmd: "/checkslip sportybet ",  label: "Check SportyBet",  desc: "Paste your code after space" },
                         { cmd: "/checkslip bet9ja ",     label: "Check Bet9ja",     desc: "AI edge score per game" },
-                        { cmd: "/checkslip 1xbet ",      label: "Check 1xBet",      desc: "Cashout recommendation" },
+                        { cmd: "/checkslip msport ",      label: "Check MSport",      desc: "Cashout recommendation" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
                           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-white/5 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
@@ -855,8 +855,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                           {[
                             { cmd: "/checkslip sportybet ABC123", desc: "Decode & analyse a SportyBet slip" },
                             { cmd: "/checkslip bet9ja XYZ789",   desc: "Analyse a Bet9ja booking code" },
-                            { cmd: "/checkslip betway CODE",     desc: "Betway slip EV + cashout advice" },
-                            { cmd: "/checkslip 1xbet CODE",      desc: "1xBet slip breakdown" },
+                            { cmd: "/checkslip betika CODE",     desc: "Betika slip EV + cashout advice" },
+                            { cmd: "/checkslip msport CODE",      desc: "MSport slip breakdown" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-blue/10 border border-transparent hover:border-brand-blue/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
@@ -877,8 +877,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                           {[
                             { cmd: "/convert sportybet bet9ja CODE",  desc: "Move a slip from SportyBet to Bet9ja" },
                             { cmd: "/convert bet9ja sportybet CODE",  desc: "Bet9ja → SportyBet" },
-                            { cmd: "/convert sportybet betway CODE",  desc: "SportyBet → Betway" },
-                            { cmd: "/convert sportybet 1xbet CODE",   desc: "SportyBet → 1xBet" },
+                            { cmd: "/convert sportybet msport CODE",  desc: "SportyBet → MSport" },
+                            { cmd: "/convert bet9ja betika CODE",    desc: "Bet9ja → Betika" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
