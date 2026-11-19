@@ -1,439 +1,251 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Trophy, Crown, Zap, TrendingUp, Loader2, Medal, ShieldCheck,
-  Plus, CheckCircle2, XCircle, Clock, Star, ChevronRight, Eye, Send,
-} from "lucide-react";
 import { useSession } from "next-auth/react";
+import { CheckCircle2, Clock, Copy, Loader2, Send, ShieldCheck, Trophy, UserPlus, UserCheck, Users, XCircle } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
+const BOOKIES = [
+  { id: "sportybet", name: "SportyBet" }, { id: "bet9ja", name: "Bet9ja" },
+  { id: "msport", name: "MSport" }, { id: "betika", name: "Betika" },
+];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface LeaderEntry {
-  user_id: number;
-  username: string;
-  total: number;
-  wins: number;
-  losses: number;
-  win_rate: number;
-  avg_odds: number;
-  roi: number;
+interface Leg { match: string; league?: string; kickoff?: string; market: string; pick: string; odds: number; state?: string; score?: string; result?: string }
+interface Record { settled: number; wins: number; losses: number; win_rate: number | null; roi: number | null; streak: number; followers: number; pending?: number }
+interface Slip {
+  id: number; username: string; platform: string; code: string; legs: Leg[]; legs_count: number; total_odds: number;
+  probability: number | null; note?: string; status: string; tails: number; posted_at: string; author: Record; following: boolean; mine: boolean;
+}
+interface Rank extends Record { user_id: number; username: string; following: boolean; me: boolean }
+
+const errText = (e: unknown) => (axios.isAxiosError(e) && typeof e.response?.data?.detail === "string" ? e.response.data.detail : "Something went wrong. Please try again.");
+
+function StatusBadge({ status }: { status: string }) {
+  const map: { [k: string]: { cls: string; icon: React.ReactNode; label: string } } = {
+    won: { cls: "text-green-400 border-green-400/30 bg-green-400/10", icon: <CheckCircle2 className="w-3 h-3" />, label: "Won" },
+    lost: { cls: "text-red-400 border-red-400/30 bg-red-400/10", icon: <XCircle className="w-3 h-3" />, label: "Lost" },
+    pending: { cls: "text-slate-300 border-white/15 bg-white/5", icon: <Clock className="w-3 h-3" />, label: "Open" },
+  };
+  const s = map[status] || { cls: "text-slate-400 border-white/10 bg-white/5", icon: <Clock className="w-3 h-3" />, label: status };
+  return <span className={`inline-flex items-center gap-1 px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider ${s.cls}`}>{s.icon}{s.label}</span>;
 }
 
-interface FeedPick {
-  id: number;
-  username: string;
-  match: string;
-  market: string;
-  odds: number;
-  confidence: number | null;
-  note: string | null;
-  posted_at: string;
+function RecordLine({ r }: { r: Record }) {
+  if (!r || !r.settled) return <span className="text-[10px] text-slate-500">No settled slips yet</span>;
+  return (
+    <span className="text-[10px] text-slate-400">
+      {r.wins}W–{r.losses}L · {r.win_rate}% hit · <span className={(r.roi ?? 0) >= 0 ? "text-green-400" : "text-red-400"}>{(r.roi ?? 0) > 0 ? "+" : ""}{r.roi}% return</span>
+    </span>
+  );
 }
 
-interface MyPick {
-  id: number;
-  match: string;
-  market: string;
-  odds: number;
-  confidence: number | null;
-  outcome: "pending" | "won" | "lost";
-  created_at: string;
-}
-
-type Tab = "leaderboard" | "feed" | "my-picks";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const rankColor = (i: number) =>
-  i === 0 ? "text-yellow-400" : i === 1 ? "text-slate-300" : i === 2 ? "text-amber-500" : "text-slate-500";
-
-const rankBg = (i: number) =>
-  i === 0 ? "bg-yellow-400/10" : i === 1 ? "bg-slate-300/10" : i === 2 ? "bg-amber-500/10" : "bg-white/5";
-
-const outcomeStyle = (o: string) =>
-  o === "won"
-    ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
-    : o === "lost"
-    ? "text-red-400 bg-red-400/10 border-red-400/20"
-    : "text-slate-400 bg-white/5 border-white/10";
-
-export default function LeaderboardPage() {
+export default function CommunityPage() {
   const { data: session } = useSession();
-  const token = (session as any)?.accessToken;
+  const token = (session as { accessToken?: string } | null)?.accessToken;
+  const headers = { Authorization: `Bearer ${token}` };
 
-  const [activeTab, setActiveTab] = useState<Tab>("leaderboard");
-  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
-  const [feed, setFeed] = useState<FeedPick[]>([]);
-  const [myPicks, setMyPicks] = useState<MyPick[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<"all" | "following" | "mine" | "board">("all");
+  const [slips, setSlips] = useState<Slip[]>([]);
+  const [board, setBoard] = useState<Rank[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ platform: "sportybet", code: "", note: "" });
+  const [posting, setPosting] = useState(false);
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const [tailPlatform, setTailPlatform] = useState("sportybet");
+  const [tailed, setTailed] = useState<{ [id: number]: { code?: string; error?: string; skipped?: string[]; loading?: boolean } }>({});
 
-  // Share pick form
-  const [shareForm, setShareForm] = useState({ match: "", market: "", odds: "", note: "" });
-  const [sharing, setSharing] = useState(false);
-  const [shareMsg, setShareMsg] = useState("");
-
-  // Resolve pick
-  const [resolving, setResolving] = useState<number | null>(null);
-
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-
-  const fetchLeaderboard = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_URL}/tipster/leaderboard`);
-      setLeaders(res.data);
-    } catch { /* silent */ } finally { setLoading(false); }
-  }, []);
-
-  const fetchFeed = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_URL}/tipster/feed`);
-      setFeed(res.data);
-    } catch { /* silent */ } finally { setLoading(false); }
-  }, []);
-
-  const fetchMyPicks = useCallback(async () => {
+  const load = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/tipster/my-picks`, { headers: authHeader });
-      setMyPicks(res.data);
-    } catch { /* silent */ } finally { setLoading(false); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+      if (tab === "board") {
+        setBoard((await axios.get(`${API_URL}/social/leaderboard`, { headers })).data);
+      } else {
+        setSlips((await axios.get(`${API_URL}/social/feed`, { headers, params: { scope: tab } })).data);
+      }
+    } catch (e) {
+      setNotice({ ok: false, text: errText(e) });
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, tab]);
 
-  useEffect(() => {
-    if (activeTab === "leaderboard") fetchLeaderboard();
-    else if (activeTab === "feed") fetchFeed();
-    else fetchMyPicks();
-  }, [activeTab, fetchLeaderboard, fetchFeed, fetchMyPicks]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleShare = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token) return;
-    setSharing(true); setShareMsg("");
+  const post = async () => {
+    if (!form.code.trim()) return;
+    setPosting(true); setNotice(null);
     try {
-      await axios.post(`${API_URL}/tipster/share`, {
-        match: shareForm.match,
-        market: shareForm.market,
-        odds: parseFloat(shareForm.odds),
-        note: shareForm.note || undefined,
-      }, { headers: authHeader });
-      setShareMsg("✅ Pick shared to the leaderboard!");
-      setShareForm({ match: "", market: "", odds: "", note: "" });
-      fetchMyPicks();
-    } catch (err: any) {
-      setShareMsg(`❌ ${err?.response?.data?.detail || "Failed to share pick."}`);
-    } finally { setSharing(false); }
+      await axios.post(`${API_URL}/social/post`, { platform: form.platform, code: form.code.trim(), note: form.note.trim() || null }, { headers });
+      setForm({ ...form, code: "", note: "" });
+      setNotice({ ok: true, text: "Posted. Your followers were notified and the result will be verified automatically." });
+      if (tab === "board") setTab("mine"); else load();
+    } catch (e) {
+      setNotice({ ok: false, text: errText(e) });
+    } finally {
+      setPosting(false);
+    }
   };
 
-  const handleResolve = async (pickId: number, outcome: "won" | "lost") => {
-    if (!token) return;
-    setResolving(pickId);
+  const toggleFollow = async (username: string, following: boolean) => {
     try {
-      await axios.post(`${API_URL}/tipster/resolve`, { pick_id: pickId, outcome }, { headers: authHeader });
-      setMyPicks(prev => prev.map(p => p.id === pickId ? { ...p, outcome } : p));
-    } catch { /* silent */ } finally { setResolving(null); }
+      await axios({ method: following ? "delete" : "post", url: `${API_URL}/social/follow/${encodeURIComponent(username)}`, headers });
+      setSlips(prev => prev.map(s => (s.username === username ? { ...s, following: !following } : s)));
+      setBoard(prev => prev.map(b => (b.username === username ? { ...b, following: !following } : b)));
+    } catch (e) {
+      setNotice({ ok: false, text: errText(e) });
+    }
   };
 
-  const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "leaderboard", label: "Leaderboard", icon: <Trophy className="w-3.5 h-3.5" /> },
-    { id: "feed",        label: "Copy Feed",   icon: <Eye className="w-3.5 h-3.5" /> },
-    { id: "my-picks",   label: "My Picks",    icon: <Star className="w-3.5 h-3.5" /> },
-  ];
+  const tail = async (id: number) => {
+    setTailed(prev => ({ ...prev, [id]: { loading: true } }));
+    try {
+      const res = await axios.post(`${API_URL}/social/tail/${id}`, { platform: tailPlatform }, { headers });
+      setTailed(prev => ({ ...prev, [id]: { code: res.data.code, skipped: res.data.skipped } }));
+    } catch (e) {
+      setTailed(prev => ({ ...prev, [id]: { error: errText(e) } }));
+    }
+  };
+
+  const tabs = [
+    { id: "all", label: "Everyone" }, { id: "following", label: "Following" },
+    { id: "mine", label: "My slips" }, { id: "board", label: "Leaderboard" },
+  ] as const;
+  const input = "bg-black/30 border border-white/10 px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-brand-teal/60";
 
   return (
-    <div className="max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-0 space-y-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            <span className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em]">Copy-Betting Arena</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none mb-2">
-            Top <span className="text-gradient">Tipsters</span>
-          </h1>
-          <p className="text-sm text-slate-400">Share picks publicly · Copy winners · Build your reputation.</p>
-        </div>
-        <div className="px-4 py-2 rounded-xl bg-brand-teal/10 border border-brand-teal/20 text-brand-teal text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-          <Zap className="w-4 h-4" /> Live Performance Data
-        </div>
+    <div className="w-full max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-0 space-y-6">
+      <header>
+        <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight text-gradient mb-1">Community</h1>
+        <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" /> Every result here is read from the bookmaker. Nobody marks their own slips.
+        </p>
       </header>
 
-      {/* Tab switcher */}
-      <div className="flex gap-1 p-1 bg-black/40 rounded-2xl border border-white/5">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-              activeTab === t.id
-                ? "bg-brand-teal text-background shadow-[0_0_20px_rgba(0,198,186,0.25)]"
-                : "text-slate-500 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            {t.icon} {t.label}
+      <section className="bg-[#0A0F1C] border border-white/10 p-4 md:p-5 space-y-3">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Post a slip to your followers</p>
+        <div className="flex flex-col md:flex-row gap-2">
+          <select value={form.platform} onChange={e => setForm({ ...form, platform: e.target.value })} className={input}>
+            {BOOKIES.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+          <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} placeholder="Booking code" className={`${input} md:w-44 font-mono`} />
+          <input value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Note (optional)" maxLength={280} className={`${input} flex-1`} />
+          <button onClick={post} disabled={posting || !form.code.trim()} className="px-5 py-2.5 bg-brand-teal text-background font-black text-xs uppercase tracking-wider disabled:opacity-40 flex items-center justify-center gap-2">
+            {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Post
           </button>
-        ))}
+        </div>
+        <p className="text-[10px] text-slate-500">Only slips whose games have not started can be posted.</p>
+        {notice && <p className={`text-xs ${notice.ok ? "text-green-400" : "text-red-400"}`}>{notice.text}</p>}
+      </section>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex border border-white/10">
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} className={`px-3 md:px-4 py-2 text-[11px] font-bold uppercase tracking-wider ${tab === t.id ? "bg-brand-teal text-background" : "text-slate-400 hover:text-white"}`}>{t.label}</button>
+          ))}
+        </div>
+        {tab !== "board" && (
+          <label className="flex items-center gap-2 text-[11px] text-slate-400">Tail to
+            <select value={tailPlatform} onChange={e => setTailPlatform(e.target.value)} className={`${input} py-1.5 text-xs`}>
+              {BOOKIES.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </label>
+        )}
       </div>
 
-      {/* ── LEADERBOARD TAB ────────────────────────────────────────────────── */}
-      {activeTab === "leaderboard" && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-32 text-slate-500">
-                <Loader2 className="w-8 h-8 animate-spin mb-4 text-brand-teal" />
-                <p className="text-sm font-medium">Ranking tipsters...</p>
-              </div>
-            ) : leaders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-32 text-slate-500">
-                <Trophy className="w-12 h-12 mb-4 opacity-20" />
-                <p className="text-sm font-medium">No ranked tipsters yet.</p>
-                <p className="text-xs mt-1">Share 3+ picks to appear here.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-white/5 bg-white/2">
-                      {["Rank", "Tipster", "Win Rate", "ROI", "Picks", "Avg Odds"].map(h => (
-                        <th key={h} className="px-4 md:px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <AnimatePresence>
-                      {leaders.map((u, i) => (
-                        <motion.tr
-                          key={u.user_id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          className="group border-b border-white/5 hover:bg-white/[0.02] transition-colors"
-                        >
-                          <td className="px-4 md:px-6 py-5">
-                            {i < 3 ? (
-                              <Medal className={`w-5 h-5 ${rankColor(i)}`} />
-                            ) : (
-                              <span className="text-slate-500 font-mono text-sm">#{i + 1}</span>
-                            )}
-                          </td>
-                          <td className="px-4 md:px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${rankBg(i)} ${rankColor(i)}`}>
-                                {u.username[0]?.toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="text-sm font-bold text-white group-hover:text-brand-teal transition-colors">{u.username}</div>
-                                <div className="text-[10px] text-slate-500">{u.wins}W / {u.losses}L</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 md:px-6 py-5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-brand-blue to-brand-teal rounded-full" style={{ width: `${u.win_rate}%` }} />
-                              </div>
-                              <span className="text-sm font-black text-white">{u.win_rate}%</span>
-                            </div>
-                          </td>
-                          <td className="px-4 md:px-6 py-5">
-                            <span className={`text-sm font-black ${u.roi >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                              {u.roi >= 0 ? "+" : ""}{u.roi}%
-                            </span>
-                          </td>
-                          <td className="px-4 md:px-6 py-5">
-                            <span className="text-sm font-mono text-slate-300">{u.total}</span>
-                          </td>
-                          <td className="px-4 md:px-6 py-5">
-                            <span className="text-sm font-mono text-slate-300">{u.avg_odds.toFixed(2)}</span>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Info cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/5 flex gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-teal/10 flex items-center justify-center shrink-0">
-                <Medal className="w-6 h-6 text-brand-teal" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold mb-1">Seasonal Rewards</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">Top 3 tipsters each month receive credit boosts and exclusive AI market signals.</p>
-              </div>
-            </div>
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/5 flex gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-6 h-6 text-brand-blue" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold mb-1">Verified Performance</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">Every ranking is verified by the Bet Assistant tracking engine for absolute integrity.</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── COPY FEED TAB ──────────────────────────────────────────────────── */}
-      {activeTab === "feed" && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-          {loading ? (
-            <div className="flex justify-center py-20 text-slate-500">
-              <Loader2 className="w-8 h-8 animate-spin text-brand-teal" />
-            </div>
-          ) : feed.length === 0 ? (
-            <div className="flex flex-col items-center py-20 text-slate-500">
-              <Eye className="w-12 h-12 mb-4 opacity-20" />
-              <p className="text-sm">No live picks right now.</p>
-            </div>
-          ) : (
-            feed.map(pick => (
-              <motion.div
-                key={pick.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-2xl bg-[#0A0F1C]/80 border border-white/8 flex items-center justify-between gap-4"
-              >
+      {loading ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand-teal" /></div>
+      ) : tab === "board" ? (
+        board.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-16">The leaderboard opens once someone has 3 settled slips.</p>
+        ) : (
+          <div className="border border-white/10 divide-y divide-white/5">
+            {board.map((b, i) => (
+              <div key={b.user_id} className="flex items-center gap-3 p-4 bg-[#0A0F1C]">
+                <span className="w-7 text-sm font-black text-slate-500">{i === 0 ? <Trophy className="w-4 h-4 text-yellow-400" /> : i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 rounded-full bg-brand-blue/20 text-brand-blue flex items-center justify-center text-[10px] font-black shrink-0">
-                      {pick.username[0]?.toUpperCase()}
-                    </div>
-                    <span className="text-[11px] font-bold text-brand-teal">{pick.username}</span>
-                    <span className="text-[10px] text-slate-600">·</span>
-                    <span className="text-[10px] text-slate-500">{new Date(pick.posted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                  </div>
-                  <p className="text-sm font-bold text-white truncate">{pick.match}</p>
-                  <p className="text-[11px] text-slate-400">{pick.market}</p>
-                  {pick.note && <p className="text-[10px] text-slate-500 italic mt-1 truncate">"{pick.note}"</p>}
+                  <p className="text-sm font-bold text-white truncate">@{b.username}{b.me && <span className="text-slate-500 font-normal"> (you)</span>}</p>
+                  <RecordLine r={b} />
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="text-lg font-black text-brand-teal">{pick.odds.toFixed(2)}</div>
-                  {pick.confidence && (
-                    <div className="text-[10px] text-slate-500">{pick.confidence}% conf.</div>
-                  )}
-                </div>
-              </motion.div>
-            ))
-          )}
-        </motion.div>
-      )}
-
-      {/* ── MY PICKS TAB ───────────────────────────────────────────────────── */}
-      {activeTab === "my-picks" && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          {/* Share a Pick form */}
-          {token && (
-            <div className="p-5 rounded-2xl bg-[#0A0F1C]/80 border border-brand-teal/20 space-y-4">
-              <div className="flex items-center gap-2">
-                <Plus className="w-4 h-4 text-brand-teal" />
-                <span className="text-[11px] font-black text-brand-teal uppercase tracking-widest">Share a Pick</span>
+                <span className="hidden md:flex items-center gap-1 text-[10px] text-slate-500"><Users className="w-3 h-3" />{b.followers}</span>
+                {!b.me && (
+                  <button onClick={() => toggleFollow(b.username, b.following)} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider border ${b.following ? "border-white/15 text-slate-300" : "border-brand-teal text-brand-teal"}`}>
+                    {b.following ? "Following" : "Follow"}
+                  </button>
+                )}
               </div>
-              <form onSubmit={handleShare} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  className="col-span-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
-                  placeholder="Match (e.g. Arsenal vs Chelsea)"
-                  value={shareForm.match}
-                  onChange={e => setShareForm(f => ({ ...f, match: e.target.value }))}
-                  required
-                />
-                <input
-                  className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
-                  placeholder="Market (e.g. Home or Draw)"
-                  value={shareForm.market}
-                  onChange={e => setShareForm(f => ({ ...f, market: e.target.value }))}
-                  required
-                />
-                <input
-                  type="number" step="0.01" min="1.01" max="50"
-                  className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
-                  placeholder="Odds (e.g. 1.75)"
-                  value={shareForm.odds}
-                  onChange={e => setShareForm(f => ({ ...f, odds: e.target.value }))}
-                  required
-                />
-                <input
-                  className="col-span-full sm:col-span-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-brand-teal/50 transition-colors"
-                  placeholder="Optional note (reasoning…)"
-                  value={shareForm.note}
-                  onChange={e => setShareForm(f => ({ ...f, note: e.target.value }))}
-                />
-                <button
-                  type="submit"
-                  disabled={sharing}
-                  className="col-span-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-teal text-background font-black text-xs uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 transition-all"
-                >
-                  {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {sharing ? "Sharing…" : "Share Pick"}
-                </button>
-              </form>
-              {shareMsg && (
-                <p className={`text-xs text-center ${shareMsg.startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>{shareMsg}</p>
-              )}
-            </div>
-          )}
-
-          {/* My picks list */}
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-brand-teal" />
-            </div>
-          ) : myPicks.length === 0 ? (
-            <div className="flex flex-col items-center py-16 text-slate-500">
-              <Star className="w-12 h-12 mb-4 opacity-20" />
-              <p className="text-sm">No picks shared yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {myPicks.map(pick => (
-                <div key={pick.id} className="p-4 rounded-2xl bg-[#0A0F1C]/80 border border-white/8 flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{pick.match}</p>
-                    <p className="text-[11px] text-slate-400">{pick.market} <span className="text-brand-teal font-bold">@ {pick.odds.toFixed(2)}</span></p>
-                    <p className="text-[10px] text-slate-600 mt-0.5">{new Date(pick.created_at).toLocaleDateString()}</p>
+            ))}
+          </div>
+        )
+      ) : slips.length === 0 ? (
+        <p className="text-sm text-slate-500 text-center py-16">
+          {tab === "following" ? "Nobody you follow has posted yet. Find people under Everyone or the Leaderboard." : tab === "mine" ? "You have not posted a slip yet." : "No slips posted yet. Be the first."}
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {slips.map(s => {
+            const t = tailed[s.id];
+            return (
+              <article key={s.id} className="bg-[#0A0F1C] border border-white/10 p-4 md:p-5 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-white truncate">@{s.username}</p>
+                    <RecordLine r={s.author} />
                   </div>
-                  {pick.outcome === "pending" ? (
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        onClick={() => handleResolve(pick.id, "won")}
-                        disabled={resolving === pick.id}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-400/20 transition-all disabled:opacity-50"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Won
+                  <div className="flex items-center gap-2 shrink-0">
+                    <StatusBadge status={s.status} />
+                    {!s.mine && (
+                      <button onClick={() => toggleFollow(s.username, s.following)} title={s.following ? "Unfollow" : "Follow"} className={`p-1.5 border ${s.following ? "border-white/15 text-slate-300" : "border-brand-teal text-brand-teal"}`}>
+                        {s.following ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
                       </button>
-                      <button
-                        onClick={() => handleResolve(pick.id, "lost")}
-                        disabled={resolving === pick.id}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-400/10 border border-red-400/20 text-red-400 text-[10px] font-bold hover:bg-red-400/20 transition-all disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" /> Lost
-                      </button>
-                    </div>
-                  ) : (
-                    <span className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase ${outcomeStyle(pick.outcome)}`}>
-                      {pick.outcome === "won" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                      {pick.outcome}
-                    </span>
+                    )}
+                  </div>
+                </div>
+                {s.note && <p className="text-xs text-slate-300">{s.note}</p>}
+                <ul className="divide-y divide-white/5 border border-white/5">
+                  {s.legs.map((l, i) => (
+                    <li key={i} className="flex items-center justify-between gap-3 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-white truncate">{l.match}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{l.market}: {l.pick}{l.kickoff ? ` · ${new Date(l.kickoff).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : ""}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-mono font-bold text-brand-teal">@{l.odds}</p>
+                        {l.result && l.result !== "pending" ? <p className={`text-[10px] font-bold uppercase ${l.result === "won" ? "text-green-400" : l.result === "lost" ? "text-red-400" : "text-slate-400"}`}>{l.result}</p>
+                          : l.state === "live" ? <p className="text-[10px] text-yellow-400">Live {l.score || ""}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[11px] text-slate-400">
+                    {s.legs_count} legs · total odds <span className="text-white font-bold">{s.total_odds}</span>
+                    {s.probability != null && <> · chance <span className="text-white font-bold">{s.probability}%</span></>} · {s.tails} tailed
+                  </p>
+                  {s.status === "pending" && !t?.code && (
+                    <button onClick={() => tail(s.id)} disabled={t?.loading} className="px-4 py-2 bg-white text-background font-black text-[11px] uppercase tracking-wider disabled:opacity-50 flex items-center gap-2">
+                      {t?.loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Tail on {BOOKIES.find(b => b.id === tailPlatform)?.name}
+                    </button>
                   )}
                 </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+                {t?.code && (
+                  <div className="border border-brand-teal/30 bg-brand-teal/5 px-3 py-2 space-y-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-mono font-bold text-white">{t.code}</span>
+                      <button onClick={() => navigator.clipboard.writeText(t.code || "")} className="flex items-center gap-1 text-[10px] font-bold uppercase text-brand-teal"><Copy className="w-3 h-3" /> Copy</button>
+                    </div>
+                    {(t.skipped || []).map((x, i) => <p key={i} className="text-[10px] text-yellow-400">Left out: {x}</p>)}
+                  </div>
+                )}
+                {t?.error && <p className="text-xs text-red-400">{t.error}</p>}
+              </article>
+            );
+          })}
+        </div>
       )}
+      <p className="text-[10px] text-slate-600 text-center">A good record does not guarantee the next slip. Stake only what you can afford to lose.</p>
     </div>
   );
 }

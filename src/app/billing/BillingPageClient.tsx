@@ -67,7 +67,6 @@ export default function BillingPageClient({ user, accessToken }: BillingPageClie
 
   return (
     <main className="min-h-screen bg-[#03060E] text-slate-200 p-8 relative overflow-hidden flex flex-col items-center justify-center">
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-brand-blue/10 blur-[150px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-4xl z-10 space-y-12">
         <header className="text-center space-y-4">
@@ -109,7 +108,7 @@ export default function BillingPageClient({ user, accessToken }: BillingPageClie
           </div>
 
           {/* Upgrade Card */}
-          <div className="p-10 rounded-[3rem] bg-gradient-to-br from-brand-blue/20 to-brand-teal/10 border border-brand-teal/30 shadow-[0_0_50px_rgba(0,198,186,0.1)] space-y-8 relative overflow-hidden group">
+          <div className="p-10 rounded-[3rem] bg-gradient-to-br from-brand-blue/20 to-brand-teal/10 border border-brand-teal/30 space-y-8 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform"><Crown className="w-32 h-32 text-brand-teal" /></div>
             
             <div className="space-y-4 relative z-10">
@@ -122,7 +121,7 @@ export default function BillingPageClient({ user, accessToken }: BillingPageClie
                {/* Crypto Payment */}
                <button
                  onClick={() => setShowCryptoModal(true)}
-                 className="w-full py-5 bg-gradient-to-r from-brand-teal/20 to-brand-blue/20 border border-brand-teal/40 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,198,186,0.15)]"
+                 className="w-full py-5 bg-gradient-to-r from-brand-teal/20 to-brand-blue/20 border border-brand-teal/40 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
                  <Bitcoin className="w-5 h-5 text-brand-teal" />
                  Pay with USDT / USDC
@@ -237,7 +236,7 @@ export default function BillingPageClient({ user, accessToken }: BillingPageClie
 
                 <button
                   onClick={() => setPaymentSent(true)}
-                  className="w-full py-4 bg-brand-teal text-background font-black rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,198,186,0.2)]"
+                  className="w-full py-4 bg-brand-teal text-background font-black rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   I've Sent the Payment
                 </button>

@@ -79,8 +79,6 @@ function LoginForm() {
       />
 
       {/* Background Decor */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-brand-blue/10 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[10%] w-[40vw] h-[40vw] bg-brand-teal/5 blur-[120px] rounded-full pointer-events-none" />
 
       <AnimatePresence>
         {!isLoading || error ? (
@@ -151,7 +149,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-white text-background font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(255,255,255,0.05)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center text-sm uppercase tracking-widest"
+                className="w-full bg-white text-background font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center text-sm uppercase tracking-widest"
               >
                 ENGAGE TERMINAL
               </button>

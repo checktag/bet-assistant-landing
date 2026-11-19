@@ -57,7 +57,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       aria-checked={on}
       role="switch"
       className={`relative flex items-center w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${on
-        ? "bg-brand-teal shadow-[0_0_12px_rgba(0,198,186,0.45)]"
+        ? "bg-brand-teal"
         : "bg-white/10"
         }`}
     >
@@ -585,7 +585,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Searching Registry...</span>
                 </div>
 
-                <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6 shadow-[0_0_30px_rgba(0,113,206,0.1)]">
+                <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-6">
                   <Zap className="w-8 h-8 animate-pulse" />
                 </div>
 
@@ -598,7 +598,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
                   href={`https://t.me/BetAssistant_AI_bot?start=verify_${user.link_code || ""}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.2)]"
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <Send className="w-4 h-4" /> START HANDSHAKE IN BOT
                 </a>

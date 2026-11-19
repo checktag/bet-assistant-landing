@@ -13,7 +13,6 @@ const fadeUp: Variants = {
 };
 import { CalcWrapper } from "@/components/calculator/CalculatorComponents";
 import LiveSlipFeed from "@/components/landing/LiveSlipFeed";
-import WorldCupBanner from "@/components/landing/WorldCupBanner";
 import PWAInstallOverlay from "@/components/landing/PWAInstallOverlay";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,15 +57,12 @@ export default function Home() {
       <div className="bg-noise opacity-[0.20] mix-blend-overlay"></div>
 
       {/* Ambient Depth Orbs */}
-      <div className="absolute top-[-15%] left-[-10%] w-[60vw] h-[60vw] bg-brand-blue/15 blur-[140px] rounded-full pointer-events-none mix-blend-screen" />
-      <div className="absolute top-[40%] right-[-20%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[130px] rounded-full pointer-events-none mix-blend-screen" />
-      <div className="absolute bottom-[-10%] left-[20%] w-[40vw] h-[40vw] bg-brand-blue/10 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
 
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#03060E]/50 backdrop-blur-xl supports-[backdrop-filter]:bg-[#03060E]/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 overflow-hidden rounded-xl drop-shadow-[0_0_15px_rgba(0,198,186,0.4)] flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
+            <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center"><img src="/logo.png" alt="Bet Assistant" className="w-full h-full" /></div>
             <span className="text-md font-semibold tracking-wide text-white">Bet Assistant</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
@@ -79,7 +75,7 @@ export default function Home() {
           <Link 
             href="/dashboard" 
             onClick={handleLaunchTerminal}
-            className="px-5 py-2 py-2 text-sm bg-brand-teal text-background font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(0,198,186,0.3)] flex items-center"
+            className="px-5 py-2 py-2 text-sm bg-brand-teal text-background font-bold rounded-full transition-all hover:scale-105 flex items-center"
           >
             Open Terminal
           </Link>
@@ -120,7 +116,7 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 40, 0], rotate: [0, -4, 0] }}
             transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-[35%] right-[22%] hidden lg:flex flex-col items-start p-4 bg-brand-blue/10 backdrop-blur-xl rounded-xl border border-brand-blue/20 shadow-[0_0_50px_rgba(0,113,206,0.3)]"
+            className="absolute top-[35%] right-[22%] hidden lg:flex flex-col items-start p-4 bg-brand-blue/10 backdrop-blur-xl rounded-xl border border-brand-blue/20"
           >
             <span className="text-[10px] text-brand-teal font-bold uppercase mb-1">Detected Edge</span>
             <span className="text-xl font-black text-white">+14.2% EV</span>
@@ -145,7 +141,7 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, -35, 0], x: [0, -15, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-            className="absolute top-[60%] right-[24%] hidden lg:flex flex-col p-4 bg-[#0A0F1C]/80 backdrop-blur-xl rounded-xl border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.25)]"
+            className="absolute top-[60%] right-[24%] hidden lg:flex flex-col p-4 bg-[#0A0F1C]/80 backdrop-blur-xl rounded-xl border border-green-500/30"
           >
             <div className="flex items-center gap-2 mb-1">
               <Bot className="w-4 h-4 text-purple-400" />
@@ -182,7 +178,7 @@ export default function Home() {
             <Link 
               href="/dashboard" 
               onClick={handleLaunchTerminal}
-              className="group relative px-6 md:px-10 py-4 md:py-5 bg-white text-background font-bold text-base md:text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(0,198,186,0.3)] inline-flex items-center justify-center w-full md:w-auto"
+              className="group relative px-6 md:px-10 py-4 md:py-5 bg-white text-background font-bold text-base md:text-lg rounded-full overflow-hidden transition-all hover:scale-[1.02] inline-flex items-center justify-center w-full md:w-auto"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2 group-hover:text-white transition-colors duration-300">
@@ -215,11 +211,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </motion.section>
-
-      {/* World Cup 2026 Promotional Banner — between hero and LiveSlipFeed */}
-      <div className="relative z-20 px-4 md:px-8 max-w-5xl mx-auto -mt-4 mb-4">
-        <WorldCupBanner />
-      </div>
 
       <LiveSlipFeed />
 
@@ -320,13 +311,13 @@ export default function Home() {
             <p className="text-xl text-slate-400 font-light max-w-3xl mx-auto">Level the playing field instantly with institutional-grade automation.</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-blue/5 border border-brand-blue/20 shadow-[0_0_30px_rgba(0,113,206,0.1)]">
+            <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-blue/5 border border-brand-blue/20">
               <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-6"><Calculator className="w-6 h-6 text-brand-blue" /></div>
               <h3 className="text-2xl font-bold text-white mb-4">Cold Statistical Execution</h3>
               <p className="text-slate-400 text-lg leading-relaxed mb-4">We completely eradicate human emotion, psychological fatigue, and bias from your strategy. The Quant Engine strictly executes upon positive Expected Value (+EV) discrepancies and absolutely rejects everything else, regardless of the media narrative or recent team form.</p>
               <p className="text-slate-400 text-lg leading-relaxed">By enforcing an algorithmic filter that only signals plays when the mathematical edge exceeds a rigid fractional threshold, we mathematically force the odds back into your favor. If the numbers don't validate the investment, the system actively prevents you from betting.</p>
             </motion.div>
-            <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-teal/5 border border-brand-teal/20 shadow-[0_0_30px_rgba(0,198,186,0.1)]">
+            <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-teal/5 border border-brand-teal/20">
               <div className="w-12 h-12 rounded-xl bg-brand-teal/10 flex items-center justify-center mb-6"><Globe className="w-6 h-6 text-brand-teal" /></div>
               <h3 className="text-2xl font-bold text-white mb-4">Total Data Neutralization</h3>
               <p className="text-slate-400 text-lg leading-relaxed mb-4">You no longer waste hours passively scanning disjointed matches on sportsbook applications. The platform concurrently maps identical odds across 55+ global leagues the exact millisecond they are published digitally by interconnected bookmakers.</p>
@@ -491,7 +482,6 @@ export default function Home() {
 
       {/* ─── Bet Calculator Section ─── */}
       <section id="calculator" className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5 overflow-hidden">
-        <div className="absolute top-0 right-[-10%] w-[40vw] h-[40vw] bg-brand-blue/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-12">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-brand-teal mb-4">Free Tools</p>
@@ -568,7 +558,6 @@ export default function Home() {
 
       {/* ─── Reviews Section ─── */}
       <section className="relative z-20 py-24 px-6 bg-[#060913] border-t border-white/5 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[40vw] bg-brand-teal/4 blur-[130px] rounded-full pointer-events-none" />
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-16">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-brand-teal mb-4">From The Community</p>
@@ -587,7 +576,6 @@ export default function Home() {
               style={{ background: "linear-gradient(135deg, rgba(0,198,186,0.13) 0%, rgba(0,113,206,0.07) 55%, rgba(3,6,14,1) 100%)" }}
             >
               <div className="absolute inset-0 border border-brand-teal/20 rounded-3xl pointer-events-none" />
-              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-teal/10 rounded-full blur-[70px] pointer-events-none" />
               {/* Giant decorative quote */}
               <div className="text-[140px] leading-none font-black text-brand-teal/8 absolute top-0 left-4 select-none pointer-events-none">&ldquo;</div>
               <div className="relative z-10 mt-10">
@@ -598,7 +586,7 @@ export default function Home() {
               </div>
               <div className="relative z-10 mt-8 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(0,198,186,0.3)]">AL</div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center text-white font-black text-sm">AL</div>
                   <div>
                     <div className="text-sm font-bold text-white">Ade_Lagos</div>
                     <div className="text-[11px] text-slate-400">@ade.sporty · Market Scanner</div>
@@ -749,12 +737,12 @@ export default function Home() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand-blue/20 to-brand-teal/10 border border-brand-teal/20 p-12 md:p-20 text-center relative overflow-hidden backdrop-blur-3xl shadow-[0_0_100px_rgba(0,198,186,0.15)]"
+          className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand-blue/20 to-brand-teal/10 border border-brand-teal/20 p-12 md:p-20 text-center relative overflow-hidden backdrop-blur-3xl"
         >
           <div className="absolute inset-0 bg-noise opacity-[0.25] mix-blend-overlay"></div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight relative z-10">Stop guessing. <br />Start <span className="text-gradient">Executing.</span></h2>
           <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto relative z-10">Deploy the bot to your Telegram infrastructure right now and gain immediate mathematical parity over the market.</p>
-          <Link href="/auth/signup" className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-white text-background font-black text-sm md:text-xl rounded-full shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,198,186,0.4)] transition-all duration-300 flex items-center justify-center uppercase tracking-widest text-center w-full md:w-auto">
+          <Link href="/auth/signup" className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-white text-background font-black text-sm md:text-xl rounded-full hover:scale-105 transition-all duration-300 flex items-center justify-center uppercase tracking-widest text-center w-full md:w-auto">
             Initialize Free Terminal
           </Link>
         </motion.div>
@@ -763,7 +751,7 @@ export default function Home() {
       <footer className="border-t border-white/5 relative z-20 bg-[#03060E]">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
+            <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/logo.png" alt="Bet Assistant" className="w-full h-full" /></div>
             <span className="text-slate-300 font-bold tracking-wide">Bet Assistant</span>
           </div>
           <div className="flex gap-8 text-slate-500 text-sm font-medium">

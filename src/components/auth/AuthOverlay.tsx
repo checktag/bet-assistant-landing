@@ -21,12 +21,10 @@ export default function AuthOverlay({ isVisible, message = "Initializing Neural 
           className="fixed inset-0 z-[300] bg-[#03060E] flex flex-col items-center justify-center p-6 text-center"
         >
           {/* Background Orbs */}
-          <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-brand-teal/5 blur-[120px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none" />
 
           {/* Icon Animation */}
           <div className="relative mb-12">
-            <div className="w-24 h-24 rounded-[2.5rem] bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue relative z-10 shadow-[0_0_50px_rgba(0,102,255,0.1)]">
+            <div className="w-24 h-24 rounded-[2.5rem] bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center text-brand-blue relative z-10">
               <Bot className="w-10 h-10 animate-pulse" />
             </div>
             

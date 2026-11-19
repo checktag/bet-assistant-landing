@@ -37,7 +37,6 @@ function VerifyEmailContent() {
 
   return (
     <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-15%] w-[50vw] h-[50vw] bg-brand-blue/10 blur-[130px] rounded-full pointer-events-none" />
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
@@ -63,7 +62,7 @@ function VerifyEmailContent() {
             <p className="text-slate-400 text-sm mb-8">Your terminal access has been securely verified and activated.</p>
             <button
               onClick={() => router.push("/auth/login")}
-              className="w-full bg-white text-background font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all font-mono"
+              className="w-full bg-white text-background font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all font-mono"
             >
               LAUNCH DASHBOARD
             </button>

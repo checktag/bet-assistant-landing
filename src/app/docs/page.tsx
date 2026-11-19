@@ -14,7 +14,7 @@ export default function Documentation() {
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/image.jpg" alt="Bet Assistant" className="w-full h-full object-cover scale-[1.65]" /></div>
+             <div className="w-8 h-8 overflow-hidden rounded-md flex items-center justify-center"><img src="/logo.png" alt="Bet Assistant" className="w-full h-full" /></div>
              <span className="text-sm font-bold tracking-wide text-white">Bet Assistant</span>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function Documentation() {
         <div className="max-w-3xl mx-auto space-y-16">
           
           <div className="pl-8 border-l-2 border-brand-teal/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-teal/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,198,186,0.3)]">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-teal/50 rounded-full flex items-center justify-center">
               <Zap className="w-5 h-5 text-brand-teal" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">1. Initialize Terminal & Claim Credits</h3>
@@ -45,7 +45,7 @@ export default function Documentation() {
           </div>
 
           <div className="pl-8 border-l-2 border-brand-blue/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-blue/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,113,206,0.3)]">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-brand-blue/50 rounded-full flex items-center justify-center">
               <TerminalSquare className="w-5 h-5 text-brand-blue" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">2. Scan for Mathematical Edges</h3>
@@ -55,7 +55,7 @@ export default function Documentation() {
           </div>
 
           <div className="pl-8 border-l-2 border-purple-500/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-purple-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-purple-500/50 rounded-full flex items-center justify-center">
               <ShieldCheck className="w-5 h-5 text-purple-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">3. Auto-Generate & Analyze Slips</h3>
@@ -65,14 +65,14 @@ export default function Documentation() {
           </div>
 
           <div className="pl-8 border-l-2 border-green-500/30 relative">
-            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-green-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+            <div className="absolute -left-[25px] top-0 w-12 h-12 bg-[#0A0F1C] border border-green-500/50 rounded-full flex items-center justify-center">
               <BellRing className="w-5 h-5 text-green-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">4. Live Tracker & Cashout Alerts (PRO)</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-8">
               Execution isn't the end of the lifecycle. Add your active booking code to the Premium Slip Tracker. The AI watchdog continuously monitors live scoreboards, evaluating momentum shifts. If a sudden risk spike threatens your position, it pushes an instantaneous <strong>Cashout Alert</strong> directly to your linked Telegram account to secure your profits.
             </p>
-            <Link href="/dashboard" className="inline-block px-8 py-4 bg-gradient-to-r from-brand-teal to-brand-blue text-background font-bold text-lg rounded-full shadow-[0_0_30px_rgba(0,198,186,0.2)] hover:scale-105 transition-transform uppercase tracking-wider">
+            <Link href="/dashboard" className="inline-block px-8 py-4 bg-gradient-to-r from-brand-teal to-brand-blue text-background font-bold text-lg rounded-full hover:scale-105 transition-transform uppercase tracking-wider">
               Open Your Terminal
             </Link>
           </div>

@@ -89,9 +89,7 @@ export default function DashboardSidebar({
     { name: "Quant Terminal", path: isQuantRoute ? "/premiumquant" : "/dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-4 h-4" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-4 h-4" /> },
-    { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-4 h-4" /> },
-    { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-4 h-4" /> },
-    { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-4 h-4" /> },
+    { name: "Community",       path: "/dashboard/leaderboard", icon: <Trophy className="w-4 h-4" /> },
     { 
       name: "Notifications",   
       path: isQuantRoute ? "/premiumquant/settings#notifications" : "/dashboard/settings#notifications",    
@@ -133,7 +131,7 @@ export default function DashboardSidebar({
       <div className={`flex items-center transition-all ${collapsed ? "justify-center" : "justify-between px-2"}`}>
         <div className={`flex items-center ${collapsed ? "" : "gap-3"} overflow-hidden transition-all text-ellipsis`}>
           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-lg border border-white/10">
-            <img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" />
+            <img src="/logo.png" alt="Logo" className="w-full h-full" />
           </div>
           {!collapsed && <span className="font-bold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-500">Bet Assistant</span>}
         </div>
@@ -189,7 +187,7 @@ export default function DashboardSidebar({
               )}
               {collapsed && isLocked && (
                  <div className="absolute top-1 right-1">
-                    <Crown className="w-2.5 h-2.5 text-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]" />
+                    <Crown className="w-2.5 h-2.5 text-yellow-500" />
                  </div>
               )}
             </Link>
@@ -214,7 +212,7 @@ export default function DashboardSidebar({
             <div className="space-y-2">
               <button 
                 onClick={() => window.open("https://t.me/+KKXegSaFc1Y3MTQ0", "_blank")}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-background font-black text-[11px] uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(0,198,186,0.1)]"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-background font-black text-[11px] uppercase tracking-wider hover:scale-105 transition-all"
               >
                 <Send className="w-3.5 h-3.5" /> 1. Join Telegram
               </button>

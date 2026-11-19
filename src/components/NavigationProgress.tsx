@@ -92,7 +92,7 @@ export default function NavigationProgress() {
 
           {/* Glowing tip */}
           <div
-            className="absolute top-0 h-full w-8 rounded-full shadow-[0_0_12px_3px_rgba(0,198,186,0.8)]"
+            className="absolute top-0 h-full w-8 rounded-full"
             style={{ left: `calc(${progress}% - 16px)` }}
           />
         </motion.div>

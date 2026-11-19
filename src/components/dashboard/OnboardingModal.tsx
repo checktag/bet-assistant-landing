@@ -153,7 +153,7 @@ export default function OnboardingModal({ isOpen, onClose, accessToken, linkCode
                               href={`https://t.me/BetAssistant_AI_bot?start=verify_${linkCode}`}
                               target="_blank"
                               onClick={() => setPollingStatus("handshaking")}
-                              className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,113,206,0.3)]"
+                              className="w-full flex items-center justify-center gap-2 py-4 bg-brand-blue text-white font-black text-xs rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                             >
                               <Send className="w-4 h-4" /> START HANDSHAKE IN APP
                             </a>

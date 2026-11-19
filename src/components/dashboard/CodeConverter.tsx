@@ -12,10 +12,11 @@ interface CodeConverterProps {
 const platforms = [
   { id: "sportybet", name: "SportyBet", emoji: "🏆" },
   { id: "bet9ja",    name: "Bet9ja",    emoji: "🇳🇬" },
+  { id: "msport",    name: "MSport",    emoji: "⚽" },
+  { id: "betika",    name: "Betika",    emoji: "🇰🇪" },
   { id: "1xbet",     name: "1xBet",     emoji: "🌍" },
   { id: "betway",    name: "Betway",    emoji: "⚡" },
   { id: "betwinner", name: "BetWinner", emoji: "🎯" },
-  { id: "msport",    name: "MSport",    emoji: "⚽" },
   { id: "22bet",     name: "22Bet",     emoji: "🎰" },
 ];
 
@@ -136,7 +137,7 @@ export default function CodeConverter({ accessToken }: CodeConverterProps) {
         <button
           type="submit"
           disabled={isLoading || !code.trim() || fromPlatform === toPlatform}
-          className="w-full py-5 bg-brand-teal text-background font-black text-lg rounded-2xl shadow-[0_20px_40px_rgba(0,198,186,0.2)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 disabled:hover:scale-100 transition-all cursor-pointer flex items-center justify-center gap-3 uppercase tracking-tighter"
+          className="w-full py-5 bg-brand-teal text-background font-black text-lg rounded-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 disabled:hover:scale-100 transition-all cursor-pointer flex items-center justify-center gap-3 uppercase tracking-tighter"
         >
           {isLoading ? (
             <Loader2 className="w-6 h-6 animate-spin" />

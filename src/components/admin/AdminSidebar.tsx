@@ -31,7 +31,7 @@ export default function AdminSidebar({ userEmail, username }: AdminSidebarProps)
       <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between px-2"}`}>
         <div className="flex items-center gap-3 overflow-hidden transition-all text-ellipsis">
           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-lg border border-white/10">
-            <img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" />
+            <img src="/logo.png" alt="Logo" className="w-full h-full" />
           </div>
           {!collapsed && <span className="font-black tracking-tight text-white whitespace-nowrap">ADMIN PANEL</span>}
         </div>
@@ -73,7 +73,7 @@ export default function AdminSidebar({ userEmail, username }: AdminSidebarProps)
       {/* Admin Info */}
       <div className={`mt-auto rounded-2xl bg-brand-teal/5 border border-brand-teal/10 p-4 transition-all overflow-hidden flex flex-col items-center gap-3 ${collapsed ? "items-center" : ""}`}>
         <div className="flex items-center gap-3 w-full">
-          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-brand-teal/20 flex items-center justify-center text-brand-teal font-bold shadow-[0_0_15px_rgba(0,198,186,0.2)]">
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-brand-teal/20 flex items-center justify-center text-brand-teal font-bold">
             A
           </div>
           {!collapsed && (

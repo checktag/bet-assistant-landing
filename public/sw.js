@@ -1,7 +1,8 @@
-const CACHE_NAME = "betassistant-cache-v1";
+const CACHE_NAME = "betassistant-cache-v2";
 const ASSETS_TO_CACHE = [
   "/",
-  "/image.jpg",
+  "/logo.png",
+  "/icon.png",
 ];
 
 // Install Event

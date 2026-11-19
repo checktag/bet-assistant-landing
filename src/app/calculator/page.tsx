@@ -353,8 +353,6 @@ export default function CalculatorPage() {
   return (
     <main className="min-h-screen bg-[#03060E] text-slate-200 relative overflow-hidden">
       {/* Ambient orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-brand-blue/10 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-[-10%] w-[40vw] h-[40vw] bg-brand-teal/8 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-16">
         {/* Header */}

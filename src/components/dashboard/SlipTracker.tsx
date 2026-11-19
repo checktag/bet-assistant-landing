@@ -163,7 +163,7 @@ export default function SlipTracker({ accessToken, telegramLinked, isPremium }: 
             onChange={(e) => setNewPlatform(e.target.value)}
             className="bg-[#03060E] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-brand-teal/50 shrink-0"
           >
-            {["sportybet", "bet9ja", "1xbet", "betway", "betwinner", "msport", "22bet"].map(p => (
+            {["sportybet", "bet9ja", "msport", "betika", "1xbet", "betway", "betwinner", "22bet"].map(p => (
               <option key={p} value={p}>{platformEmoji[p]} {p.charAt(0).toUpperCase() + p.slice(1)}</option>
             ))}
           </select>

@@ -80,7 +80,7 @@ function SignupForm() {
               We have securely dispatched an initialization link to <span className="text-white font-bold">{email}</span>. 
               <br/><br/>Please inspect your inbox (and spam array) to verify your clearance and activate your terminal.
             </p>
-            <Link href="/auth/login" className="w-full inline-flex justify-center bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all font-mono text-sm uppercase tracking-widest">
+            <Link href="/auth/login" className="w-full inline-flex justify-center bg-brand-blue text-white font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all font-mono text-sm uppercase tracking-widest">
               RETURN TO LOGIN
             </Link>
           </motion.div>
@@ -149,19 +149,19 @@ function SignupForm() {
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1 font-mono">Security Protocol</p>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                     <div className={`flex items-center gap-1.5 text-[9px] font-bold ${password.length >= 8 ? "text-brand-teal/80" : "text-slate-700"}`}>
-                      <div className={`w-1 h-1 rounded-full ${password.length >= 8 ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      <div className={`w-1 h-1 rounded-full ${password.length >= 8 ? "bg-brand-teal" : "bg-slate-800"}`} />
                       8+ CHARS
                     </div>
                     <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
-                      <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? "bg-brand-teal" : "bg-slate-800"}`} />
                       ALPHA MIX
                     </div>
                     <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/\d/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
-                      <div className={`w-1 h-1 rounded-full ${/\d/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      <div className={`w-1 h-1 rounded-full ${/\d/.test(password) ? "bg-brand-teal" : "bg-slate-800"}`} />
                       NUMERIC
                     </div>
                     <div className={`flex items-center gap-1.5 text-[9px] font-bold ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-brand-teal/80" : "text-slate-700"}`}>
-                      <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "bg-brand-teal shadow-[0_0_5px_rgba(20,255,200,0.5)]" : "bg-slate-800"}`} />
+                      <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "bg-brand-teal" : "bg-slate-800"}`} />
                       SYMBOL
                     </div>
                   </div>
@@ -190,7 +190,7 @@ function SignupForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-brand-blue text-white font-black py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,113,206,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center text-sm uppercase tracking-widest"
+                className="w-full bg-brand-blue text-white font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center text-sm uppercase tracking-widest"
               >
                 DEPLOY AGENT
               </button>
@@ -210,7 +210,6 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <main className="min-h-screen bg-[#03060E] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-15%] w-[50vw] h-[50vw] bg-brand-teal/10 blur-[140px] rounded-full pointer-events-none" />
       <Suspense fallback={
         <div className="flex items-center justify-center gap-3 text-slate-500">
           <Loader2 className="w-5 h-5 animate-spin" />

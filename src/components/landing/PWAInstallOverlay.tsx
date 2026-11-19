@@ -36,11 +36,9 @@ export default function PWAInstallOverlay({ isOpen, onClose, onBypass }: PWAInst
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: "spring", duration: 0.5 }}
-          className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-[#070B16] p-6 shadow-[0_0_80px_rgba(0,198,186,0.15)]"
+          className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-[#070B16] p-6"
         >
           {/* Ambient Glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-teal/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-blue/10 blur-3xl rounded-full pointer-events-none" />
 
           {/* Close button */}
           <button
@@ -52,8 +50,8 @@ export default function PWAInstallOverlay({ isOpen, onClose, onBypass }: PWAInst
 
           {/* Header */}
           <div className="flex flex-col items-center text-center mt-4 mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-blue/20 to-brand-teal/20 border border-brand-teal/30 flex items-center justify-center mb-4 shadow-lg shadow-brand-teal/5">
-              <img src="/image.jpg" alt="Logo" className="w-12 h-12 rounded-xl object-cover scale-[1.3]" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-blue/20 to-brand-teal/20 border border-brand-teal/30 flex items-center justify-center mb-4 shadow-lg">
+              <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-xl" />
             </div>
             <h3 className="text-xl font-black text-white tracking-tight">Install BetAssistant</h3>
             <p className="text-xs text-slate-400 mt-1.5 max-w-[280px]">

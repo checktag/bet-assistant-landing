@@ -71,7 +71,7 @@
 }
 
 .card-glow {
-  box-shadow: 0 4px 60px -15px rgba(0, 198, 186, 0.08);
+  box-shadow: none;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

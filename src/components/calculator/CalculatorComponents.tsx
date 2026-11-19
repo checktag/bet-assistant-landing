@@ -282,7 +282,7 @@ export function CalcWrapper() {
             key={tab.id}
             onClick={() => setActiveCalcTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border whitespace-nowrap shrink-0 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${activeCalcTab === tab.id
-                ? "bg-brand-teal text-background border-brand-teal shadow-[0_0_16px_rgba(0,198,186,0.3)]"
+                ? "bg-brand-teal text-background border-brand-teal"
                 : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
               }`}
           >

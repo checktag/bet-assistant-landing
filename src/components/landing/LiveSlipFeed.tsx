@@ -55,7 +55,7 @@ export default function LiveSlipFeed() {
         >
           {/* Duplicate list twice for the infinite loop illusion */}
           {[...slips, ...slips].map((slip, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-2.5 bg-white/5 rounded-xl border border-white/10 shrink-0 shadow-[0_0_15px_rgba(0,198,186,0.05)] cursor-default hover:bg-white/10 transition-colors">
+            <div key={i} className="flex items-center gap-3 px-4 py-2.5 bg-white/5 rounded-xl border border-white/10 shrink-0 cursor-default hover:bg-white/10 transition-colors">
               <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
                 <CheckCircle2 className="w-4 h-4 text-green-400" />
               </div>

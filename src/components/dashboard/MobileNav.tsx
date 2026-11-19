@@ -83,9 +83,7 @@ export default function MobileNav({
     { name: "Quant Terminal", path: isQuantRoute ? "/premiumquant" : "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { name: "Slip Tracker",   path: "/dashboard/tracker",   icon: <Radar className="w-5 h-5" />, premiumLock: !isPremium },
     { name: "Code Converter", path: "/dashboard/convert",   icon: <ArrowRightLeft className="w-5 h-5" /> },
-    { name: "Bet Calculator", path: "/dashboard/calculator", icon: <Calculator className="w-5 h-5" /> },
-    { name: "Analytics",      path: "/dashboard/analytics",  icon: <BarChart3 className="w-5 h-5" /> },
-    { name: "Leaderboard",     path: "/dashboard/leaderboard", icon: <Trophy className="w-5 h-5" /> },
+    { name: "Community",       path: "/dashboard/leaderboard", icon: <Trophy className="w-5 h-5" /> },
     { name: "Settings",       path: isQuantRoute ? "/premiumquant/settings" : "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
     { name: "Admin Panel",    path: "/admin",                 icon: <Zap className="w-5 h-5 text-brand-teal" />, adminOnly: true },
   ];
@@ -126,7 +124,7 @@ export default function MobileNav({
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#060913]/90 backdrop-blur-xl sticky top-0 z-[100]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-white/10">
-            <img src="/image.jpg" alt="Logo" className="w-full h-full object-cover scale-[1.65]" />
+            <img src="/logo.png" alt="Logo" className="w-full h-full" />
           </div>
           <span className="font-bold tracking-tight text-white text-sm">Bet Assistant</span>
         </div>

@@ -79,10 +79,9 @@ export default function TrackerPage() {
             className="relative overflow-hidden group"
           >
             {/* Background Glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/20 via-transparent to-brand-teal/10 opacity-50 blur-3xl pointer-events-none" />
 
             <div className="relative bg-[#0A0F1C]/60 border border-white/10 rounded-[2.5rem] p-8 md:p-16 backdrop-blur-2xl text-center flex flex-col items-center">
-              <div className="w-20 h-20 rounded-3xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400 mb-8 shadow-[0_0_50px_rgba(250,204,21,0.15)]">
+              <div className="w-20 h-20 rounded-3xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400 mb-8">
                 <Crown className="w-10 h-10" />
               </div>
 
@@ -111,7 +110,7 @@ export default function TrackerPage() {
 
               <button
                 onClick={() => router.push("/billing")}
-                className="group relative px-10 py-5 bg-white text-background font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_40px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 overflow-hidden"
+                className="group relative px-10 py-5 bg-white text-background font-black text-sm uppercase tracking-[0.2em] rounded-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-teal opacity-0 group-hover:opacity-10 transition-opacity" />
                 UPGRADE TO PREMIUM

@@ -4,10 +4,10 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "BetAssistant Quant Terminal",
     short_name: "BetAssistant",
-    description: "Institutional-Grade Quantitative Betting engine scanning 55+ global leagues.",
+    description: "Agentic sports betting: live markets across 14 sports, AI analysis and one-tap booking codes.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#03060E",
+    background_color: "#060913",
     theme_color: "#03060E",
     orientation: "portrait-primary",
     icons: [
@@ -18,10 +18,16 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/icon.jpg",
-        sizes: "512x512",
-        type: "image/jpeg",
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/icon-maskable.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

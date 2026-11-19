@@ -43,7 +43,7 @@ const LinkingRequiredOverlay = ({ onAction }: { onAction: () => void }) => (
     animate={{ opacity: 1 }} 
     className="absolute inset-0 z-50 bg-[#03060E]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
   >
-    <div className="w-20 h-20 rounded-3xl bg-brand-blue/10 flex items-center justify-center text-brand-blue border border-brand-blue/20 mb-6 shadow-[0_0_40px_rgba(45,108,223,0.15)]">
+    <div className="w-20 h-20 rounded-3xl bg-brand-blue/10 flex items-center justify-center text-brand-blue border border-brand-blue/20 mb-6">
       <Send className="w-10 h-10" />
     </div>
     <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Identity Sync Required</h3>
@@ -52,7 +52,7 @@ const LinkingRequiredOverlay = ({ onAction }: { onAction: () => void }) => (
     </p>
     <button 
       onClick={onAction}
-      className="px-8 py-4 rounded-xl bg-brand-teal text-background font-black text-xs uppercase tracking-widest hover:scale-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(0,198,186,0.3)]"
+      className="px-8 py-4 rounded-xl bg-brand-teal text-background font-black text-xs uppercase tracking-widest hover:scale-110 active:scale-95 transition-all"
     >
       Link Telegram Now
     </button>
@@ -100,7 +100,7 @@ const MessageTicker = ({ messages, interval = 2200, color }: { messages: string[
 
 // ── 1. Market Scan Loader ─────────────────────────────────────────────────────
 const ScanLoader = () => (
-  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-teal/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(0,198,186,0.05)]">
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-teal/15 w-full max-w-[300px]">
     <div className="flex items-center gap-3">
       {/* Radar pulse icon */}
       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center">
@@ -136,7 +136,7 @@ const ScanLoader = () => (
 
 // ── 2. Check Slip Loader ──────────────────────────────────────────────────────
 const CheckSlipLoader = () => (
-  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-blue/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(45,108,223,0.05)]">
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-brand-blue/15 w-full max-w-[300px]">
     <div className="flex items-center gap-3">
       {/* Magnifier scan icon */}
       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center bg-brand-blue/10 rounded-xl border border-brand-blue/20">
@@ -197,7 +197,7 @@ const AILoader = () => {
 
 // ── 4. Code Generation Loader ─────────────────────────────────────────────────
 const CodeGenLoader = () => (
-  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-yellow-500/15 w-full max-w-[300px] shadow-[0_0_30px_rgba(234,179,8,0.05)]">
+  <div className="flex flex-col gap-3 p-4 bg-black/25 rounded-2xl border border-yellow-500/15 w-full max-w-[300px]">
     <div className="flex items-center gap-3">
       <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-yellow-500/10 rounded-xl border border-yellow-500/20">
         <Clock className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: "3s" }} />
@@ -324,7 +324,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
                     </div>
                   </div>
                   <div className="text-right space-y-0.5 shrink-0">
-                    <div className="text-[10px] font-bold text-green-400">+{bet.ev_edge}% EV</div>
+                    <div className={`text-[10px] font-bold ${bet.ev_edge >= 0 ? "text-green-400" : "text-slate-400"}`}>{bet.ev_edge > 0 ? "+" : ""}{bet.ev_edge}% edge</div>
                     <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
                   </div>
                 </div>
@@ -350,7 +350,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
   );
 };
 
-export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fast-reasoning" }: AssistantChatProps) {
+export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0309-non-reasoning" }: AssistantChatProps) {
   const { update } = useSession();
   const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
   const [messages, setMessages] = useState<Message[]>([
@@ -413,14 +413,27 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         const riskProfile = riskArg ? RISK_KEYWORDS[riskArg.toLowerCase()] : "moderate";
 
         // Extract sport keyword from anywhere in the command
-        const SPORT_KEYWORDS = ["basketball", "bball", "nba", "wnba"];
-        const hasBasketball = parts.slice(1).some(p => SPORT_KEYWORDS.includes(p.toLowerCase()));
-        const sportArg = hasBasketball ? "basketball" : "soccer";
+        const SPORT_MAP: Record<string, string> = {
+          basketball: "basketball", bball: "basketball", nba: "basketball", wnba: "basketball",
+          tennis: "tennis", atp: "tennis", wta: "tennis",
+          hockey: "ice_hockey", nhl: "ice_hockey",
+          handball: "handball", volleyball: "volleyball", baseball: "baseball", mlb: "baseball",
+          nfl: "american_football", rugby: "rugby", cricket: "cricket", darts: "darts",
+          mma: "mma", ufc: "mma", boxing: "boxing", tabletennis: "table_tennis",
+          soccer: "soccer", football: "soccer",
+        };
+        const SPORT_KEYWORDS = Object.keys(SPORT_MAP);
+        const sportKey = parts.slice(1).map(p => p.toLowerCase()).find(p => SPORT_MAP[p]);
+        const sportArg = sportKey ? SPORT_MAP[sportKey] : "soccer";
+
+        // Optional market filter: "/scan market:corners" or "/scan nba market:handicap"
+        const marketPart = parts.slice(1).find(p => p.toLowerCase().startsWith("market:"));
+        const marketArg = marketPart ? marketPart.slice(7).replace(/[-_]/g, " ") : null;
 
         // Remove the risk and sport keywords, then parse remaining args
-        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()] && !SPORT_KEYWORDS.includes(p.toLowerCase()));
+        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()] && !SPORT_KEYWORDS.includes(p.toLowerCase()) && !p.toLowerCase().startsWith("market:"));
 
-        if (remaining[0] === "upcoming" || remaining[0] === "weekend") {
+        if (remaining[0] === "upcoming" || remaining[0] === "weekend" || remaining[0] === "tomorrow") {
           dateArg = remaining[0];
         } else if (remaining[0] && remaining[0].match(/\d{4}-\d{2}-\d{2}/)) {
           dateArg = remaining[0];
@@ -429,7 +442,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
         }
 
         const res = await axios.get(`${API_URL}/scan`, {
-          params: { date: dateArg, league: leagueArg, risk: riskProfile, sport: sportArg },
+          params: { date: dateArg, league: leagueArg, risk: riskProfile, sport: sportArg, market: marketArg },
           headers: { Authorization: `Bearer ${accessToken}` }
         });
 
@@ -439,64 +452,12 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
         setMessages(prev => [...prev, {
           role: "assistant",
-          content: `🔍 **${sportArg === 'basketball' ? '🏀 Basketball' : '⚽ Soccer'} Market Scan Complete!** Found **${totalBets} +EV picks** from ${scope} (${window}). Select a risk profile below to filter and build your slip.`,
+          content: `🔍 **${sportArg.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())} Market Scan Complete!** Found **${totalBets} picks** from ${scope} (${window}). Select a risk profile below to filter and build your slip.`,
           type: "scan",
           data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches }
         }]);
 
         // Sync Credits Pulse
-        await update();
-      } else if (userMsg.toLowerCase().startsWith("/worldcup")) {
-        setActiveLoader("scan");
-        const parts = userMsg.split(" ");
-
-        // Extract risk keyword
-        const RISK_KEYWORDS: Record<string, string> = {
-          high: "high", "high-stake": "high", stake: "high",
-          moderate: "moderate", balanced: "moderate", mid: "moderate",
-          low: "low", spread: "low",
-        };
-        const riskArg = parts.slice(1).find(p => RISK_KEYWORDS[p.toLowerCase()]) || null;
-        const riskProfile = riskArg ? RISK_KEYWORDS[riskArg.toLowerCase()] : "moderate";
-
-        // Parse remaining arg as date
-        const remaining = parts.slice(1).filter(p => !RISK_KEYWORDS[p.toLowerCase()]);
-        let dateArg: string | null = null;
-        if (remaining[0] === "upcoming" || remaining[0] === "weekend") {
-          dateArg = remaining[0];
-        } else if (remaining[0]?.match(/\d{4}-\d{2}-\d{2}/)) {
-          dateArg = remaining[0];
-        }
-
-        const res = await axios.get(`${API_URL}/scan/worldcup`, {
-          params: { date: dateArg, risk: riskProfile },
-          headers: { Authorization: `Bearer ${accessToken}` }
-        });
-
-        const totalBets = res.data.bets?.length ?? 0;
-
-        // Build context-aware empty-state hint
-        const windowLabel = dateArg === "upcoming"
-          ? "the next 72 hours"
-          : dateArg === "weekend"
-          ? "the coming weekend"
-          : dateArg?.match(/\d{4}-\d{2}-\d{2}/)
-          ? dateArg
-          : "today";
-
-        const nextHint = dateArg === "upcoming" || dateArg?.match(/\d{4}-\d{2}-\d{2}/)
-          ? "Try `/worldcup weekend` or a different date."
-          : "Try `/worldcup upcoming` to see the next 72h of fixtures.";
-
-        setMessages(prev => [...prev, {
-          role: "assistant",
-          content: totalBets > 0
-            ? `🏆 **World Cup 2026 Scan Complete!** Found **${totalBets} +EV picks** for ${windowLabel}. Select a risk profile to filter and build your slip.`
-            : `🏆 **World Cup Mode** — No fixtures scheduled for **${windowLabel}**. ${nextHint}`,
-          type: "scan",
-          data: { bets: res.data.bets, default_tab: riskProfile, total_matches: res.data.total_matches, worldcup: true }
-        }]);
-
         await update();
       } else if (userMsg.toLowerCase().startsWith("/checkslip")) {
         setActiveLoader("checkslip");
@@ -554,14 +515,14 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
     setActiveLoader("codegen");
     const platforms = singlePlatform
       ? [singlePlatform]
-      : ["sportybet", "bet9ja", "1xbet"];
+      : ["sportybet", "bet9ja", "msport"];
     try {
       const results = await Promise.all(
         platforms.map(p =>
           axios.post(`${API_URL}/generate-multi-code`, { platform: p, selections }, {
             headers: { Authorization: `Bearer ${accessToken}` }
-          }).then(r => ({ platform: p, code: r.data.code as string }))
-            .catch(() => ({ platform: p, code: "[Match Error]" }))
+          }).then(r => ({ platform: p, code: r.data.code as string, note: (typeof r.data.added === "number" && r.data.added < selections.length && !String(r.data.code).startsWith("[")) ? `only ${r.data.added} of ${selections.length} legs available` : "" }))
+            .catch(() => ({ platform: p, code: "[Match Error]", note: "" }))
         )
       );
       // Show the premium codes card
@@ -663,7 +624,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                         onClick={() => setActiveScanSport("soccer")}
                         className={`py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
                           activeScanSport === "soccer"
-                            ? "bg-brand-teal text-background shadow-[0_0_10px_rgba(0,198,186,0.3)]"
+                            ? "bg-brand-teal text-background"
                             : "text-slate-400 hover:text-white"
                         }`}
                       >
@@ -674,7 +635,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                         onClick={() => setActiveScanSport("basketball")}
                         className={`py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer text-center ${
                           activeScanSport === "basketball"
-                            ? "bg-brand-teal text-background shadow-[0_0_10px_rgba(0,198,186,0.3)]"
+                            ? "bg-brand-teal text-background"
                             : "text-slate-400 hover:text-white"
                         }`}
                       >
@@ -707,6 +668,9 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                           { cmd: "/scan basketball upcoming", label: "Upcoming 72h",       desc: "Next 3 days basketball" },
                           { cmd: "/scan basketball weekend",  label: "Weekend Basketball", desc: "Weekend basketball value" },
                           { cmd: "/scan euroleague ",         label: "Euroleague Scan",    desc: "Scan Euroleague matches" },
+                          { cmd: "/scan tennis upcoming ",    label: "Tennis Scan",        desc: "ATP / WTA / Challenger" },
+                          { cmd: "/scan hockey upcoming ",    label: "Ice Hockey Scan",    desc: "NHL, KHL and more" },
+                          { cmd: "/scan upcoming market:corners ", label: "Corners Market", desc: "Filter any scan by market" },
                         ].map((a, i) => (
                           <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
                             className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
@@ -723,22 +687,22 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
 
                   <div className="h-px bg-white/5" />
 
-                  {/* 🏆 WORLD CUP MODE GROUP */}
+                  {/* MORE SPORTS GROUP */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">🏆</span>
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ background: "linear-gradient(90deg, #f59e0b, #22c55e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>World Cup Mode</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ background: "linear-gradient(90deg, #f59e0b, #22c55e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>More Sports</span>
                       </div>
-                      <span className="text-[8px] font-black text-green-400 bg-green-400/10 border border-green-400/20 px-1.5 py-0.5 rounded-full animate-pulse">2026</span>
+                      <span className="text-[8px] font-black text-green-400 bg-green-400/10 border border-green-400/20 px-1.5 py-0.5 rounded-full">LIVE</span>
                     </div>
                     <div className="grid gap-1">
                       {[
-                        { cmd: "/worldcup",          label: "Today's WC Games",   desc: "WC fixtures in the next 24h" },
-                        { cmd: "/worldcup upcoming", label: "Upcoming WC 72h",    desc: "Next 3 days of World Cup" },
-                        { cmd: "/worldcup weekend",  label: "Weekend WC Games",  desc: "Sat & Sun WC fixtures" },
-                        { cmd: "/worldcup high",     label: "High-Stake WC",     desc: "Filter to top WC edges" },
-                        { cmd: "/worldcup low",      label: "WC Spread Mode",    desc: "Max volume, more WC picks" },
+                        { cmd: "/scan tennis upcoming",     label: "Tennis",          desc: "ATP, WTA and Challenger" },
+                        { cmd: "/scan hockey upcoming",     label: "Ice Hockey",      desc: "NHL, KHL and more" },
+                        { cmd: "/scan nfl upcoming",        label: "American Football", desc: "NFL and college" },
+                        { cmd: "/scan volleyball upcoming", label: "Volleyball",      desc: "Next 3 days" },
+                        { cmd: "/scan mma upcoming",        label: "MMA",             desc: "UFC and other cards" },
                       ].map((a, i) => (
                         <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
                           className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer group border border-transparent hover:border-yellow-500/25 hover:scale-[1.02] active:scale-[0.98]"
@@ -845,13 +809,13 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                           ))}
                         </div>
 
-                        <div className="text-[10px] font-bold text-slate-400 mt-3 uppercase tracking-wide">🏆 World Cup Mode</div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-3 uppercase tracking-wide">🏆 More Sports &amp; Markets</div>
                         <div className="space-y-2">
                           {[
-                            { cmd: "/worldcup",          desc: "Today's World Cup fixtures & value picks" },
-                            { cmd: "/worldcup upcoming", desc: "Next 72h of World Cup matches" },
-                            { cmd: "/worldcup weekend",  desc: "Weekend World Cup fixtures" },
-                            { cmd: "/worldcup 2026-07-06", desc: "WC games on a specific date (YYYY-MM-DD)" },
+                            { cmd: "/scan tennis upcoming",   desc: "Any of 14 sports: tennis, hockey, nfl, mma, cricket..." },
+                            { cmd: "/scan upcoming market:corners", desc: "Filter a scan by market (corners, bookings, handicap...)" },
+                            { cmd: "/scan tomorrow",          desc: "Tomorrow's fixtures" },
+                            { cmd: "/scan 2026-12-06",        desc: "Fixtures on a specific date (YYYY-MM-DD)" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => setInput(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group border border-transparent hover:border-yellow-500/25"
@@ -952,7 +916,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => handleBuildSlip(curated, "sportybet")}
-                          className="py-2 bg-brand-teal text-background text-[10px] font-bold rounded-lg hover:scale-105 transition-all shadow-[0_0_15px_rgba(0,198,186,0.3)]"
+                          className="py-2 bg-brand-teal text-background text-[10px] font-bold rounded-lg hover:scale-105 transition-all"
                         >
                           SportyBet Only
                         </button>
@@ -975,9 +939,9 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4-1-fa
                   {m.type === "codes" && m.data && (
                     <div className="mt-3 space-y-2">
                       <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-3">Booking Codes</div>
-                      {(m.data as { platform: string; code: string }[]).map((r, ri) => {
+                      {(m.data as { platform: string; code: string; note?: string }[]).map((r, ri) => {
                         const isError = r.code.startsWith("[");
-                        const label = r.platform.charAt(0).toUpperCase() + r.platform.slice(1);
+                        const label = r.platform.charAt(0).toUpperCase() + r.platform.slice(1) + (r.note ? ` (${r.note})` : "");
                         return (
                           <div key={ri} className={`flex items-center justify-between gap-3 p-2.5 rounded-xl border text-xs ${
                             isError
