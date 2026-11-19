@@ -353,6 +353,14 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
 export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0309-non-reasoning" }: AssistantChatProps) {
   const { update } = useSession();
   const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
+  // Bookmakers the server can reach right now (the list changes if one refuses our server)
+  const [bookies, setBookies] = useState<string[]>(["sportybet", "bet9ja", "msport"]);
+  useEffect(() => {
+    axios.get(`${API_URL}/sports`).then(r => {
+      const list = r.data?.available_bookmakers;
+      if (Array.isArray(list) && list.length) setBookies(list);
+    }).catch(() => {});
+  }, [API_URL]);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -515,7 +523,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
     setActiveLoader("codegen");
     const platforms = singlePlatform
       ? [singlePlatform]
-      : ["sportybet", "bet9ja", "msport"];
+      : bookies.slice(0, 3);
     try {
       const results = await Promise.all(
         platforms.map(p =>
@@ -915,10 +923,10 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => handleBuildSlip(curated, "sportybet")}
+                          onClick={() => handleBuildSlip(curated, bookies[0])}
                           className="py-2 bg-brand-teal text-background text-[10px] font-bold rounded-lg hover:scale-105 transition-all"
                         >
-                          SportyBet Only
+                          {bookies[0].charAt(0).toUpperCase() + bookies[0].slice(1)} Only
                         </button>
                         <button
                           onClick={() => handleBuildSlip(curated)}
