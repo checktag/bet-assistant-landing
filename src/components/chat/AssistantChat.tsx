@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useSession } from "next-auth/react";
+import { createBet9jaCode } from "@/lib/bet9ja";
 
 interface Prediction {
   match: string;
@@ -16,6 +17,8 @@ interface Prediction {
   model_prob: number;
   commence_time: string;
   profiles?: string[];
+  category?: string;
+  top?: boolean;
 }
 
 interface Selection {
@@ -260,6 +263,10 @@ const MetricGlossary = () => (
 const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips: (picks: any[]) => void }) => {
   const allBets: Prediction[] = data?.bets || [];
   const [activeTab, setActiveTab] = useState<string>(data?.default_tab || "moderate");
+  // "Mixed" = the single strongest pick of each match, whatever its market; a category shows only that kind
+  const [category, setCategory] = useState<string>("Mixed");
+  const categories: string[] = ["Mixed", ...Array.from(new Set(allBets.map(b => b.category).filter(Boolean) as string[]))];
+  const inCategory = (b: Prediction) => (category === "Mixed" ? b.top !== false : b.category === category);
 
   const PROFILE_TABS = [
     { id: "high",     label: "High-Stake", style: "border-yellow-400/20 text-yellow-300",  bg: "bg-yellow-400/10", activeBg: "bg-yellow-400", dot: "bg-yellow-400" },
@@ -270,7 +277,7 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
   // Filter bets based on their backend-annotated profiles list
   // Sort High-Stake by Confidence first; Moderate/Spread by EV first
   const filteredBets = allBets
-    .filter(b => b.profiles?.includes(activeTab))
+    .filter(b => b.profiles?.includes(activeTab) && inCategory(b))
     .sort((a, b) => activeTab === "high" ? (b.model_prob - a.model_prob) : (b.ev_edge - a.ev_edge));
 
   // Removing artificial limits so all mathematically sound picks are displayed
@@ -278,11 +285,21 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
 
   return (
     <div className="mt-4 flex flex-col gap-3">
+      {categories.length > 2 && (
+        <div className="flex flex-wrap gap-1.5">
+          {categories.map(c => (
+            <button key={c} onClick={() => setCategory(c)}
+              className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border cursor-pointer ${category === c ? "bg-white text-background border-white" : "border-white/10 text-slate-400 hover:text-white"}`}>
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
       {/* Risk Profile Selector Tabs */}
       <div className="flex p-1 bg-black/40 rounded-xl border border-white/5">
         {PROFILE_TABS.map(tab => {
           const isActive = activeTab === tab.id;
-          const count = allBets.filter(b => b.profiles?.includes(tab.id)).length;
+          const count = allBets.filter(b => b.profiles?.includes(tab.id) && inCategory(b)).length;
           return (
             <button
               key={tab.id}
@@ -351,14 +368,17 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
 };
 
 export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0309-non-reasoning" }: AssistantChatProps) {
-  const { update } = useSession();
+  const { update, data: session } = useSession();
   const API_URL = (process.env.NEXT_PUBLIC_API_URL || "https://api.betassistant.io").replace(/\/$/, "");
   // Bookmakers the server can reach right now (the list changes if one refuses our server)
   const [bookies, setBookies] = useState<string[]>(["sportybet", "bet9ja", "msport"]);
+  const [browserBookies, setBrowserBookies] = useState<string[]>([]);   // codes created by this browser
   useEffect(() => {
     axios.get(`${API_URL}/sports`).then(r => {
       const list = r.data?.available_bookmakers;
-      if (Array.isArray(list) && list.length) setBookies(list);
+      const viaBrowser: string[] = Array.isArray(r.data?.browser_bookmakers) ? r.data.browser_bookmakers : [];
+      setBrowserBookies(viaBrowser);
+      if (Array.isArray(list) && list.length) setBookies([...list, ...viaBrowser]);
     }).catch(() => {});
   }, [API_URL]);
   const [messages, setMessages] = useState<Message[]>([
@@ -375,18 +395,59 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
   const [activeScanSport, setActiveScanSport] = useState<"soccer" | "basketball">("soccer");
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Keep the newest message in view: on every message, while loading, and after entry animations settle
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const toBottom = () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+      el.lastElementChild?.scrollIntoView({ block: "end" });
+    };
+    toBottom();
+    const t1 = setTimeout(toBottom, 150);
+    const t2 = setTimeout(toBottom, 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [messages, activeLoader, isLoading]);
 
-  const handleSend = async (e?: React.FormEvent) => {
+  // Chat history is kept on this device, per account (type /clear to wipe it)
+  const historyKey = `ba_chat_${(session?.user as { email?: string } | undefined)?.email || "guest"}`;
+  const restoredKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (restoredKey.current === historyKey) return;
+    restoredKey.current = historyKey;
+    try {
+      const saved = JSON.parse(localStorage.getItem(historyKey) || "null");
+      if (Array.isArray(saved) && saved.length) setMessages(saved);
+    } catch { /* storage unavailable */ }
+  }, [historyKey]);
+  useEffect(() => {
+    if (restoredKey.current !== historyKey) return;
+    try {
+      const recent = messages.slice(-40);
+      // full scan tables are large: keep them for the latest few messages only
+      const light = recent.map((m, i) => (m.type === "scan" && i < recent.length - 4 ? { role: m.role, content: m.content } : m));
+      localStorage.setItem(historyKey, JSON.stringify(light));
+    } catch { /* quota or private mode */ }
+  }, [messages, historyKey]);
+
+  // Quick actions: scans run immediately; templates that need a code are placed in the input
+  const runQuick = (cmd: string) => {
+    setIsMenuOpen(false);
+    if (cmd.trim().toLowerCase().startsWith("/scan")) handleSend(undefined, cmd.trim());
+    else setInput(cmd);
+  };
+
+  const handleSend = async (e?: React.FormEvent, override?: string) => {
     e?.preventDefault();
-    if (!input.trim() || isLoading) return;
+    const text = (override ?? input).trim();
+    if (!text || isLoading) return;
 
-    const userMsg = input.trim();
+    const userMsg = text;
     setInput("");
+    if (userMsg.toLowerCase() === "/clear") {
+      setMessages(prev => prev.slice(0, 1));
+      return;
+    }
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setIsLoading(true);
 
@@ -526,12 +587,25 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
       : bookies.slice(0, 3);
     try {
       const results = await Promise.all(
-        platforms.map(p =>
-          axios.post(`${API_URL}/generate-multi-code`, { platform: p, selections }, {
-            headers: { Authorization: `Bearer ${accessToken}` }
-          }).then(r => ({ platform: p, code: r.data.code as string, note: (typeof r.data.added === "number" && r.data.added < selections.length && !String(r.data.code).startsWith("[")) ? `only ${r.data.added} of ${selections.length} legs available` : "" }))
-            .catch(() => ({ platform: p, code: "[Match Error]", note: "" }))
-        )
+        platforms.map(async p => {
+          const headers = { Authorization: `Bearer ${accessToken}` };
+          try {
+            if (p === "bet9ja" && browserBookies.includes("bet9ja")) {
+              // Bet9ja accepts this browser but not our server: the server prepares, the browser books
+              const plan = (await axios.post(`${API_URL}/bet9ja/plan`, { selections }, { headers })).data;
+              const res = await createBet9jaCode(plan.legs || []);
+              const notes: string[] = [];
+              if (res.code && res.added < selections.length) notes.push(`only ${res.added} of ${selections.length} legs available`);
+              if (res.code && plan.swapped?.length) notes.push(`${plan.swapped.length} swapped to markets Bet9ja offers`);
+              return { platform: p, code: res.code || `[${res.error || plan.error || "Bet9ja code unavailable"}]`, note: notes.join(", ") };
+            }
+            const r = await axios.post(`${API_URL}/generate-multi-code`, { platform: p, selections }, { headers });
+            const partial = typeof r.data.added === "number" && r.data.added < selections.length && !String(r.data.code).startsWith("[");
+            return { platform: p, code: r.data.code as string, note: partial ? `only ${r.data.added} of ${selections.length} legs available` : "" };
+          } catch {
+            return { platform: p, code: "[Match Error]", note: "" };
+          }
+        })
       );
       // Show the premium codes card
       setMessages(prev => [...prev, {
@@ -660,7 +734,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                           { cmd: "/scan premier league ", label: "Premier League",    desc: "Scan EPL matches" },
                           { cmd: "/scan champions league ",label: "Champions League",  desc: "Scan UEFA CL matches" },
                         ].map((a, i) => (
-                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          <button key={i} onClick={() => runQuick(a.cmd)}
                             className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
                             <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
                             <div className="min-w-0">
@@ -680,7 +754,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                           { cmd: "/scan hockey upcoming ",    label: "Ice Hockey Scan",    desc: "NHL, KHL and more" },
                           { cmd: "/scan upcoming market:corners ", label: "Corners Market", desc: "Filter any scan by market" },
                         ].map((a, i) => (
-                          <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                          <button key={i} onClick={() => runQuick(a.cmd)}
                             className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl hover:bg-brand-teal/5 text-left transition-all cursor-pointer group border border-transparent hover:border-brand-teal/20 hover:scale-[1.02] active:scale-[0.98]">
                             <code className="text-[10px] font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
                             <div className="min-w-0">
@@ -712,7 +786,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                         { cmd: "/scan volleyball upcoming", label: "Volleyball",      desc: "Next 3 days" },
                         { cmd: "/scan mma upcoming",        label: "MMA",             desc: "UFC and other cards" },
                       ].map((a, i) => (
-                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                        <button key={i} onClick={() => runQuick(a.cmd)}
                           className="flex items-center gap-2 w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer group border border-transparent hover:border-yellow-500/25 hover:scale-[1.02] active:scale-[0.98]"
                           style={{ background: 'transparent' }}
                           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.04)')}
@@ -740,7 +814,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                         { cmd: "/checkslip bet9ja ",     label: "Check Bet9ja",     desc: "AI edge score per game" },
                         { cmd: "/checkslip msport ",      label: "Check MSport",      desc: "Cashout recommendation" },
                       ].map((a, i) => (
-                        <button key={i} onClick={() => { setInput(a.cmd); setIsMenuOpen(false); }}
+                        <button key={i} onClick={() => runQuick(a.cmd)}
                           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-white/5 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                           <code className="text-[10px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-lg shrink-0 font-mono whitespace-nowrap">{a.cmd.trim()}</code>
                           <div className="min-w-0">
@@ -809,7 +883,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             { cmd: "/scan upcoming",        desc: "All fixtures in the upcoming window" },
                             { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
                           ].map((c, ci) => (
-                            <button key={ci} onClick={() => setInput(c.cmd)}
+                            <button key={ci} onClick={() => runQuick(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
@@ -825,7 +899,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             { cmd: "/scan tomorrow",          desc: "Tomorrow's fixtures" },
                             { cmd: "/scan 2026-12-06",        desc: "Fixtures on a specific date (YYYY-MM-DD)" },
                           ].map((c, ci) => (
-                            <button key={ci} onClick={() => setInput(c.cmd)}
+                            <button key={ci} onClick={() => runQuick(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group border border-transparent hover:border-yellow-500/25"
                               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.06)')}
                               onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -844,7 +918,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             { cmd: "/scan nba weekend",     desc: "Weekend NBA value fixtures" },
                             { cmd: "/scan basketball upcoming", desc: "All upcoming basketball games" },
                           ].map((c, ci) => (
-                            <button key={ci} onClick={() => setInput(c.cmd)}
+                            <button key={ci} onClick={() => runQuick(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-teal/10 border border-transparent hover:border-brand-teal/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-teal font-mono shrink-0">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors min-w-0 truncate">{c.desc}</span>
@@ -866,7 +940,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             { cmd: "/checkslip betika CODE",     desc: "Betika slip EV + cashout advice" },
                             { cmd: "/checkslip msport CODE",      desc: "MSport slip breakdown" },
                           ].map((c, ci) => (
-                            <button key={ci} onClick={() => setInput(c.cmd)}
+                            <button key={ci} onClick={() => runQuick(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-brand-blue/10 border border-transparent hover:border-brand-blue/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-brand-blue font-mono shrink-0 whitespace-nowrap">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
@@ -888,7 +962,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             { cmd: "/convert sportybet msport CODE",  desc: "SportyBet → MSport" },
                             { cmd: "/convert bet9ja betika CODE",    desc: "Bet9ja → Betika" },
                           ].map((c, ci) => (
-                            <button key={ci} onClick={() => setInput(c.cmd)}
+                            <button key={ci} onClick={() => runQuick(c.cmd)}
                               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-black/20 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] group">
                               <code className="text-[10px] font-black text-purple-400 font-mono shrink-0 break-all">{c.cmd}</code>
                               <span className="text-[9px] text-slate-500 group-hover:text-slate-300 transition-colors">{c.desc}</span>
