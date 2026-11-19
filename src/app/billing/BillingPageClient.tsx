@@ -148,7 +148,7 @@ export default function BillingPageClient({ user, accessToken }: BillingPageClie
                 {premium ? "Extend with crypto" : "Pay with crypto"}
               </button>
             )}
-            <p className="text-[10px] text-slate-500">USDT on Tron, or USDC on Base and Ethereum.</p>
+            <p className="text-[10px] text-slate-500">USDC on Base or Ethereum.</p>
           </section>
         </div>
         <p className="text-center text-slate-600 text-xs">By upgrading, you agree to our Terms of Service. Crypto payments cannot be reversed.</p>
