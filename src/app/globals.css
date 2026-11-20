@@ -15,9 +15,18 @@
 }
 
 @layer base {
+  html {
+    /* phones must not rescale text or let a wide child widen the page */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     background-color: var(--color-background);
     color: #f8fafc;
+    max-width: 100%;
     overflow-x: hidden;
   }
 

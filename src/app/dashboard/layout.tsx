@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   const userInitial = displayName[0].toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
+    <div className="min-h-dvh bg-[#03060E] text-slate-200 flex flex-col md:flex-row overflow-hidden">
       <MobileNav 
         isPremium={user.is_premium} 
         userInitial={userInitial} 
@@ -42,7 +42,7 @@ export default async function DashboardLayout({
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative overflow-y-auto h-[calc(100vh-72px)] md:h-screen scrollbar-hide">
+      <main className="flex-1 flex flex-col relative overflow-y-auto overflow-x-hidden h-[calc(100dvh-72px)] md:h-dvh scrollbar-hide">
         {/* Persistent Background Orbs */}
         
         <div className="relative z-10 w-full pb-[calc(72px+env(safe-area-inset-bottom)+20px)] md:pb-0">

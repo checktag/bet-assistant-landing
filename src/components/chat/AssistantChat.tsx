@@ -332,10 +332,10 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
                 <div key={bi} className={`p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${tabDef.style.split(' ')[0]} transition-all`}>
                   <div className="flex-1 min-w-0 pr-3">
                     <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors truncate">{bet.match}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="text-[10px] text-slate-400 capitalize">{bet.market} @ {bet.odds}</div>
+                    <div className="flex flex-wrap items-center gap-x-2 mt-0.5 min-w-0">
+                      <div className="text-[10px] text-slate-400 capitalize min-w-0 break-words [overflow-wrap:anywhere]">{bet.market} @ {bet.odds}</div>
                       <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
-                      <div className="text-[10px] text-slate-500 font-mono italic truncate">
+                      <div className="text-[10px] text-slate-500 font-mono italic shrink-0">
                         {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
                       </div>
                     </div>
@@ -412,7 +412,6 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
       const el = scrollRef.current;
       if (!el) return;
       el.scrollTop = el.scrollHeight;
-      el.lastElementChild?.scrollIntoView({ block: "end" });
     };
     toBottom();
     const t1 = setTimeout(toBottom, 150);
@@ -660,7 +659,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
   };
 
   return (
-    <div className="relative flex flex-col h-[600px] md:h-[650px] bg-[#0A0F1C] rounded-3xl border border-white/8 shadow-2xl overflow-hidden group">
+    <div className="relative flex flex-col w-full min-w-0 h-[calc(100dvh-272px)] min-h-[380px] md:min-h-0 md:h-[min(650px,calc(100dvh-180px))] bg-[#0A0F1C] rounded-2xl md:rounded-3xl border border-white/8 shadow-2xl overflow-hidden group">
       <AnimatePresence>
         {showLinkRequired && (
           <LinkingRequiredOverlay onAction={() => {
@@ -853,7 +852,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain p-3 md:p-6 space-y-4 md:space-y-6 scrollbar-hide">
         <AnimatePresence initial={false}>
           {messages.map((m, i) => {
             const curated = m.role === "assistant" ? parseCuratedSelections(m.content) : [];
@@ -870,8 +869,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${m.role === "assistant" ? "bg-brand-blue/20 text-brand-blue" : "bg-white/10 text-white"}`}>
                   {m.role === "assistant" ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                 </div>
-                <div className={`max-w-[92%] md:max-w-[80%] rounded-2xl p-3 md:p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
-                  <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m.role === "assistant" ? "prose-invert markdown-content" : ""}`}>
+                <div className={`min-w-0 max-w-[calc(100%-3rem)] md:max-w-[80%] rounded-2xl p-3 md:p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
+                  <div className={`text-sm leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] ${m.role === "assistant" ? "prose-invert markdown-content" : ""}`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanContent}</ReactMarkdown>
                   </div>
 
@@ -1034,7 +1033,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                       <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-3">Booking Codes</div>
                       {(m.data as { platform: string; code: string; note?: string }[]).map((r, ri) => {
                         const isError = r.code.startsWith("[");
-                        const label = r.platform.charAt(0).toUpperCase() + r.platform.slice(1) + (r.note ? ` (${r.note})` : "");
+                        const label = r.platform.charAt(0).toUpperCase() + r.platform.slice(1);
                         return (
                           <div key={ri} className={`flex items-center justify-between gap-3 p-2.5 rounded-xl border text-xs ${
                             isError
@@ -1042,8 +1041,11 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                               : "bg-white/4 border-white/8 hover:border-brand-teal/20 transition-all"
                           }`}>
                             <span className="font-bold text-slate-300 w-20 shrink-0">{label}</span>
-                            <span className={`font-mono flex-1 truncate ${ isError ? "text-red-400/60 text-[10px]" : "text-brand-teal font-bold" }`}>
-                              {r.code}
+                            <span className="flex-1 min-w-0">
+                              <span className={`block font-mono ${ isError ? "text-red-400/70 text-[10px] whitespace-normal break-words" : "text-brand-teal font-bold truncate" }`}>
+                                {isError ? r.code.replace(/^\[|\]$/g, "") : r.code}
+                              </span>
+                              {r.note && <span className="block text-[9px] text-yellow-400/80 whitespace-normal">{r.note}</span>}
                             </span>
                             {!isError && (
                               <button

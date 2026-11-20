@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   const user = session.user as any;
   
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 flex flex-col justify-center min-h-full py-8 md:py-12 px-4 md:px-0">
+    <div className="w-full max-w-5xl mx-auto space-y-4 md:space-y-8 flex flex-col justify-center min-h-full py-4 md:py-12 px-3 md:px-0">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
         <div>
           <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mb-1 md:mb-2 text-gradient">Quant Terminal</h1>
