@@ -101,3 +101,15 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.02);
 }
+
+/* Chat answers: tables, code blocks and images never widen the bubble */
+.markdown-content pre,
+.markdown-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+}

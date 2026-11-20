@@ -284,7 +284,7 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
   const slicedBets = filteredBets;
 
   return (
-    <div className="mt-4 flex flex-col gap-3">
+    <div className="mt-4 flex flex-col gap-3 w-full min-w-0">
       {categories.length > 2 && (
         <div className="flex flex-wrap gap-1.5">
           {categories.map(c => (
@@ -304,7 +304,7 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer ${
                 isActive ? `${tab.bg} border ${tab.style}` : "hover:bg-white/5 border border-transparent opacity-50 hover:opacity-100"
               }`}
             >
@@ -325,15 +325,15 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top Edges in {activeTab}</span>
             <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
           </div>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-1 gap-2 min-w-0">
             {slicedBets.map((bet: Prediction, bi: number) => {
               const tabDef = PROFILE_TABS.find(t => t.id === activeTab)!;
               return (
-                <div key={bi} className={`p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${tabDef.style.split(' ')[0]} transition-all`}>
+                <div key={bi} className={`p-3 min-w-0 w-full overflow-hidden bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group hover:${tabDef.style.split(' ')[0]} transition-all`}>
                   <div className="flex-1 min-w-0 pr-3">
                     <div className="text-xs font-bold text-white group-hover:text-brand-teal transition-colors truncate">{bet.match}</div>
                     <div className="flex flex-wrap items-center gap-x-2 mt-0.5 min-w-0">
-                      <div className="text-[10px] text-slate-400 capitalize min-w-0 break-words [overflow-wrap:anywhere]">{bet.market} @ {bet.odds}</div>
+                      <div className="text-[10px] text-slate-400 capitalize min-w-0 break-words [overflow-wrap:anywhere]">{bet.market} @ {Number(bet.odds).toFixed(2)}</div>
                       <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
                       <div className="text-[10px] text-slate-500 font-mono italic shrink-0">
                         {bet.commence_time ? new Date(bet.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
@@ -869,7 +869,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${m.role === "assistant" ? "bg-brand-blue/20 text-brand-blue" : "bg-white/10 text-white"}`}>
                   {m.role === "assistant" ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                 </div>
-                <div className={`min-w-0 max-w-[calc(100%-3rem)] md:max-w-[80%] rounded-2xl p-3 md:p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
+                <div className={`min-w-0 overflow-hidden max-w-[calc(100%-3rem)] md:max-w-[80%] rounded-2xl p-3 md:p-4 text-slate-200 ${m.role === "assistant" ? "bg-white/5 border border-white/10" : "bg-brand-blue/80 text-white"}`}>
                   <div className={`text-sm leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] ${m.role === "assistant" ? "prose-invert markdown-content" : ""}`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanContent}</ReactMarkdown>
                   </div>
