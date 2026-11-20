@@ -50,7 +50,7 @@ export default function Documentation() {
             </div>
             <h3 className="text-2xl font-bold text-white mb-3 tracking-wide mt-2">2. Scan for Mathematical Edges</h3>
             <p className="text-lg text-slate-400 leading-relaxed mb-4">
-              Forget manual research. Use our built-in terminal commands like <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan</code>, <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan basketball</code>, or <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan weekend</code>. The AI fetches live odds from global leagues, runs deep Poisson & Gaussian distributions, and filters out everything except <strong>Strict Positive Expected Value (+EV)</strong> fixtures. If an edge exists, the system flags it.
+              Forget manual research. Use our built-in terminal commands like <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan</code>, <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan basketball</code>, or <code className="text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded">/scan weekend</code>. It reads live odds across 14 sports, checks how fair each price is, and shows the likeliest picks first. If an edge exists, the system flags it.
             </p>
           </div>
 

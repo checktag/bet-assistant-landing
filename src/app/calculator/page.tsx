@@ -109,7 +109,7 @@ function ParlayCalculator() {
       </div>
 
       <div className="p-4 bg-brand-teal/5 border border-brand-teal/20 rounded-2xl text-xs text-slate-400 leading-relaxed">
-        💡 <strong className="text-brand-teal">Break-even probability</strong> is how often ALL selections need to win for this bet to be profitable long-term. The lower the implied probability vs your combined EV, the better the edge.
+        💡 <strong className="text-brand-teal">Break-even probability</strong> is how often ALL your picks must win for this bet to pay off over time. The lower it is compared with the real chance of your picks, the better the price.
       </div>
     </div>
   );

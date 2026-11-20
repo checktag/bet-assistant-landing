@@ -116,8 +116,8 @@ const ScanLoader = () => (
         <MessageTicker color="text-brand-teal" messages={[
           "Connecting to global league markets...",
           "Fetching live bookmaker odds...",
-          "Running Poisson & Gaussian models...",
-          "Calculating EV edges...",
+          "Working out the real chances...",
+          "Checking how fair each price is...",
           "Applying Dixon-Coles & spread math...",
           "Filtering high-confidence picks...",
           "Building your risk-tiered output...",
@@ -132,7 +132,7 @@ const ScanLoader = () => (
     </div>
     <ProgressBar color="bg-gradient-to-r from-brand-teal to-brand-blue" duration={16000} />
     <div className="flex justify-between text-[9px] text-slate-600">
-      <span>Global leagues</span><span>Quant + EV model</span><span>Live odds</span>
+      <span>Global leagues</span><span>Fair-price check</span><span>Live odds</span>
     </div>
   </div>
 );
@@ -240,22 +240,31 @@ const ActionLoader = ({ type }: { type: LoaderType }) => {
 
 
 // Plain-English Glossary Card shown on scan/slip results
-const MetricGlossary = () => (
+const MetricGlossary = ({ levels = false }: { levels?: boolean }) => (
   <div className="flex flex-wrap gap-3 mb-3 p-3 rounded-xl border border-white/5 bg-black/20">
     <div className="flex items-start gap-2">
       <span className="w-2 h-2 rounded-full bg-green-400 mt-1 shrink-0" />
       <div>
-        <span className="text-[9px] font-black text-green-400 uppercase tracking-wider block">Edge (price vs fair value)</span>
-        <span className="text-[9px] text-slate-500 leading-tight">How the odds compare with the true chance. 0% is a fair price; -2% means the bookmaker keeps about 2%. Closer to zero is a better price.</span>
+        <span className="text-[9px] font-black text-green-400 uppercase tracking-wider block">Edge</span>
+        <span className="text-[9px] text-slate-500 leading-tight">How fair the price is. 0% is a fair price. A small minus means the bookmaker keeps a little. Closer to zero is better.</span>
       </div>
     </div>
     <div className="flex items-start gap-2">
       <span className="w-2 h-2 rounded-full bg-brand-blue mt-1 shrink-0" />
       <div>
-        <span className="text-[9px] font-black text-brand-blue uppercase tracking-wider block">Conf (chance)</span>
-        <span className="text-[9px] text-slate-500 leading-tight">The chance this outcome happens, with the bookmaker&apos;s margin removed. Higher is likelier, never certain.</span>
+        <span className="text-[9px] font-black text-brand-blue uppercase tracking-wider block">Chance</span>
+        <span className="text-[9px] text-slate-500 leading-tight">How likely it is to happen. 78% means about 78 times out of 100. Never a sure thing.</span>
       </div>
     </div>
+    {levels && (
+      <div className="flex items-start gap-2">
+        <span className="w-2 h-2 rounded-full bg-yellow-400 mt-1 shrink-0" />
+        <div>
+          <span className="text-[9px] font-black text-yellow-300 uppercase tracking-wider block">Risk levels</span>
+          <span className="text-[9px] text-slate-500 leading-tight">High-Stake: the likeliest picks (80% and up). Moderate: likely (70 to 80%). Spread: riskier, bigger payout (50 to 70%). Mixed shows the best pick for each game.</span>
+        </div>
+      </div>
+    )}
   </div>
 );
 
@@ -275,7 +284,7 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
   ];
 
   // Filter bets based on their backend-annotated profiles list
-  // Sort High-Stake by Confidence first; Moderate/Spread by EV first
+  // Sort High-Stake by chance first; Moderate/Spread by edge first
   const filteredBets = allBets
     .filter(b => b.profiles?.includes(activeTab) && inCategory(b))
     .sort((a, b) => activeTab === "high" ? (b.model_prob - a.model_prob) : (b.ev_edge - a.ev_edge));
@@ -320,10 +329,10 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
 
       {slicedBets.length > 0 ? (
         <>
-          <MetricGlossary />
+          <MetricGlossary levels />
           <div className="flex items-center justify-between px-1 mb-1">
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top Edges in {activeTab}</span>
-            <span className="text-[9px] font-medium text-brand-teal italic">Edge · Conf</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top picks: {activeTab}</span>
+            <span className="text-[9px] font-medium text-brand-teal italic">Edge · Chance</span>
           </div>
           <div className="grid grid-cols-1 gap-2 min-w-0">
             {slicedBets.map((bet: Prediction, bi: number) => {
@@ -342,7 +351,7 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
                   </div>
                   <div className="text-right space-y-0.5 shrink-0">
                     <div className={`text-[10px] font-bold ${bet.ev_edge >= 0 ? "text-green-400" : "text-slate-400"}`}>{bet.ev_edge > 0 ? "+" : ""}{bet.ev_edge}% edge</div>
-                    <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% Conf</div>
+                    <div className="text-[10px] text-brand-blue font-mono">{bet.model_prob}% chance</div>
                   </div>
                 </div>
               );
@@ -648,14 +657,13 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
     return selections;
   };
 
-  // Derive a rough EV+Confidence for each slip item from its odds
-  const estimateSlipItemEV = (oddValue: string) => {
-    const odds = parseFloat(oddValue);
-    if (isNaN(odds) || odds <= 0) return null;
-    const impliedProb = 1 / odds;
-    const estimatedTrueProb = impliedProb * 1.05; // ~5% model edge assumption
-    const ev = (estimatedTrueProb * odds - 1) * 100;
-    return { ev: ev.toFixed(1), conf: (estimatedTrueProb * 100).toFixed(1) };
+  // Edge and chance per slip item (shown only when the bookmaker feed provides them)
+  // Edge and chance for a slip leg, only from the bookmaker's own figures: nothing is estimated
+  const slipItemMetrics = (home?: { odd_value?: string | number; probability?: string | number }) => {
+    const odds = parseFloat(String(home?.odd_value ?? ""));
+    const chance = parseFloat(String(home?.probability ?? ""));
+    if (!(odds > 1) || !(chance > 0 && chance <= 1)) return null;
+    return { ev: ((chance * odds - 1) * 100).toFixed(1), conf: (chance * 100).toFixed(1) };
   };
 
   return (
@@ -888,7 +896,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                         <div className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-wide">⚽ Soccer Scans</div>
                         <div className="space-y-2">
                           {[
-                            { cmd: "/scan",                 desc: "Global +EV edges — top market signals" },
+                            { cmd: "/scan",                 desc: "Best picks from today's games" },
                             { cmd: "/scan weekend",         desc: "Saturday & Sunday fixtures" },
                             { cmd: "/scan upcoming",        desc: "All fixtures in the upcoming window" },
                             { cmd: "/scan premier league",  desc: "Filter by league / tournament" },
@@ -947,7 +955,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                           {[
                             { cmd: "/checkslip sportybet ABC123", desc: "Decode & analyse a SportyBet slip" },
                             { cmd: "/checkslip bet9ja XYZ789",   desc: "Analyse a Bet9ja booking code" },
-                            { cmd: "/checkslip betika CODE",     desc: "Betika slip EV + cashout advice" },
+                            { cmd: "/checkslip betika CODE",     desc: "Check a Betika slip and get advice" },
                             { cmd: "/checkslip msport CODE",      desc: "MSport slip breakdown" },
                           ].map((c, ci) => (
                             <button key={ci} onClick={() => runQuick(c.cmd)}
@@ -1062,13 +1070,13 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                     </div>
                   )}
 
-                  {/* SLIP Results — Enhanced with EV + Confidence per game */}
+                  {/* SLIP results, with edge and chance per game when available */}
                   {m.type === "slip" && m.data && (
                     <div className="mt-4 space-y-2">
                       <MetricGlossary />
                       <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-2">Decoded Slip Analysis</div>
-                      {(m.data.lists || []).map((item: { home?: { item_name: string; market_name: string; outcome_name: string; odd_value: string } }, si: number) => {
-                        const metrics = estimateSlipItemEV(item.home?.odd_value || "0");
+                      {(m.data.lists || []).map((item: { home?: { item_name: string; market_name: string; outcome_name: string; odd_value: string; probability?: string } }, si: number) => {
+                        const metrics = slipItemMetrics(item.home);
                         const evNum = metrics ? parseFloat(metrics.ev) : 0;
                         const confNum = metrics ? parseFloat(metrics.conf) : 0;
                         return (
@@ -1082,10 +1090,10 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                                 <div className="text-xs font-mono text-brand-teal font-bold">@{item.home?.odd_value}</div>
                                 {metrics && (
                                   <div className="flex gap-2 mt-1 justify-end">
-                                    <span className={`text-[9px] font-bold ${evNum >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                      {evNum >= 0 ? '+' : ''}{metrics.ev}% EV
+                                    <span className={`text-[9px] font-bold ${evNum >= 0 ? 'text-green-400' : 'text-slate-400'}`}>
+                                      {evNum > 0 ? '+' : ''}{metrics.ev}% edge
                                     </span>
-                                    <span className="text-[9px] text-brand-blue font-mono">{metrics.conf}% Conf</span>
+                                    <span className="text-[9px] text-brand-blue font-mono">{metrics.conf}% chance</span>
                                   </div>
                                 )}
                               </div>
@@ -1094,7 +1102,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
                             {metrics && (
                               <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full ${evNum >= 5 ? 'bg-green-400' : evNum >= 0 ? 'bg-brand-teal' : 'bg-red-400'}`}
+                                  className={`h-full rounded-full ${confNum >= 70 ? 'bg-brand-teal' : confNum >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`}
                                   style={{ width: `${Math.min(100, Math.max(5, confNum))}%` }}
                                 />
                               </div>

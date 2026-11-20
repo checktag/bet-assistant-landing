@@ -122,6 +122,10 @@ export default function CommunityPage() {
         <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" /> Every result here is read from the bookmaker. Nobody marks their own slips.
         </p>
+        <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+          <span className="text-slate-300">Tail</span>: copy a slip to your own bookmaker. <span className="text-slate-300">Hit</span>: how often their slips win.{" "}
+          <span className="text-slate-300">Return</span>: profit or loss for every 100 staked on their slips. <span className="text-slate-300">Chance</span>: how likely the whole slip is to win.
+        </p>
       </header>
 
       <section className="bg-[#0A0F1C] border border-white/10 p-4 md:p-5 space-y-3">

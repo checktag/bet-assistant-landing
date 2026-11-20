@@ -118,8 +118,8 @@ export default function Home() {
             transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute top-[35%] right-[22%] hidden lg:flex flex-col items-start p-4 bg-brand-blue/10 backdrop-blur-xl rounded-xl border border-brand-blue/20"
           >
-            <span className="text-[10px] text-brand-teal font-bold uppercase mb-1">Detected Edge</span>
-            <span className="text-xl font-black text-white">+14.2% EV</span>
+            <span className="text-[10px] text-brand-teal font-bold uppercase mb-1">Chance to win</span>
+            <span className="text-xl font-black text-white">78% chance</span>
           </motion.div>
 
           {/* Node 3: Slip Creation */}
@@ -283,8 +283,8 @@ export default function Home() {
               <p className="text-slate-400 leading-relaxed">Most players rely purely on gut feelings or team loyalty, leading to impulsive, irrational capital allocation when facing a losing streak. This psychological vulnerability inevitably destroys discipline, causing bettors to chase losses with increasingly reckless stakes instead of adhering strictly to long-term mathematical strategies and structured bankroll mechanics.</p>
             </motion.div>
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-8 rounded-2xl bg-red-500/5 border border-red-500/10">
-              <h3 className="text-xl font-bold text-white mb-3">Negative EV Traps</h3>
-              <p className="text-slate-400 leading-relaxed">Bookmakers deliberately bake an excessive overround (or vig) into every market pricing model they release. Without strict algorithmic derivation to uncover true implied probabilities, you are mathematically guaranteed to bleed money over an extended period. The entire system is structurally designed to extract wealth from those betting blindly into negative-value markets.</p>
+              <h3 className="text-xl font-bold text-white mb-3">Prices tilted against you</h3>
+              <p className="text-slate-400 leading-relaxed">Every bookmaker price has a small cut built in. If you cannot see how big that cut is, you cannot tell a fair price from a bad one, and the bad ones add up over time.</p>
             </motion.div>
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-8 rounded-2xl bg-red-500/5 border border-red-500/10">
               <h3 className="text-xl font-bold text-white mb-3">Data Asymmetry</h3>
@@ -314,7 +314,7 @@ export default function Home() {
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-blue/5 border border-brand-blue/20">
               <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-6"><Calculator className="w-6 h-6 text-brand-blue" /></div>
               <h3 className="text-2xl font-bold text-white mb-4">Cold Statistical Execution</h3>
-              <p className="text-slate-400 text-lg leading-relaxed mb-4">We completely eradicate human emotion, psychological fatigue, and bias from your strategy. The Quant Engine strictly executes upon positive Expected Value (+EV) discrepancies and absolutely rejects everything else, regardless of the media narrative or recent team form.</p>
+              <p className="text-slate-400 text-lg leading-relaxed mb-4">We take the guesswork and the emotion out. Every pick is shown with its real chance of happening and how fair the price is, whatever the headlines say.</p>
               <p className="text-slate-400 text-lg leading-relaxed">By enforcing an algorithmic filter that only signals plays when the mathematical edge exceeds a rigid fractional threshold, we mathematically force the odds back into your favor. If the numbers don't validate the investment, the system actively prevents you from betting.</p>
             </motion.div>
             <motion.div variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true }} className="p-10 rounded-3xl bg-brand-teal/5 border border-brand-teal/20">
@@ -345,9 +345,9 @@ export default function Home() {
               <div className="w-14 h-14 rounded-2xl bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center mb-8">
                 <Calculator className="w-7 h-7 text-brand-teal" />
               </div>
-              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Strict +EV Math Engine</h3>
+              <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">A fair-price check on every pick</h3>
               <p className="text-slate-400 text-lg leading-relaxed max-w-xl mb-6">
-                Our architecture heavily analyzes live market odds to calculate pure intrinsic probabilities. We don't guess — we run hard mathematical derivations ensuring you only deploy capital when the true variance is explicitly in your favor.
+                We read live odds and work out the real chance behind every price. No guessing: you see how likely each pick is and how fair the price is before you stake.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center text-slate-300"><CheckCircle2 className="w-5 h-5 text-brand-teal mr-3" /> Live Market Consensus Reversal</li>
@@ -401,10 +401,10 @@ export default function Home() {
                 <p className="text-white">$ /scan weekend</p>
                 <p className="text-brand-teal opacity-80">🔍 Spinning up Quant Engine...</p>
                 <p className="text-brand-teal opacity-80">📊 Found 55 live matches. Analyzing edge...</p>
-                <p className="text-green-400 mt-4">🔥 Top +EV Value Bets Found:</p>
+                <p className="text-green-400 mt-4">🔥 Top picks found:</p>
                 <p>⚽ Italy vs Northern Ireland</p>
                 <p>🎯 Market: Home @ 1.31</p>
-                <p>📈 Edge (EV): +13.8%</p>
+                <p>📈 Chance: 75% · Edge: -1.8%</p>
               </div>
             </div>
           </motion.div>
@@ -439,7 +439,7 @@ export default function Home() {
               {
                 step: "02",
                 title: "Mathematical Edge Identification",
-                desc: "Once the massive volume of data footprint is securely captured locally, our heavily optimized offline Quant Engine springs into action. It maps the incoming bookmaker lines into raw, intrinsic probabilities devoid of the standard house vigorish. Utilizing extremely advanced algebraic modeling, dynamic statistical calculations, and deeply historic Poisson and Gaussian distribution models, it rigorously searches for mathematically mispriced odds—immediately isolating explicit positive Expected Value (+EV) opportunities where the bookmaker's implied probability is fundamentally flawed.",
+                desc: "The engine removes the bookmaker's cut to show the real chance behind every price, then ranks the picks by how likely they are and how fair the price is. You see the best pick for each game, across every market.",
                 icon: <Calculator className="w-6 h-6 text-brand-teal" />
               },
               {
@@ -690,16 +690,16 @@ export default function Home() {
           </motion.div>
           <div className="space-y-3">
             {[
-              { q: "What exactly is Expected Value (EV) in simple terms?", a: "EV is your mathematical profit edge over the bookmaker. A bet with +5% EV means that for every ₦100 you stake on that type of bet consistently, you are mathematically expected to get ₦105 back on average. Bookmakers make money by offering bets with negative EV — our engine finds the rare opportunities where the maths tips in YOUR favour." },
-              { q: "What does the Confidence percentage mean?", a: "Confidence is the AI's internally calculated probability that the specific outcome will actually happen — based on our Poisson and Gaussian distribution models, historical form, and scoring averages. For example, 78% Confidence on a Home Win means the AI believes there's a 78% chance that team wins. We set minimum confidence floors per market (e.g., 72% for Home/Away, 25% for Draw) before even considering the EV edge." },
-              { q: "How does the market scanner work?", a: "Type /scan in the chat (or click Quick Actions). The engine fetches live odds from global leagues, runs each bet through our Poisson and Gaussian probability models to estimate a 'true' probability, and compares it to the bookmaker's implied probability. Only fixtures with a positive EV above our minimum threshold AND above our confidence floor are shown. We also refine results with real historical team form data." },
+              { q: "What does Edge mean?", a: "Edge shows how fair a price is. 0% means the price is fair. A small minus, like -2%, means the bookmaker keeps about 2% for itself, which is normal. The closer to zero, the better the price." },
+              { q: "What does the Chance percentage mean?", a: "It is how likely a pick is to happen. 78% means it should happen about 78 times out of 100. It comes from the bookmaker's own numbers with their cut taken out. A high chance is never a guarantee." },
+              { q: "How does the market scanner work?", a: "Type /scan in the chat or tap a Quick Action. The engine reads live odds across 14 sports and every market, works out the real chance behind each price, and shows the best pick for each game. You can filter by risk level and by market type, then turn your picks into a booking code." },
               { q: "Is this a Telegram bot or a website?", a: "Both. The core AI engine runs on Telegram for instant mobile notifications and quick commands on the go. The web dashboard gives you a richer interface with market scan results, slip analysis, the bet calculator, and the premium slip tracker. You can link your Telegram account to your web dashboard for seamless push notifications." },
               { q: "How do I link my Telegram account?", a: "Start a conversation with our Telegram bot and it will generate a secure link code for you. Then, on your dashboard, go to Settings and enter the code. Your accounts are merged instantly. Premium subscribers can then receive AI push notifications directly on Telegram whenever an opportunity or cashout signal is detected on their tracked slips." },
               { q: "What platforms are supported for booking codes?", a: "We currently support SportyBet, Bet9ja, MSport and Betika. After a scan you get codes for SportyBet, Bet9ja and MSport in one tap, and you can convert a code between any of the four with the /convert command." },
               { q: "What is the Slip Tracker and who can use it?", a: "The Slip Tracker is a Premium-exclusive feature where you submit your active booking code and the AI continuously monitors your games. When it detects a momentum shift, adverse variance, or a cashout opportunity, it sends you a push notification via Telegram with specific reasons. You can also manually mark slips as Won, Lost, or Cashed Out to keep your records." },
               { q: "What is the difference between Standard and Premium?", a: "Standard access gives you full access to market scanning, slip analysis, booking code generation, and AI chat, powered by your credit balance. Joining Telegram injections 100 free credits immediately. Premium adds: Slip Tracking with Telegram push notifications, re-analysis of active slips, priority scan access during high-traffic periods, and early access to new features like advanced league filters and sharps tracking." },
-              { q: "Does the AI guarantee profits?", a: "No. No betting tool can guarantee profits, and anyone who says otherwise is lying to you. What we do is provide a statistically sound mathematical edge on each bet we recommend. EV betting is a long-run strategy — over hundreds of bets, the mathematics will work in your favour. A single session can still result in a loss. Use proper bankroll management (check our Kelly Criterion Calculator!) and never stake money you can't afford to lose." },
-              { q: "How accurate are the mathematical models?", a: "The Poisson and Gaussian point-spread models are used by professional bettors and syndicates worldwide. The Poisson model uses scoring averages to estimate soccer probabilities, while the Gaussian spread model handles basketball totals and margins. We also layer in real historical form data (last 5 games momentum) and home/away multipliers. No model is 100% accurate — but they are significantly more rigorous than manual guessing or tipster advice." },
+              { q: "Does the AI guarantee profits?", a: "No. No betting tool can guarantee profits, and anyone who says otherwise is lying to you. What we do is show you the real chance behind every pick and how fair the price is, so you choose with your eyes open. Bookmaker prices are tilted slightly in their favour, so most bettors lose over time. Set a budget, use our Kelly Criterion Calculator, and never stake money you cannot afford to lose." },
+              { q: "How accurate are the numbers?", a: "The chances come from the bookmaker's own live numbers with their cut taken out, so they are as sharp as the market itself. They are still chances, not promises: a 78% pick loses about 22 times out of 100." },
             ].map((faq, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}
                 className="border border-white/8 rounded-2xl overflow-hidden"

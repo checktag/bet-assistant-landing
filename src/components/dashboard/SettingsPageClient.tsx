@@ -697,7 +697,7 @@ export default function SettingsPageClient({ user, accessToken }: SettingsPageCl
         {/* --- Platform Performance --- */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Section title="Notification Preferences" desc="Choose what alerts you receive via Telegram and email">
-            <Row label="Scan Completion Alerts" desc="Notify when a market scan finds +EV edges">
+            <Row label="Scan Completion Alerts" desc="Notify when a scan finds good picks">
               <Toggle on={notifScan} onToggle={() => setNotifScan(v => !v)} />
             </Row>
             <div className="h-px bg-white/5" />
