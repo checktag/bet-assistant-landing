@@ -245,15 +245,15 @@ const MetricGlossary = () => (
     <div className="flex items-start gap-2">
       <span className="w-2 h-2 rounded-full bg-green-400 mt-1 shrink-0" />
       <div>
-        <span className="text-[9px] font-black text-green-400 uppercase tracking-wider block">EV (Expected Value)</span>
-        <span className="text-[9px] text-slate-500 leading-tight">Your math profit edge. +5% EV = $105 back per $100 bet, long-term.</span>
+        <span className="text-[9px] font-black text-green-400 uppercase tracking-wider block">Edge (price vs fair value)</span>
+        <span className="text-[9px] text-slate-500 leading-tight">How the odds compare with the true chance. 0% is a fair price; -2% means the bookmaker keeps about 2%. Closer to zero is a better price.</span>
       </div>
     </div>
     <div className="flex items-start gap-2">
       <span className="w-2 h-2 rounded-full bg-brand-blue mt-1 shrink-0" />
       <div>
-        <span className="text-[9px] font-black text-brand-blue uppercase tracking-wider block">Conf (AI Confidence)</span>
-        <span className="text-[9px] text-slate-500 leading-tight">AI-calculated probability this outcome happens. Higher = safer bet.</span>
+        <span className="text-[9px] font-black text-brand-blue uppercase tracking-wider block">Conf (chance)</span>
+        <span className="text-[9px] text-slate-500 leading-tight">The chance this outcome happens, with the bookmaker&apos;s margin removed. Higher is likelier, never certain.</span>
       </div>
     </div>
   </div>
@@ -323,7 +323,7 @@ const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 
           <MetricGlossary />
           <div className="flex items-center justify-between px-1 mb-1">
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Top Edges in {activeTab}</span>
-            <span className="text-[9px] font-medium text-brand-teal italic">EV · Conf</span>
+            <span className="text-[9px] font-medium text-brand-teal italic">Edge · Conf</span>
           </div>
           <div className="grid grid-cols-1 gap-2 min-w-0">
             {slicedBets.map((bet: Prediction, bi: number) => {
