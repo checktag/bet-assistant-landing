@@ -260,7 +260,7 @@ const MetricGlossary = () => (
 );
 
 // Interactive component to handle client-side profile switching
-const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips: (picks: any[]) => void }) => {
+const InteractiveScanResult = ({ data, onBuildSlips, paid = [], paidCredits = 3 }: { data: any, onBuildSlips: (picks: any[], platform?: string) => void, paid?: string[], paidCredits?: number }) => {
   const allBets: Prediction[] = data?.bets || [];
   const [activeTab, setActiveTab] = useState<string>(data?.default_tab || "moderate");
   // "Mixed" = the single strongest pick of each match, whatever its market; a category shows only that kind
@@ -356,6 +356,13 @@ const InteractiveScanResult = ({ data, onBuildSlips }: { data: any, onBuildSlips
           >
             Generate Booking Codes
           </button>
+          {/* Bookmakers reached through a paid conversion: on request only, main markets carry over */}
+          {paid.map(p => (
+            <button key={p} onClick={() => onBuildSlips(slicedBets, p)}
+              className="w-full mt-2 py-2.5 border border-white/15 text-[10px] font-bold uppercase tracking-wider text-slate-200 hover:bg-white/5 cursor-pointer">
+              {p.charAt(0).toUpperCase() + p.slice(1)} code · {paidCredits} credits
+            </button>
+          ))}
         </>
       ) : (
         <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-center">
@@ -373,11 +380,15 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
   // Bookmakers the server can reach right now (the list changes if one refuses our server)
   const [bookies, setBookies] = useState<string[]>(["sportybet", "bet9ja", "msport"]);
   const [browserBookies, setBrowserBookies] = useState<string[]>([]);   // codes created by this browser
+  const [paidBookies, setPaidBookies] = useState<string[]>([]);         // codes through the paid conversion service
+  const [paidCredits, setPaidCredits] = useState(3);
   useEffect(() => {
     axios.get(`${API_URL}/sports`).then(r => {
       const list = r.data?.available_bookmakers;
       const viaBrowser: string[] = Array.isArray(r.data?.browser_bookmakers) ? r.data.browser_bookmakers : [];
       setBrowserBookies(viaBrowser);
+      setPaidBookies(Array.isArray(r.data?.paid_bookmakers) ? r.data.paid_bookmakers : []);
+      if (typeof r.data?.paid_code_credits === "number") setPaidCredits(r.data.paid_code_credits);
       if (Array.isArray(list) && list.length) setBookies([...list, ...viaBrowser]);
     }).catch(() => {});
   }, [API_URL]);
@@ -624,8 +635,8 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
     }
   };
 
-  const handleBuildAllSlips = async (selections: any[]) => {
-    await handleBuildSlip(selections); // reuse the same multi-platform logic
+  const handleBuildAllSlips = async (selections: any[], platform?: string) => {
+    await handleBuildSlip(selections, platform); // reuse the same multi-platform logic
   };
 
   const parseCuratedSelections = (text: string) => {
@@ -1014,7 +1025,7 @@ export default function AssistantChat({ accessToken, modelVersion = "grok-4.20-0
 
                   {/* SCAN Results — Interactive Tab Component */}
                   {m.type === "scan" && m.data && (
-                    <InteractiveScanResult data={m.data} onBuildSlips={handleBuildAllSlips} />
+                    <InteractiveScanResult data={m.data} onBuildSlips={handleBuildAllSlips} paid={paidBookies} paidCredits={paidCredits} />
                   )}
 
                   {/* BOOKING CODES card — used by both scan and AI chat slip generation */}
